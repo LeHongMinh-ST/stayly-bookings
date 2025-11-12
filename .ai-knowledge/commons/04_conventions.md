@@ -858,6 +858,7 @@ docs(api): update API documentation
 - **Strict mode enabled**
 - **Explicit types** cho functions và variables
 - **Avoid `any`** - sử dụng `unknown` nếu cần
+- **Import type an toàn:** Khi interface/type xuất hiện trong chữ ký có decorator (ví dụ constructor sử dụng `@Inject()`), luôn import bằng `import type` (hoặc namespace import) để tương thích với `isolatedModules` + `emitDecoratorMetadata`.
 - **Use interfaces** cho object shapes
 - **Use type aliases** cho complex types
 

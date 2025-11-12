@@ -1,0 +1,45 @@
+/**
+ * CustomersController exposes signup and profile endpoints for customers
+ */
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { Public } from '../../../../common/decorators/public.decorator';
+import { RegisterCustomerDto } from '../../application/dto/register-customer.dto';
+import { RegisterCustomerCommand } from '../../application/commands/register-customer.command';
+import { CustomerResponseDto } from '../../application/dto/customer-response.dto';
+import { GetCustomerProfileQuery } from '../../application/queries/get-customer-profile.query';
+
+@Controller('api/v1/customers')
+export class CustomersController {
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
+
+  /**
+   * Registers a new customer account
+   */
+  @Post('register')
+  @Public()
+  async register(@Body() dto: RegisterCustomerDto): Promise<CustomerResponseDto> {
+    const command = new RegisterCustomerCommand(
+      dto.email,
+      dto.password,
+      dto.fullName,
+      dto.phone,
+    );
+    return this.commandBus.execute(command);
+  }
+
+  /**
+   * Returns profile for the currently authenticated customer
+   */
+  @Get('me')
+  async me(@Request() req: any): Promise<CustomerResponseDto> {
+    const customerId = req.user?.id ?? req.user?.sub;
+    if (!customerId) {
+      throw new Error('Missing customer identifier in token');
+    }
+    return this.queryBus.execute(new GetCustomerProfileQuery(customerId));
+  }
+}

@@ -23,7 +23,33 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Stayly Booking API server built with NestJS and structured via modular bounded contexts.
+
+## Authentication & Authorization
+
+The API provides a modular authentication system implemented with bounded contexts (`auth`, `user-management`, `customer-management`). Key capabilities include:
+
+- JWT access/refresh token issuance with session rotation
+- RBAC enforcement via roles (`super_admin`, `owner`, `manager`, `staff`) and granular permissions
+- Administrative user management (create, list, update status, assign roles)
+- Customer self-service registration and profile retrieval
+
+### REST Endpoints
+
+| Method | Path | Description | Guards |
+| --- | --- | --- | --- |
+| POST | /api/v1/auth/login | Staff & customer login, issues token pair | `@Public()` |
+| POST | /api/v1/auth/refresh | Refresh token pair | `@Public()` |
+| POST | /api/v1/auth/logout | Revoke refresh session | JWT guard |
+| POST | /api/v1/admin/users | Create admin user | Roles: super_admin/owner |
+| GET | /api/v1/admin/users | List admin users | Roles: super_admin/owner/manager |
+| GET | /api/v1/admin/users/:id | Get admin user | Roles: super_admin/owner/manager |
+| PATCH | /api/v1/admin/users/:id/status | Update user status | Roles: super_admin/owner |
+| PATCH | /api/v1/admin/users/:id/roles | Assign roles | Role: super_admin |
+| POST | /api/v1/customers/register | Customer registration | `@Public()` |
+| GET | /api/v1/customers/me | Authenticated customer profile | JWT guard |
+
+JWT secrets, token TTLs, and bcrypt salt rounds are configured via `src/config/configuration.ts` (`jwt.*`, `security.bcryptSaltRounds`).
 
 ## Project setup
 

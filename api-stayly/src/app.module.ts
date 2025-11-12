@@ -4,10 +4,8 @@
  */
 
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,7 +24,6 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
 
 // Interceptors
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { CacheInterceptor } from './common/interceptors/cache.interceptor';
 
 // Filters
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -35,8 +32,10 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 // Pipes
 import { ValidationPipe } from './common/pipes/validation.pipe';
 
-// Strategies
-import { JwtStrategy } from './common/strategies/jwt.strategy';
+// Bounded Context Modules
+import { AuthModule } from './bounded-contexts/auth/auth.module';
+import { UserManagementModule } from './bounded-contexts/user-management/user.module';
+import { CustomerManagementModule } from './bounded-contexts/customer-management/customer.module';
 
 @Module({
   imports: [
@@ -50,31 +49,20 @@ import { JwtStrategy } from './common/strategies/jwt.strategy';
     // Event Emitter for Domain Events
     EventEmitterModule.forRoot(),
 
-    // Passport & JWT
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('jwt.secret'),
-        signOptions: {
-          expiresIn: configService.get<string>('jwt.expiresIn'),
-        },
-      }),
-      inject: [ConfigService],
-    }),
-
     // Infrastructure modules
     DatabaseModule,
     CacheModuleConfig,
     KafkaModule,
     LoggerModuleConfig,
 
-    // Bounded contexts will be imported here later
+    // Bounded contexts
+    AuthModule,
+    UserManagementModule,
+    CustomerManagementModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    JwtStrategy,
 
     // Global guards
     {

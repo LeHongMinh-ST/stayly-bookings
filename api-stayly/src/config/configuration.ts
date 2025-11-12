@@ -47,6 +47,11 @@ export default () => ({
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
 
+  // Security
+  security: {
+    bcryptSaltRounds: parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10),
+  },
+
   // CORS
   cors: {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
@@ -58,4 +63,3 @@ export default () => ({
     format: process.env.LOG_FORMAT || 'json',
   },
 });
-
