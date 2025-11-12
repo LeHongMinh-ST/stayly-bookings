@@ -6,9 +6,9 @@ import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../../app.module';
-import { RolePermissionSeedService } from '../../modules/user-management/infrastructure/persistence/seeds/role-permission-seed.service';
-import { DefaultUsersSeedService } from '../../modules/user-management/infrastructure/persistence/seeds/default-users-seed.service';
-import { DefaultCustomersSeedService } from '../../modules/customer-management/infrastructure/persistence/seeds/default-customers-seed.service';
+import { RolePermissionSeedService } from '../../modules/user/infrastructure/persistence/seeds/role-permission-seed.service';
+import { DefaultUsersSeedService } from '../../modules/user/infrastructure/persistence/seeds/default-users-seed.service';
+import { DefaultCustomersSeedService } from '../../modules/customer/infrastructure/persistence/seeds/default-customers-seed.service';
 
 async function bootstrap() {
   const logger = new Logger('Seeder');

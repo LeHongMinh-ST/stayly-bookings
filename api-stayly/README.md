@@ -27,7 +27,7 @@ Stayly Booking API server built with NestJS and structured via modular bounded c
 
 ## Authentication & Authorization
 
-The API provides a modular authentication system implemented with bounded contexts (`auth`, `user-management`, `customer-management`). Key capabilities include:
+The API provides a modular authentication system implemented with bounded contexts (`auth`, `user`, `customer`). Key capabilities include:
 
 - JWT access/refresh token issuance with session rotation
 - RBAC enforcement via roles (`super_admin`, `owner`, `manager`, `staff`) and granular permissions

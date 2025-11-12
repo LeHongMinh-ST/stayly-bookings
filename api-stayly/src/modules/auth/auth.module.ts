@@ -10,8 +10,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { SecurityModule } from "../../common/infrastructure/security/security.module";
-import { UserManagementModule } from "../user-management/user.module";
-import { CustomerManagementModule } from "../customer-management/customer.module";
+import { UserModule } from "../user/user.module";
+import { CustomerModule } from "../customer/customer.module";
 import { AuthenticateUserHandler } from "./application/commands/handlers/authenticate-user.handler";
 import { AuthenticateCustomerHandler } from "./application/commands/handlers/authenticate-customer.handler";
 import { RefreshTokenHandler } from "./application/commands/handlers/refresh-token.handler";
@@ -41,8 +41,8 @@ const commandHandlers = [
   imports: [
     CqrsModule,
     SecurityModule,
-    UserManagementModule,
-    CustomerManagementModule,
+    UserModule,
+    CustomerModule,
     TypeOrmModule.forFeature([SessionOrmEntity]),
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.registerAsync({

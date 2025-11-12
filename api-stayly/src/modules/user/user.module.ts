@@ -63,4 +63,4 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
     USER_AUTHENTICATION_SERVICE, // Export service for other modules
   ],
 })
-export class UserManagementModule {}
+export class UserModule {}

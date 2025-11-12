@@ -33,8 +33,8 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
 
 // Bounded Context Modules
 import { AuthModule } from './modules/auth/auth.module';
-import { UserManagementModule } from './modules/user-management/user.module';
-import { CustomerManagementModule } from './modules/customer-management/customer.module';
+import { UserModule } from './modules/user/user.module';
+import { CustomerModule } from './modules/customer/customer.module';
 
 @Module({
   imports: [
@@ -56,8 +56,8 @@ import { CustomerManagementModule } from './modules/customer-management/customer
 
     // Bounded contexts
     AuthModule,
-    UserManagementModule,
-    CustomerManagementModule,
+    UserModule,
+    CustomerModule,
   ],
   controllers: [AppController],
   providers: [

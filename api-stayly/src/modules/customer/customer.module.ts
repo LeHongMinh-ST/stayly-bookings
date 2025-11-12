@@ -39,4 +39,4 @@ const queryHandlers = [GetCustomerProfileHandler];
     CUSTOMER_AUTHENTICATION_SERVICE, // Export service for other modules
   ],
 })
-export class CustomerManagementModule {}
+export class CustomerModule {}

@@ -1,7 +1,7 @@
 /**
  * ICustomerAuthenticationService provides authentication-specific contract for customer lookup
- * This interface abstracts customer service dependency from customer-management module
- * Following Adapter Pattern to decouple auth module from customer-management domain
+ * This interface abstracts customer service dependency from customer module
+ * Following Adapter Pattern to decouple auth module from customer domain
  */
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 

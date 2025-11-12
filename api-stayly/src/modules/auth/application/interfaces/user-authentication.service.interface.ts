@@ -1,7 +1,7 @@
 /**
  * IUserAuthenticationService provides authentication-specific contract for user lookup
- * This interface abstracts user service dependency from user-management module
- * Following Adapter Pattern to decouple auth module from user-management domain
+ * This interface abstracts user service dependency from user module
+ * Following Adapter Pattern to decouple auth module from user domain
  */
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 

@@ -1,13 +1,13 @@
 /**
- * CustomerAuthenticationAdapter adapts CustomerAuthenticationService from customer-management module
+ * CustomerAuthenticationAdapter adapts CustomerAuthenticationService from customer module
  * to ICustomerAuthenticationService interface for auth module
  * Following Adapter Pattern - adapters use services, not repositories
  * Services are exported from modules and provide what other modules need
  */
 import { Inject, Injectable } from '@nestjs/common';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { CustomerAuthenticationService } from '../../../customer-management/infrastructure/services/customer-authentication.service';
-import { CUSTOMER_AUTHENTICATION_SERVICE } from '../../../customer-management/infrastructure/services/customer-authentication.service';
+import type { CustomerAuthenticationService } from '../../../customer/infrastructure/services/customer-authentication.service';
+import { CUSTOMER_AUTHENTICATION_SERVICE } from '../../../customer/infrastructure/services/customer-authentication.service';
 import type {
   ICustomerAuthenticationService,
   CustomerAuthenticationData,
