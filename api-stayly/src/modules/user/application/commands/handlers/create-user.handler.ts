@@ -19,7 +19,7 @@ import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Role } from '../../../domain/value-objects/role.vo';
 import { Permission } from '../../../domain/value-objects/permission.vo';
 import { User } from '../../../domain/entities/user.entity';
-import { UserResponseDto } from '../../dto/user-response.dto';
+import { UserResponseDto } from '../../dto/response/user-response.dto';
 
 @Injectable()
 @CommandHandler(CreateUserCommand)

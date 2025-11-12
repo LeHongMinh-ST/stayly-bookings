@@ -2,7 +2,7 @@
  * CustomerResponseDto standardizes serialized customer data
  */
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Customer } from '../../domain/entities/customer.entity';
+import { Customer } from '../../../domain/entities/customer.entity';
 
 export class CustomerResponseDto {
   @ApiProperty({ description: 'Customer unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })

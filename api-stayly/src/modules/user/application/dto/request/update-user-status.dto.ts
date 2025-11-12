@@ -3,7 +3,7 @@
  */
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
-import { UserStatus } from '../../domain/value-objects/user-status.vo';
+import { UserStatus } from '../../../domain/value-objects/user-status.vo';
 
 export class UpdateUserStatusDto {
   @ApiProperty({

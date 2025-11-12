@@ -17,7 +17,7 @@ import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
 import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
 import { Customer } from '../../../domain/entities/customer.entity';
-import { CustomerResponseDto } from '../../dto/customer-response.dto';
+import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
 
 @Injectable()
 @CommandHandler(RegisterCustomerCommand)

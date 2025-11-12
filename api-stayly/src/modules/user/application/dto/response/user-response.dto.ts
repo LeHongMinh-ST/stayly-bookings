@@ -2,7 +2,7 @@
  * UserResponseDto defines response shape for administrative user resources
  */
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../domain/entities/user.entity';
+import { User } from '../../../domain/entities/user.entity';
 
 export class UserResponseDto {
   @ApiProperty({ description: 'User unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })

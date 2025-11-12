@@ -17,7 +17,7 @@ import { SESSION_REPOSITORY } from '../../../domain/repositories/session.reposit
 import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
 import { Session } from '../../../domain/entities/session.entity';
 import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
-import { TokenResponseDto } from '../../dto/token-response.dto';
+import { TokenResponseDto } from '../../dto/response/token-response.dto';
 
 @Injectable()
 @CommandHandler(AuthenticateUserCommand)

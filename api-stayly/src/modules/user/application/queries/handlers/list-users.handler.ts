@@ -6,8 +6,8 @@ import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { ListUsersQuery } from '../list-users.query';
 import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
-import { UserResponseDto } from '../../dto/user-response.dto';
-import { UserCollectionDto } from '../../dto/user-collection.dto';
+import { UserResponseDto } from '../../dto/response/user-response.dto';
+import { UserCollectionDto } from '../../dto/response/user-collection.dto';
 
 @Injectable()
 @QueryHandler(ListUsersQuery)

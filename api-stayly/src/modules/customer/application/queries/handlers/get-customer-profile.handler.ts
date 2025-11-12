@@ -9,7 +9,7 @@ import {
 } from '../../../domain/repositories/customer.repository.interface';
 import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
 import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
-import { CustomerResponseDto } from '../../dto/customer-response.dto';
+import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
 
 @Injectable()
 @QueryHandler(GetCustomerProfileQuery)

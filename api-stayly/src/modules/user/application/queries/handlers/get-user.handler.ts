@@ -7,7 +7,7 @@ import { GetUserQuery } from '../get-user.query';
 import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { UserResponseDto } from '../../dto/user-response.dto';
+import { UserResponseDto } from '../../dto/response/user-response.dto';
 
 @Injectable()
 @QueryHandler(GetUserQuery)

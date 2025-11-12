@@ -6,9 +6,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nes
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { JwtCustomerGuard } from '../../../../common/guards/jwt-customer.guard';
-import { RegisterCustomerDto } from '../../application/dto/register-customer.dto';
+import { RegisterCustomerDto } from '../../application/dto/request/register-customer.dto';
 import { RegisterCustomerCommand } from '../../application/commands/register-customer.command';
-import { CustomerResponseDto } from '../../application/dto/customer-response.dto';
+import { CustomerResponseDto } from '../../application/dto/response/customer-response.dto';
 import { GetCustomerProfileQuery } from '../../application/queries/get-customer-profile.query';
 
 @ApiTags('customers')

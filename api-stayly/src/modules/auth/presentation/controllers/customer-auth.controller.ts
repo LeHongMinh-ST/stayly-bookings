@@ -7,10 +7,10 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nes
 import { CommandBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { JwtCustomerGuard } from '../../../../common/guards/jwt-customer.guard';
-import { LoginDto } from '../../application/dto/login.dto';
+import { LoginDto } from '../../application/dto/request/login.dto';
 import { AuthenticateCustomerCommand } from '../../application/commands/authenticate-customer.command';
-import { TokenResponseDto } from '../../application/dto/token-response.dto';
-import { RefreshTokenDto } from '../../application/dto/refresh-token.dto';
+import { TokenResponseDto } from '../../application/dto/response/token-response.dto';
+import { RefreshTokenDto } from '../../application/dto/request/refresh-token.dto';
 import { RefreshTokenCommand } from '../../application/commands/refresh-token.command';
 import { RevokeSessionCommand } from '../../application/commands/revoke-session.command';
 import type { TokenService } from '../../../../common/application/interfaces/token-service.interface';

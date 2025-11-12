@@ -10,7 +10,7 @@ import type { IRoleRepository } from '../../../domain/repositories/role.reposito
 import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Role } from '../../../domain/value-objects/role.vo';
-import { UserResponseDto } from '../../dto/user-response.dto';
+import { UserResponseDto } from '../../dto/response/user-response.dto';
 
 @Injectable()
 @CommandHandler(AssignRolesCommand)

@@ -10,7 +10,7 @@ import type { TokenService } from '../../../../../../common/application/interfac
 import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { TokenResponseDto } from '../../../dto/token-response.dto';
+import { TokenResponseDto } from '../../../dto/response/token-response.dto';
 import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';

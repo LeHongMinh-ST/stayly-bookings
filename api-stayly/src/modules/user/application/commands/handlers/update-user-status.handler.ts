@@ -8,7 +8,7 @@ import type { IUserRepository } from '../../../domain/repositories/user.reposito
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Status } from '../../../domain/value-objects/user-status.vo';
-import { UserResponseDto } from '../../dto/user-response.dto';
+import { UserResponseDto } from '../../dto/response/user-response.dto';
 
 @Injectable()
 @CommandHandler(UpdateUserStatusCommand)
