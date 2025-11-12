@@ -52,7 +52,7 @@ export class AuthenticateUserHandler
     const staffUser = await this.userRepository.findByEmail(email);
     if (staffUser) {
       return this.authenticateStaff(staffUser, command);
-    }
+    }    
 
     const customer = await this.customerRepository.findByEmail(email);
     if (customer) {

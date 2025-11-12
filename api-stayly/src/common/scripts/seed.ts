@@ -1,7 +1,14 @@
+/**
+ * Database Seeding Script
+ * Runs all seeders to populate initial data
+ */
 import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../../app.module';
+import { RolePermissionSeedService } from '../../modules/user-management/infrastructure/persistence/seeds/role-permission-seed.service';
+import { DefaultUsersSeedService } from '../../modules/user-management/infrastructure/persistence/seeds/default-users-seed.service';
+import { DefaultCustomersSeedService } from '../../modules/customer-management/infrastructure/persistence/seeds/default-customers-seed.service';
 
 async function bootstrap() {
   const logger = new Logger('Seeder');
@@ -9,9 +16,31 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log'],
   });
 
-  logger.log('Running database seeders...');
+  try {
+    logger.log('Starting database seeding...');
 
-  await app.close();
+    // 1. Seed roles and permissions first (required for users)
+    logger.log('Seeding roles and permissions...');
+    const rolePermissionSeedService = app.get(RolePermissionSeedService);
+    await rolePermissionSeedService.seed();
+
+    // 2. Seed default admin user
+    logger.log('Seeding default admin user...');
+    const defaultUsersSeedService = app.get(DefaultUsersSeedService);
+    await defaultUsersSeedService.seed();
+
+    // 3. Seed sample customer
+    logger.log('Seeding sample customer...');
+    const defaultCustomersSeedService = app.get(DefaultCustomersSeedService);
+    await defaultCustomersSeedService.seed();
+
+    logger.log('Database seeding completed successfully!');
+  } catch (error) {
+    logger.error('Seeding failed:', error);
+    throw error;
+  } finally {
+    await app.close();
+  }
 }
 
 bootstrap().catch((error) => {
