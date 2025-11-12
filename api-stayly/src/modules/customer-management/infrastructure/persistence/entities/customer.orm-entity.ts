@@ -23,13 +23,13 @@ export class CustomerOrmEntity {
   @Column({ name: 'password_hash' })
   passwordHash!: string;
 
-  @Column({ name: 'phone', nullable: true })
+  @Column({ name: 'phone', type: 'varchar', nullable: true })
   phone!: string | null;
 
   @Column({ name: 'date_of_birth', type: 'date', nullable: true })
   dateOfBirth!: Date | null;
 
-  @Column({ name: 'status', default: 'active' })
+  @Column({ name: 'status', type: 'varchar', default: 'active' })
   status!: string;
 
   @Column({ name: 'email_verified_at', type: 'timestamp', nullable: true })

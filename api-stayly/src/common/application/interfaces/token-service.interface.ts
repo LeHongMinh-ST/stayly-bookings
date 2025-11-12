@@ -1,10 +1,11 @@
 /**
  * TokenService describes operations for issuing and verifying JWT tokens
  */
-import { JwtPayload } from '../../bounded-contexts/auth/domain/value-objects/jwt-payload.vo';
-import { AccessToken } from '../../bounded-contexts/auth/domain/value-objects/access-token.vo';
-import { RefreshToken } from '../../bounded-contexts/auth/domain/value-objects/refresh-token.vo';
-import { TokenPair } from '../../bounded-contexts/auth/domain/value-objects/token-pair.vo';
+
+import { AccessToken } from "src/modules/auth/domain/value-objects/access-token.vo";
+import { JwtPayload } from "src/modules/auth/domain/value-objects/jwt-payload.vo";
+import { RefreshToken } from "src/modules/auth/domain/value-objects/refresh-token.vo";
+import { TokenPair } from "src/modules/auth/domain/value-objects/token-pair.vo";
 
 export interface TokenService {
   issueAccessToken(payload: JwtPayload): Promise<AccessToken>;

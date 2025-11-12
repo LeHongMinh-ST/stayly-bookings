@@ -33,9 +33,9 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 
 // Bounded Context Modules
-import { AuthModule } from './bounded-contexts/auth/auth.module';
-import { UserManagementModule } from './bounded-contexts/user-management/user.module';
-import { CustomerManagementModule } from './bounded-contexts/customer-management/customer.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserManagementModule } from './modules/user-management/user.module';
+import { CustomerManagementModule } from './modules/customer-management/customer.module';
 
 @Module({
   imports: [

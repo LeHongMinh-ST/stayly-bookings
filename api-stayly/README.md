@@ -51,6 +51,15 @@ The API provides a modular authentication system implemented with bounded contex
 
 JWT secrets, token TTLs, and bcrypt salt rounds are configured via `src/config/configuration.ts` (`jwt.*`, `security.bcryptSaltRounds`).
 
+### Seeded Accounts
+
+| Type | Email | Password | Notes |
+| --- | --- | --- | --- |
+| Super Admin | `admin@stayly.dev` | `ChangeMe123!` | Roles: super_admin, owner; all permissions |
+| Sample Customer | `customer@stayly.dev` | `Customer123!` | Demo customer profile |
+
+> ⚠️ Rotate the seeded credentials immediately in non-development environments or override them via environment variables (`SEED_*`).
+
 ## Project setup
 
 ```bash

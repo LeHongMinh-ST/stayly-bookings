@@ -3,6 +3,7 @@
  * Exports TypeORM configuration object
  */
 
+import { join } from 'path';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
 
@@ -21,8 +22,8 @@ export const getDatabaseConfig = (
     database: configService.get<string>('database.name'),
     synchronize: configService.get<boolean>('database.synchronize'),
     logging: configService.get<boolean>('database.logging'),
-    entities: [__dirname + '/../../../**/*.entity{.ts,.js}'],
-    migrations: [__dirname + '/../../../migrations/*{.ts,.js}'],
+    entities: [join(__dirname, '../../../modules/**/*.orm-entity{.ts,.js}')],
+    migrations: [join(__dirname, '../../../migrations/*{.ts,.js}')],
     migrationsRun: false,
     migrationsTableName: 'migrations',
     extra: {

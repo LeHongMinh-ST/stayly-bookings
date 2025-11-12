@@ -4,6 +4,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import type { JwtSignOptions } from '@nestjs/jwt';
 import { TokenService } from '../../../../common/application/interfaces/token-service.interface';
 import { JwtPayload } from '../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../domain/value-objects/access-token.vo';
@@ -15,40 +16,49 @@ export class JwtTokenService implements TokenService {
   private readonly refreshSecret: string;
   private readonly accessExpiresInSeconds: number;
   private readonly refreshExpiresInSeconds: number;
-  private readonly refreshExpiresInRaw: string | number;
+  private readonly refreshExpiresInRaw: JwtSignOptions['expiresIn'];
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.refreshSecret = this.configService.get<string>('jwt.refreshSecret');
-    this.refreshExpiresInRaw = this.configService.get<string | number>(
-      'jwt.refreshExpiresIn',
-    );
+    const accessSecret = this.configService.get<string>('jwt.secret');
+    if (!accessSecret) {
+      throw new Error('jwt.secret is not configured');
+    }
+    const refreshSecret = this.configService.get<string>('jwt.refreshSecret');
+    if (!refreshSecret) {
+      throw new Error('jwt.refreshSecret is not configured');
+    }
+    this.refreshSecret = refreshSecret;
+    const refreshExpiresInConfig = this.configService.get<string | number>('jwt.refreshExpiresIn');
+    this.refreshExpiresInRaw = (refreshExpiresInConfig ?? '7d') as JwtSignOptions['expiresIn'];
     this.accessExpiresInSeconds = this.resolveSeconds(
-      this.configService.get<string | number>('jwt.expiresIn'),
+      this.configService.get<string | number>('jwt.expiresIn') ?? '15m',
     );
-    this.refreshExpiresInSeconds = this.resolveSeconds(this.refreshExpiresInRaw);
+    this.refreshExpiresInSeconds = this.resolveSeconds(this.refreshExpiresInRaw as string | number | undefined);
   }
 
   async issueAccessToken(payload: JwtPayload): Promise<AccessToken> {
-    const token = await this.jwtService.signAsync(payload.getProps(), {
-      expiresIn: this.accessExpiresInSeconds,
+    const payloadProps = payload.getProps();
+    const expiresIn = (this.accessExpiresInSeconds > 0 ? this.accessExpiresInSeconds : undefined) as JwtSignOptions['expiresIn'];
+    const token = await this.jwtService.signAsync(payloadProps, {
+      expiresIn,
     });
     return AccessToken.create(token, this.accessExpiresInSeconds);
   }
 
   async issueRefreshToken(payload: JwtPayload): Promise<RefreshToken> {
-    const token = await this.jwtService.signAsync(payload.getProps(), {
+    const payloadProps = payload.getProps();
+    const token = await this.jwtService.signAsync(payloadProps, {
       secret: this.refreshSecret,
       expiresIn: this.refreshExpiresInRaw,
     });
     const expiresAt = new Date(Date.now() + this.refreshExpiresInSeconds * 1000);
-    const props = payload.getProps();
-    if (!props.tokenId) {
+    if (!payloadProps.tokenId) {
       throw new Error('Refresh token requires tokenId claim');
     }
-    return RefreshToken.create(token, expiresAt, props.tokenId);
+    return RefreshToken.create(token, expiresAt, payloadProps.tokenId);
   }
 
   async issueTokenPair(payload: JwtPayload): Promise<TokenPair> {

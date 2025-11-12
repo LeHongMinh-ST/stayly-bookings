@@ -3,7 +3,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 import { ISessionRepository } from '../../../domain/repositories/session.repository.interface';
 import { Session } from '../../../domain/entities/session.entity';
 import { SessionOrmEntity } from '../entities/session.orm-entity';
@@ -35,7 +35,7 @@ export class SessionRepository implements ISessionRepository {
       where: {
         tokenId,
         refreshTokenExpiresAt: MoreThan(now),
-        revokedAt: null,
+        revokedAt: IsNull(),
       },
     });
     return entity ? SessionOrmMapper.toDomain(entity) : null;

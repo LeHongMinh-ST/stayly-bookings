@@ -19,6 +19,7 @@ import { UserRepository } from './infrastructure/persistence/repositories/user.r
 import { RoleRepository } from './infrastructure/persistence/repositories/role.repository';
 import { PermissionRepository } from './infrastructure/persistence/repositories/permission.repository';
 import { RolePermissionSeeder } from './infrastructure/persistence/seeds/role-permission.seeder';
+import { DefaultUsersSeeder } from './infrastructure/persistence/seeds/default-users.seeder';
 import { UsersController } from './presentation/controllers/users.controller';
 import { UserOrmEntity } from './infrastructure/persistence/entities/user.orm-entity';
 import { RoleOrmEntity } from './infrastructure/persistence/entities/role.orm-entity';
@@ -46,6 +47,7 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
     { provide: ROLE_REPOSITORY, useClass: RoleRepository },
     { provide: PERMISSION_REPOSITORY, useClass: PermissionRepository },
     RolePermissionSeeder,
+    DefaultUsersSeeder,
   ],
   exports: [USER_REPOSITORY, ROLE_REPOSITORY, PERMISSION_REPOSITORY],
 })

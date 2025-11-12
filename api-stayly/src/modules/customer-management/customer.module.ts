@@ -11,6 +11,7 @@ import { RegisterCustomerHandler } from './application/commands/handlers/registe
 import { GetCustomerProfileHandler } from './application/queries/handlers/get-customer-profile.handler';
 import { CUSTOMER_REPOSITORY } from './domain/repositories/customer.repository.interface';
 import { CustomerRepository } from './infrastructure/persistence/repositories/customer.repository';
+import { DefaultCustomersSeeder } from './infrastructure/persistence/seeds/default-customers.seeder';
 import { CustomersController } from './presentation/controllers/customers.controller';
 import { CustomerOrmEntity } from './infrastructure/persistence/entities/customer.orm-entity';
 
@@ -24,6 +25,7 @@ const queryHandlers = [GetCustomerProfileHandler];
     ...commandHandlers,
     ...queryHandlers,
     { provide: CUSTOMER_REPOSITORY, useClass: CustomerRepository },
+    DefaultCustomersSeeder,
   ],
   exports: [CUSTOMER_REPOSITORY],
 })

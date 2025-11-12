@@ -32,7 +32,7 @@ export class SessionOrmEntity {
   @Column({ name: 'user_agent', nullable: true, type: 'text' })
   userAgent!: string | null;
 
-  @Column({ name: 'ip_address', nullable: true })
+  @Column({ name: 'ip_address', type: 'varchar', nullable: true })
   ipAddress!: string | null;
 
   @Column({ name: 'revoked_at', type: 'timestamp', nullable: true })
