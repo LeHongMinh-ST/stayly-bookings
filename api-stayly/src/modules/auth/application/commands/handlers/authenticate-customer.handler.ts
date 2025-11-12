@@ -1,12 +1,12 @@
 /**
- * AuthenticateUserHandler validates credentials and issues JWT tokens
+ * AuthenticateCustomerHandler validates customer credentials and issues JWT tokens
  */
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
-import { AuthenticateUserCommand } from '../authenticate-user.command';
-import type { IUserRepository } from '../../../../user-management/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../../user-management/domain/repositories/user.repository.interface';
+import { AuthenticateCustomerCommand } from '../authenticate-customer.command';
+import type { ICustomerRepository } from '../../../../customer-management/domain/repositories/customer.repository.interface';
+import { CUSTOMER_REPOSITORY } from '../../../../customer-management/domain/repositories/customer.repository.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
@@ -18,17 +18,16 @@ import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
 import { Session } from '../../../domain/entities/session.entity';
 import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
 import { TokenResponseDto } from '../../dto/token-response.dto';
-import { User } from '../../../../user-management/domain/entities/user.entity';
-import { UserStatus } from '../../../../user-management/domain/value-objects/user-status.vo';
+import { CustomerStatus } from '../../../../customer-management/domain/value-objects/customer-status.vo';
 
 @Injectable()
-@CommandHandler(AuthenticateUserCommand)
-export class AuthenticateUserHandler
-  implements ICommandHandler<AuthenticateUserCommand, TokenResponseDto>
+@CommandHandler(AuthenticateCustomerCommand)
+export class AuthenticateCustomerHandler
+  implements ICommandHandler<AuthenticateCustomerCommand, TokenResponseDto>
 {
   constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
+    @Inject(CUSTOMER_REPOSITORY)
+    private readonly customerRepository: ICustomerRepository,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
     @Inject(TOKEN_SERVICE)
@@ -38,58 +37,50 @@ export class AuthenticateUserHandler
   ) {}
 
   /**
-   * Executes user (admin/staff) authentication returning signed token pair
-   * Only authenticates users from users table, not customers
+   * Executes customer authentication returning signed token pair
    */
-  async execute(command: AuthenticateUserCommand): Promise<TokenResponseDto> {
+  async execute(command: AuthenticateCustomerCommand): Promise<TokenResponseDto> {
     const email = Email.create(command.email);
 
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
+    const customer = await this.customerRepository.findByEmail(email);
+    if (!customer) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.authenticateUser(user, command);
-  }
-
-  private async authenticateUser(
-    user: User,
-    command: AuthenticateUserCommand,
-  ): Promise<TokenResponseDto> {
     const matches = await this.passwordHasher.compare(
       command.password,
-      user.getPasswordHash().getValue(),
+      customer.getPasswordHash().getValue(),
     );
     if (!matches) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (user.getStatus().getValue() !== UserStatus.ACTIVE) {
-      throw new BadRequestException('User is not active');
+    if (customer.getStatus().getValue() !== CustomerStatus.ACTIVE) {
+      throw new BadRequestException('Customer account is not active');
     }
 
     const payload = JwtPayload.create({
-      sub: user.getId().getValue(),
-      email: user.getEmail().getValue(),
-      roles: user.getRoles().map((role) => role.getValue()),
-      permissions: user.getPermissions().map((permission) => permission.getValue()),
+      sub: customer.getId().getValue(),
+      email: customer.getEmail().getValue(),
+      roles: ['customer'],
+      permissions: [],
       tokenId: randomUUID(),
-      userType: 'user', // Mark as user for guard differentiation
+      userType: 'customer', // Mark as customer for guard differentiation
     });
 
-    return this.issueTokens(payload, command, user.getId().getValue());
+    return this.issueTokens(payload, command, customer.getId().getValue());
   }
 
   private async issueTokens(
     payload: JwtPayload,
-    command: AuthenticateUserCommand,
-    userId: string,
+    command: AuthenticateCustomerCommand,
+    customerId: string,
   ): Promise<TokenResponseDto> {
     const tokenPair: TokenPair = await this.tokenService.issueTokenPair(payload);
 
     const session = Session.create({
       id: randomUUID(),
-      userId: userId,
+      userId: customerId,
       refreshToken: tokenPair.refreshToken,
       userAgent: command.userAgent ?? null,
       ipAddress: command.ipAddress ?? null,
@@ -104,3 +95,4 @@ export class AuthenticateUserHandler
     );
   }
 }
+

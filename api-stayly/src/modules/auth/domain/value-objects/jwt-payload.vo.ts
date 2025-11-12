@@ -7,6 +7,7 @@ export interface JwtPayloadProps {
   roles: string[];
   permissions: string[];
   tokenId?: string;
+  userType?: 'user' | 'customer'; // Distinguish between user and customer
 }
 
 export class JwtPayload {

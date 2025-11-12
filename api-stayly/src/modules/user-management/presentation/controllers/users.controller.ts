@@ -1,9 +1,10 @@
 /**
  * UsersController exposes administrative endpoints for staff accounts
  */
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { JwtUserGuard } from '../../../../common/guards/jwt-user.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
@@ -19,6 +20,7 @@ import { AssignRolesCommand } from '../../application/commands/assign-roles.comm
 import { UserRole } from '../../domain/value-objects/role.vo';
 
 @ApiTags('users')
+@UseGuards(JwtUserGuard)
 @ApiBearerAuth('JWT-auth')
 @Controller('v1/admin/users')
 export class UsersController {

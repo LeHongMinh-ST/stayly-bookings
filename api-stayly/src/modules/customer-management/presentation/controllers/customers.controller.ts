@@ -1,10 +1,11 @@
 /**
  * CustomersController exposes signup and profile endpoints for customers
  */
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
+import { JwtCustomerGuard } from '../../../../common/guards/jwt-customer.guard';
 import { RegisterCustomerDto } from '../../application/dto/register-customer.dto';
 import { RegisterCustomerCommand } from '../../application/commands/register-customer.command';
 import { CustomerResponseDto } from '../../application/dto/customer-response.dto';
@@ -45,6 +46,7 @@ export class CustomersController {
    * Returns profile for the currently authenticated customer
    */
   @Get('me')
+  @UseGuards(JwtCustomerGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get current customer profile' })
   @ApiResponse({

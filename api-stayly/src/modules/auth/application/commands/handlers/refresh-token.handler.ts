@@ -36,9 +36,12 @@ export class RefreshTokenHandler
       throw new Error('Refresh token expired or revoked');
     }
 
+    const props = payload.getProps();
     const nextPayload = JwtPayload.create({
-      ...payload.getProps(),
+      ...props,
       tokenId: randomUUID(),
+      // Preserve userType from original token
+      userType: props.userType,
     });
 
     const tokenPair = await this.tokenService.issueTokenPair(nextPayload);

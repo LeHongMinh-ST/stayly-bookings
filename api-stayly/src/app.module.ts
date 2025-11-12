@@ -18,7 +18,6 @@ import { KafkaModule } from './common/infrastructure/kafka/kafka.module';
 import { LoggerModuleConfig } from './common/infrastructure/logger/logger.module';
 
 // Guards
-import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 
@@ -65,10 +64,8 @@ import { CustomerManagementModule } from './modules/customer-management/customer
     AppService,
 
     // Global guards
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
+    // Note: JWT authentication guards are applied per-controller (JwtUserGuard or JwtCustomerGuard)
+    // to ensure proper separation between admin and customer endpoints
     {
       provide: APP_GUARD,
       useClass: RolesGuard,

@@ -13,18 +13,22 @@ import { SecurityModule } from "../../common/infrastructure/security/security.mo
 import { UserManagementModule } from "../user-management/user.module";
 import { CustomerManagementModule } from "../customer-management/customer.module";
 import { AuthenticateUserHandler } from "./application/commands/handlers/authenticate-user.handler";
+import { AuthenticateCustomerHandler } from "./application/commands/handlers/authenticate-customer.handler";
 import { RefreshTokenHandler } from "./application/commands/handlers/refresh-token.handler";
 import { RevokeSessionHandler } from "./application/commands/handlers/revoke-session.handler";
 import { TOKEN_SERVICE } from "../../common/application/interfaces/token-service.interface";
 import { SESSION_REPOSITORY } from "./domain/repositories/session.repository.interface";
 import { SessionOrmEntity } from "./infrastructure/persistence/entities/session.orm-entity";
 import { SessionRepository } from "./infrastructure/persistence/repositories/session.repository";
-import { AuthController } from "./presentation/controllers/auth.controller";
+import { UserAuthController } from "./presentation/controllers/auth.controller";
+import { CustomerAuthController } from "./presentation/controllers/customer-auth.controller";
 import { JwtTokenService } from "./infrastructure/services/jwt-token.service";
-import { JwtStrategy } from "../../common/strategies/jwt.strategy";
+import { JwtUserStrategy } from "../../common/strategies/jwt-user.strategy";
+import { JwtCustomerStrategy } from "../../common/strategies/jwt-customer.strategy";
 
 const commandHandlers = [
   AuthenticateUserHandler,
+  AuthenticateCustomerHandler,
   RefreshTokenHandler,
   RevokeSessionHandler,
 ];
@@ -50,10 +54,11 @@ const commandHandlers = [
       inject: [ConfigService],
     }),
   ],
-  controllers: [AuthController],
+  controllers: [UserAuthController, CustomerAuthController],
   providers: [
     ...commandHandlers,
-    JwtStrategy,
+    JwtUserStrategy,
+    JwtCustomerStrategy,
     { provide: SESSION_REPOSITORY, useClass: SessionRepository },
     { provide: TOKEN_SERVICE, useClass: JwtTokenService },
   ],
