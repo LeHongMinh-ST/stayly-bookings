@@ -1,7 +1,7 @@
 /**
  * RefreshTokenHandler validates refresh token and rotates credentials
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { RefreshTokenCommand } from '../refresh-token.command';
@@ -56,11 +56,11 @@ export class RefreshTokenHandler
   private async loadSession(payload: JwtPayload): Promise<Session> {
     const props = payload.getProps();
     if (!props.tokenId) {
-      throw new Error('Refresh token missing token identifier');
+      throw new BadRequestException('Refresh token missing token identifier');
     }
     const session = await this.sessionRepository.findActiveByTokenId(props.tokenId);
     if (!session) {
-      throw new Error('Refresh session not found');
+      throw new NotFoundException('Refresh session not found');
     }
     return session;
   }

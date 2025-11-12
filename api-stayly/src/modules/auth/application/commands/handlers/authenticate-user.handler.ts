@@ -1,7 +1,7 @@
 /**
  * AuthenticateUserHandler validates credentials and issues JWT tokens
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { AuthenticateUserCommand } from '../authenticate-user.command';
@@ -59,7 +59,7 @@ export class AuthenticateUserHandler
       return this.authenticateCustomer(customer, command);
     }
 
-    throw new Error('Invalid credentials');
+    throw new UnauthorizedException('Invalid credentials');
   }
 
   private async authenticateStaff(
@@ -71,11 +71,11 @@ export class AuthenticateUserHandler
       user.getPasswordHash().getValue(),
     );
     if (!matches) {
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     if (user.getStatus().getValue() !== UserStatus.ACTIVE) {
-      throw new Error('User is not active');
+      throw new BadRequestException('User is not active');
     }
 
     const payload = JwtPayload.create({
@@ -98,11 +98,11 @@ export class AuthenticateUserHandler
       customer.getPasswordHash().getValue(),
     );
     if (!matches) {
-      throw new Error('Invalid credentials');
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     if (customer.getStatus().getValue() !== CustomerStatus.ACTIVE) {
-      throw new Error('Customer is not active');
+      throw new BadRequestException('Customer is not active');
     }
 
     const payload = JwtPayload.create({
