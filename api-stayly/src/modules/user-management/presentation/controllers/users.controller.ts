@@ -2,6 +2,7 @@
  * UsersController exposes administrative endpoints for staff accounts
  */
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
@@ -17,7 +18,9 @@ import { AssignRolesDto } from '../../application/dto/assign-roles.dto';
 import { AssignRolesCommand } from '../../application/commands/assign-roles.command';
 import { UserRole } from '../../domain/value-objects/role.vo';
 
-@Controller('api/v1/admin/users')
+@ApiTags('users')
+@ApiBearerAuth('JWT-auth')
+@Controller('v1/admin/users')
 export class UsersController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -30,6 +33,15 @@ export class UsersController {
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER)
   @Permissions('user:manage')
+  @ApiOperation({ summary: 'Create a new administrative user' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully created',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const command = new CreateUserCommand(
       dto.email,
@@ -47,6 +59,15 @@ export class UsersController {
   @Get()
   @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER, UserRole.MANAGER)
   @Permissions('user:read')
+  @ApiOperation({ summary: 'List users with pagination' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page', example: 20 })
+  @ApiQuery({ name: 'offset', required: false, type: Number, description: 'Number of items to skip', example: 0 })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns paginated list of users',
+    type: UserCollectionDto,
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async listUsers(
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 20,
     @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
@@ -60,6 +81,15 @@ export class UsersController {
   @Get(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER, UserRole.MANAGER)
   @Permissions('user:read')
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiParam({ name: 'id', description: 'User unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns user details',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async getUser(@Param('id') id: string): Promise<UserResponseDto> {
     return this.queryBus.execute(new GetUserQuery(id));
   }
@@ -70,6 +100,17 @@ export class UsersController {
   @Patch(':id/status')
   @Roles(UserRole.SUPER_ADMIN, UserRole.OWNER)
   @Permissions('user:manage')
+  @ApiOperation({ summary: 'Update user status' })
+  @ApiParam({ name: 'id', description: 'User unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiBody({ type: UpdateUserStatusDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User status updated successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async updateStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
@@ -84,6 +125,17 @@ export class UsersController {
   @Patch(':id/roles')
   @Roles(UserRole.SUPER_ADMIN)
   @Permissions('user:manage')
+  @ApiOperation({ summary: 'Assign roles to user' })
+  @ApiParam({ name: 'id', description: 'User unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiBody({ type: AssignRolesDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Roles assigned successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async assignRoles(
     @Param('id') id: string,
     @Body() dto: AssignRolesDto,

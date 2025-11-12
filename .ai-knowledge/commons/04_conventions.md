@@ -626,6 +626,133 @@ export class BookingDto {
 }
 ```
 
+### 6.4. Swagger/OpenAPI Documentation Conventions
+
+**Swagger Configuration:**
+- Swagger UI available at `/api/docs`
+- JWT Bearer Authentication configured
+- Tags for grouping endpoints
+- Version and description configured
+
+**Controller Decorators:**
+- **`@ApiTags('tag-name')`**: Group endpoints by feature/resource
+- **`@ApiOperation({ summary: '...' })`**: Describe endpoint purpose
+- **`@ApiResponse({ status, description, type })`**: Document response schemas
+- **`@ApiBearerAuth('JWT-auth')`**: Mark endpoints requiring authentication
+- **`@ApiBody({ type: DtoClass })`**: Document request body schema
+
+**DTO Decorators:**
+- **`@ApiProperty({ description, example, ... })`**: Document required properties
+- **`@ApiPropertyOptional({ description, example, ... })`**: Document optional properties
+- Include descriptions, examples, and validation constraints
+
+**Examples:**
+
+**Controller:**
+```typescript
+@ApiTags('customers')
+@Controller('v1/customers')
+export class CustomersController {
+  @Post('register')
+  @Public()
+  @ApiOperation({ summary: 'Register a new customer account' })
+  @ApiBody({ type: RegisterCustomerDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer successfully registered',
+    type: CustomerResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  async register(@Body() dto: RegisterCustomerDto): Promise<CustomerResponseDto> {
+    // ...
+  }
+
+  @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current customer profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns customer profile',
+    type: CustomerResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async me(@Request() req: any): Promise<CustomerResponseDto> {
+    // ...
+  }
+}
+```
+
+**Request DTO:**
+```typescript
+export class RegisterCustomerDto {
+  @ApiProperty({
+    description: 'Customer email address',
+    example: 'customer@example.com',
+  })
+  @IsEmail()
+  email!: string;
+
+  @ApiProperty({
+    description: 'Customer password (minimum 8 characters)',
+    example: 'SecurePassword123!',
+    minLength: 8,
+  })
+  @IsString()
+  @MinLength(8)
+  password!: string;
+
+  @ApiPropertyOptional({
+    description: 'Customer phone number',
+    example: '+1234567890',
+    pattern: '^[0-9+\\-()\\s]{6,20}$',
+  })
+  @IsOptional()
+  @Matches(/^[0-9+\-()\s]{6,20}$/)
+  phone?: string;
+}
+```
+
+**Response DTO:**
+```typescript
+export class CustomerResponseDto {
+  @ApiProperty({ 
+    description: 'Customer unique identifier', 
+    example: '123e4567-e89b-12d3-a456-426614174000' 
+  })
+  id!: string;
+
+  @ApiProperty({ 
+    description: 'Customer email address', 
+    example: 'customer@example.com' 
+  })
+  email!: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Customer phone number', 
+    example: '+1234567890', 
+    nullable: true 
+  })
+  phone!: string | null;
+
+  @ApiProperty({ 
+    description: 'Account creation timestamp', 
+    example: '2024-01-01T00:00:00.000Z' 
+  })
+  createdAt!: string;
+}
+```
+
+**Best Practices:**
+- Always add `@ApiTags` to controllers for grouping
+- Document all endpoints with `@ApiOperation`
+- Include `@ApiResponse` for all possible status codes
+- Use `@ApiBearerAuth('JWT-auth')` for protected endpoints
+- Add `@ApiProperty` to all DTO properties with descriptions and examples
+- Use `@ApiPropertyOptional` for optional fields
+- Include validation constraints in `@ApiProperty` (minLength, maxLength, pattern, etc.)
+- Use meaningful examples that reflect real-world usage
+- Document error responses (400, 401, 403, 404, 500, etc.)
+
 ---
 
 ## 7. Database Conventions

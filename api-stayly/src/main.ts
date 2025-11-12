@@ -6,6 +6,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
 
@@ -46,10 +47,40 @@ async function bootstrap() {
   const appName = configService.get<string>('app.name') || 'Stayly API';
   const env = configService.get<string>('app.env') || 'development';
 
+  // Swagger configuration
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle(appName)
+    .setDescription('Stayly Bookings API Documentation')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+    )
+    .addTag('health', 'Health check endpoints')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management endpoints')
+    .addTag('customers', 'Customer management endpoints')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true, // Keep authorization token after page refresh
+    },
+  });
+
   await app.listen(port);
 
   const logger = app.get(Logger);
   logger.log(`${appName} is running on port ${port} in ${env} mode`);
+  logger.log(`Swagger documentation available at http://localhost:${port}/api/docs`);
 }
 
 bootstrap();

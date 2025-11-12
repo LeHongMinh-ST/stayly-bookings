@@ -2,6 +2,7 @@
  * CustomersController exposes signup and profile endpoints for customers
  */
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { RegisterCustomerDto } from '../../application/dto/register-customer.dto';
@@ -9,7 +10,8 @@ import { RegisterCustomerCommand } from '../../application/commands/register-cus
 import { CustomerResponseDto } from '../../application/dto/customer-response.dto';
 import { GetCustomerProfileQuery } from '../../application/queries/get-customer-profile.query';
 
-@Controller('api/v1/customers')
+@ApiTags('customers')
+@Controller('v1/customers')
 export class CustomersController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -21,6 +23,14 @@ export class CustomersController {
    */
   @Post('register')
   @Public()
+  @ApiOperation({ summary: 'Register a new customer account' })
+  @ApiBody({ type: RegisterCustomerDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Customer successfully registered',
+    type: CustomerResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   async register(@Body() dto: RegisterCustomerDto): Promise<CustomerResponseDto> {
     const command = new RegisterCustomerCommand(
       dto.email,
@@ -35,6 +45,14 @@ export class CustomersController {
    * Returns profile for the currently authenticated customer
    */
   @Get('me')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Get current customer profile' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns customer profile',
+    type: CustomerResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async me(@Request() req: any): Promise<CustomerResponseDto> {
     const customerId = req.user?.id ?? req.user?.sub;
     if (!customerId) {
