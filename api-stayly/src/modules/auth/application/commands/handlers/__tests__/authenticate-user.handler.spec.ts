@@ -6,23 +6,15 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticateUserHandler } from '../authenticate-user.handler';
 import { AuthenticateUserCommand } from '../../authenticate-user.command';
-import type { IUserRepository } from '../../../../../user-management/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../../../user-management/domain/repositories/user.repository.interface';
+import type { IUserAuthenticationService } from '../../../interfaces/user-authentication.service.interface';
+import { USER_AUTHENTICATION_SERVICE } from '../../../interfaces/user-authentication.service.interface';
 import type { PasswordHasher } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import type { TokenService } from '../../../../../../common/application/interfaces/token-service.interface';
 import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { User } from '../../../../../user-management/domain/entities/user.entity';
-import { UserId } from '../../../../../user-management/domain/value-objects/user-id.vo';
 import { Email } from '../../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../../common/domain/value-objects/password-hash.vo';
-import { Status } from '../../../../../user-management/domain/value-objects/user-status.vo';
-import { UserStatus } from '../../../../../user-management/domain/value-objects/user-status.vo';
-import { Role } from '../../../../../user-management/domain/value-objects/role.vo';
-import { UserRole } from '../../../../../user-management/domain/value-objects/role.vo';
-import { Permission } from '../../../../../user-management/domain/value-objects/permission.vo';
 import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
@@ -31,7 +23,7 @@ import { randomUUID } from 'crypto';
 
 describe('AuthenticateUserHandler', () => {
   let handler: AuthenticateUserHandler;
-  let userRepository: jest.Mocked<IUserRepository>;
+  let userAuthService: jest.Mocked<IUserAuthenticationService>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let tokenService: jest.Mocked<TokenService>;
   let sessionRepository: jest.Mocked<ISessionRepository>;
@@ -43,22 +35,19 @@ describe('AuthenticateUserHandler', () => {
   const userAgent = 'Mozilla/5.0';
   const ipAddress = '192.168.1.1';
 
-  const mockUser = User.rehydrate({
-    id: UserId.create(userId),
-    email: userEmail,
-    fullName: 'Admin User',
-    passwordHash: PasswordHash.create(hashedPassword),
-    status: Status.create(UserStatus.ACTIVE),
-    roles: [Role.create(UserRole.SUPER_ADMIN)],
-    permissions: [Permission.create('user:manage')],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const mockUserData = {
+    id: userId,
+    email: 'admin@stayly.dev',
+    passwordHash: hashedPassword,
+    isActive: true,
+    roles: ['super_admin'],
+    permissions: ['user:manage'],
+  };
 
   beforeEach(async () => {
     // Arrange: Create mocks
-    const mockUserRepository = {
-      findByEmail: jest.fn(),
+    const mockUserAuthRepository = {
+      findForAuthentication: jest.fn(),
     };
 
     const mockPasswordHasher = {
@@ -81,8 +70,8 @@ describe('AuthenticateUserHandler', () => {
       providers: [
         AuthenticateUserHandler,
         {
-          provide: USER_REPOSITORY,
-          useValue: mockUserRepository,
+          provide: USER_AUTHENTICATION_SERVICE,
+          useValue: mockUserAuthRepository,
         },
         {
           provide: PASSWORD_HASHER,
@@ -100,7 +89,7 @@ describe('AuthenticateUserHandler', () => {
     }).compile();
 
     handler = module.get<AuthenticateUserHandler>(AuthenticateUserHandler);
-    userRepository = module.get(USER_REPOSITORY);
+    userAuthService = module.get(USER_AUTHENTICATION_SERVICE);
     passwordHasher = module.get(PASSWORD_HASHER);
     tokenService = module.get(TOKEN_SERVICE);
     sessionRepository = module.get(SESSION_REPOSITORY);
@@ -125,7 +114,7 @@ describe('AuthenticateUserHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -138,7 +127,7 @@ describe('AuthenticateUserHandler', () => {
       expect(result.accessToken).toBe('access-token-long-enough');
       expect(result.refreshToken).toBe('refresh-token-long-enough-to-pass-validation');
       expect(result.tokenType).toBe('Bearer');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEmail);
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
@@ -153,12 +142,12 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      userRepository.findByEmail.mockResolvedValue(null);
+      userAuthService.findForAuthentication.mockResolvedValue(null);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
       await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEmail);
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
       expect(passwordHasher.compare).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -172,30 +161,23 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(false);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
       await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEmail);
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith('WrongPassword', hashedPassword);
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when user is not active', async () => {
       // Arrange
-      const inactiveUser = User.rehydrate({
-        id: UserId.create(userId),
-        email: userEmail,
-        fullName: 'Inactive User',
-        passwordHash: PasswordHash.create(hashedPassword),
-        status: Status.create(UserStatus.INACTIVE),
-        roles: [Role.create(UserRole.STAFF)],
-        permissions: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      const inactiveUserData = {
+        ...mockUserData,
+        isActive: false,
+      };
 
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -204,13 +186,13 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      userRepository.findByEmail.mockResolvedValue(inactiveUser);
+      userAuthService.findForAuthentication.mockResolvedValue(inactiveUserData);
       passwordHasher.compare.mockResolvedValue(true);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BadRequestException);
       await expect(handler.execute(command)).rejects.toThrow('User is not active');
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(userEmail);
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -229,7 +211,7 @@ describe('AuthenticateUserHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -244,7 +226,8 @@ describe('AuthenticateUserHandler', () => {
       expect(payloadProps.userType).toBe('user');
       expect(payloadProps.sub).toBe(userId);
       expect(payloadProps.email).toBe(userEmail.getValue());
-      expect(payloadProps.roles).toContain(UserRole.SUPER_ADMIN);
+      expect(payloadProps.roles).toEqual(['super_admin']);
+      expect(payloadProps.permissions).toEqual(['user:manage']);
     });
 
     it('should create session with correct metadata', async () => {
@@ -261,7 +244,7 @@ describe('AuthenticateUserHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -291,7 +274,7 @@ describe('AuthenticateUserHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      userRepository.findByEmail.mockResolvedValue(mockUser);
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();

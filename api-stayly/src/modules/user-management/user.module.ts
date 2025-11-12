@@ -24,6 +24,7 @@ import { UsersController } from './presentation/controllers/users.controller';
 import { UserOrmEntity } from './infrastructure/persistence/entities/user.orm-entity';
 import { RoleOrmEntity } from './infrastructure/persistence/entities/role.orm-entity';
 import { PermissionOrmEntity } from './infrastructure/persistence/entities/permission.orm-entity';
+import { UserAuthenticationService, USER_AUTHENTICATION_SERVICE } from './infrastructure/services/user-authentication.service';
 
 const commandHandlers = [
   CreateUserHandler,
@@ -46,10 +47,20 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
     { provide: USER_REPOSITORY, useClass: UserRepository },
     { provide: ROLE_REPOSITORY, useClass: RoleRepository },
     { provide: PERMISSION_REPOSITORY, useClass: PermissionRepository },
+    // Services for other modules
+    {
+      provide: USER_AUTHENTICATION_SERVICE,
+      useClass: UserAuthenticationService,
+    },
     // Seed services for CLI usage (they won't auto-run on bootstrap)
     RolePermissionSeedService,
     DefaultUsersSeedService,
   ],
-  exports: [USER_REPOSITORY, ROLE_REPOSITORY, PERMISSION_REPOSITORY],
+  exports: [
+    USER_REPOSITORY,
+    ROLE_REPOSITORY,
+    PERMISSION_REPOSITORY,
+    USER_AUTHENTICATION_SERVICE, // Export service for other modules
+  ],
 })
 export class UserManagementModule {}

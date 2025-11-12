@@ -25,6 +25,10 @@ import { CustomerAuthController } from "./presentation/controllers/customer-auth
 import { JwtTokenService } from "./infrastructure/services/jwt-token.service";
 import { JwtUserStrategy } from "../../common/strategies/jwt-user.strategy";
 import { JwtCustomerStrategy } from "../../common/strategies/jwt-customer.strategy";
+import { CustomerAuthenticationAdapter } from "./infrastructure/adapters/customer-authentication.adapter";
+import { UserAuthenticationAdapter } from "./infrastructure/adapters/user-authentication.adapter";
+import { CUSTOMER_AUTHENTICATION_SERVICE } from "./application/interfaces/customer-authentication.service.interface";
+import { USER_AUTHENTICATION_SERVICE } from "./application/interfaces/user-authentication.service.interface";
 
 const commandHandlers = [
   AuthenticateUserHandler,
@@ -61,6 +65,16 @@ const commandHandlers = [
     JwtCustomerStrategy,
     { provide: SESSION_REPOSITORY, useClass: SessionRepository },
     { provide: TOKEN_SERVICE, useClass: JwtTokenService },
+    // Adapters use services from other modules, not repositories directly
+    // Services are exported from modules and provide what other modules need
+    {
+      provide: CUSTOMER_AUTHENTICATION_SERVICE,
+      useClass: CustomerAuthenticationAdapter,
+    },
+    {
+      provide: USER_AUTHENTICATION_SERVICE,
+      useClass: UserAuthenticationAdapter,
+    },
   ],
   exports: [TOKEN_SERVICE, SESSION_REPOSITORY, PassportModule],
 })

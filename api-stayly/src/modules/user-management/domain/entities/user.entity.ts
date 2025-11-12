@@ -136,6 +136,14 @@ export class User {
     return this.status;
   }
 
+  /**
+   * Checks if user account is active
+   * Encapsulates status check logic to avoid exposing UserStatus enum to other modules
+   */
+  isActive(): boolean {
+    return this.status.getValue() === UserStatus.ACTIVE;
+  }
+
   getRoles(): Role[] {
     return [...this.roles];
   }

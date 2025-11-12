@@ -142,6 +142,14 @@ export class Customer {
     return this.status;
   }
 
+  /**
+   * Checks if customer account is active
+   * Encapsulates status check logic to avoid exposing CustomerStatus enum to other modules
+   */
+  isActive(): boolean {
+    return this.status.getValue() === CustomerStatus.ACTIVE;
+  }
+
   getEmailVerifiedAt(): Date | null {
     return this.emailVerifiedAt;
   }

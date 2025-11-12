@@ -5,8 +5,8 @@ import { BadRequestException, Inject, Injectable, UnauthorizedException } from '
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { AuthenticateUserCommand } from '../authenticate-user.command';
-import type { IUserRepository } from '../../../../user-management/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../../user-management/domain/repositories/user.repository.interface';
+import type { IUserAuthenticationService } from '../../interfaces/user-authentication.service.interface';
+import { USER_AUTHENTICATION_SERVICE } from '../../interfaces/user-authentication.service.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
@@ -18,8 +18,6 @@ import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
 import { Session } from '../../../domain/entities/session.entity';
 import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
 import { TokenResponseDto } from '../../dto/token-response.dto';
-import { User } from '../../../../user-management/domain/entities/user.entity';
-import { UserStatus } from '../../../../user-management/domain/value-objects/user-status.vo';
 
 @Injectable()
 @CommandHandler(AuthenticateUserCommand)
@@ -27,8 +25,8 @@ export class AuthenticateUserHandler
   implements ICommandHandler<AuthenticateUserCommand, TokenResponseDto>
 {
   constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
+    @Inject(USER_AUTHENTICATION_SERVICE)
+    private readonly userAuthService: IUserAuthenticationService,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
     @Inject(TOKEN_SERVICE)
@@ -44,40 +42,33 @@ export class AuthenticateUserHandler
   async execute(command: AuthenticateUserCommand): Promise<TokenResponseDto> {
     const email = Email.create(command.email);
 
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) {
+    const userData = await this.userAuthService.findForAuthentication(email);
+    if (!userData) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    return this.authenticateUser(user, command);
-  }
-
-  private async authenticateUser(
-    user: User,
-    command: AuthenticateUserCommand,
-  ): Promise<TokenResponseDto> {
     const matches = await this.passwordHasher.compare(
       command.password,
-      user.getPasswordHash().getValue(),
+      userData.passwordHash,
     );
     if (!matches) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (user.getStatus().getValue() !== UserStatus.ACTIVE) {
+    if (!userData.isActive) {
       throw new BadRequestException('User is not active');
     }
 
     const payload = JwtPayload.create({
-      sub: user.getId().getValue(),
-      email: user.getEmail().getValue(),
-      roles: user.getRoles().map((role) => role.getValue()),
-      permissions: user.getPermissions().map((permission) => permission.getValue()),
+      sub: userData.id,
+      email: userData.email,
+      roles: userData.roles,
+      permissions: userData.permissions,
       tokenId: randomUUID(),
       userType: 'user', // Mark as user for guard differentiation
     });
 
-    return this.issueTokens(payload, command, user.getId().getValue());
+    return this.issueTokens(payload, command, userData.id);
   }
 
   private async issueTokens(

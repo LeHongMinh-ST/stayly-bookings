@@ -6,20 +6,15 @@ import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticateCustomerHandler } from '../authenticate-customer.handler';
 import { AuthenticateCustomerCommand } from '../../authenticate-customer.command';
-import type { ICustomerRepository } from '../../../../../customer-management/domain/repositories/customer.repository.interface';
-import { CUSTOMER_REPOSITORY } from '../../../../../customer-management/domain/repositories/customer.repository.interface';
+import type { ICustomerAuthenticationService } from '../../../interfaces/customer-authentication.service.interface';
+import { CUSTOMER_AUTHENTICATION_SERVICE } from '../../../interfaces/customer-authentication.service.interface';
 import type { PasswordHasher } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import type { TokenService } from '../../../../../../common/application/interfaces/token-service.interface';
 import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { Customer } from '../../../../../customer-management/domain/entities/customer.entity';
-import { CustomerId } from '../../../../../customer-management/domain/value-objects/customer-id.vo';
 import { Email } from '../../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../../common/domain/value-objects/password-hash.vo';
-import { Status } from '../../../../../customer-management/domain/value-objects/customer-status.vo';
-import { CustomerStatus } from '../../../../../customer-management/domain/value-objects/customer-status.vo';
 import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
@@ -28,7 +23,7 @@ import { randomUUID } from 'crypto';
 
 describe('AuthenticateCustomerHandler', () => {
   let handler: AuthenticateCustomerHandler;
-  let customerRepository: jest.Mocked<ICustomerRepository>;
+  let customerAuthService: jest.Mocked<ICustomerAuthenticationService>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let tokenService: jest.Mocked<TokenService>;
   let sessionRepository: jest.Mocked<ISessionRepository>;
@@ -40,23 +35,17 @@ describe('AuthenticateCustomerHandler', () => {
   const userAgent = 'Mozilla/5.0';
   const ipAddress = '192.168.1.1';
 
-  const mockCustomer = Customer.rehydrate({
-    id: CustomerId.create(customerId),
-    email: customerEmail,
-    passwordHash: PasswordHash.create(hashedPassword),
-    fullName: 'John Doe',
-    phone: '+1234567890',
-    dateOfBirth: null,
-    status: Status.create(CustomerStatus.ACTIVE),
-    emailVerifiedAt: new Date(),
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
+  const mockCustomerData = {
+    id: customerId,
+    email: 'customer@stayly.dev',
+    passwordHash: hashedPassword,
+    isActive: true,
+  };
 
   beforeEach(async () => {
     // Arrange: Create mocks
-    const mockCustomerRepository = {
-      findByEmail: jest.fn(),
+    const mockCustomerAuthRepository = {
+      findForAuthentication: jest.fn(),
     };
 
     const mockPasswordHasher = {
@@ -79,8 +68,8 @@ describe('AuthenticateCustomerHandler', () => {
       providers: [
         AuthenticateCustomerHandler,
         {
-          provide: CUSTOMER_REPOSITORY,
-          useValue: mockCustomerRepository,
+          provide: CUSTOMER_AUTHENTICATION_SERVICE,
+          useValue: mockCustomerAuthRepository,
         },
         {
           provide: PASSWORD_HASHER,
@@ -98,7 +87,7 @@ describe('AuthenticateCustomerHandler', () => {
     }).compile();
 
     handler = module.get<AuthenticateCustomerHandler>(AuthenticateCustomerHandler);
-    customerRepository = module.get(CUSTOMER_REPOSITORY);
+    customerAuthService = module.get(CUSTOMER_AUTHENTICATION_SERVICE);
     passwordHasher = module.get(PASSWORD_HASHER);
     tokenService = module.get(TOKEN_SERVICE);
     sessionRepository = module.get(SESSION_REPOSITORY);
@@ -123,7 +112,7 @@ describe('AuthenticateCustomerHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -136,7 +125,7 @@ describe('AuthenticateCustomerHandler', () => {
       expect(result.accessToken).toBe('access-token-long-enough');
       expect(result.refreshToken).toBe('refresh-token-long-enough-to-pass-validation');
       expect(result.tokenType).toBe('Bearer');
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(customerEmail);
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
@@ -151,12 +140,12 @@ describe('AuthenticateCustomerHandler', () => {
         ipAddress,
       );
 
-      customerRepository.findByEmail.mockResolvedValue(null);
+      customerAuthService.findForAuthentication.mockResolvedValue(null);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
       await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(customerEmail);
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
       expect(passwordHasher.compare).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -170,31 +159,23 @@ describe('AuthenticateCustomerHandler', () => {
         ipAddress,
       );
 
-      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
       passwordHasher.compare.mockResolvedValue(false);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
       await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(customerEmail);
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith('WrongPassword', hashedPassword);
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException when customer is not active', async () => {
       // Arrange
-      const inactiveCustomer = Customer.rehydrate({
-        id: CustomerId.create(customerId),
-        email: customerEmail,
-        passwordHash: PasswordHash.create(hashedPassword),
-        fullName: 'Inactive Customer',
-        phone: null,
-        dateOfBirth: null,
-        status: Status.create(CustomerStatus.INACTIVE),
-        emailVerifiedAt: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
+      const inactiveCustomerData = {
+        ...mockCustomerData,
+        isActive: false,
+      };
 
       const command = new AuthenticateCustomerCommand(
         customerEmail.getValue(),
@@ -203,13 +184,13 @@ describe('AuthenticateCustomerHandler', () => {
         ipAddress,
       );
 
-      customerRepository.findByEmail.mockResolvedValue(inactiveCustomer);
+      customerAuthService.findForAuthentication.mockResolvedValue(inactiveCustomerData);
       passwordHasher.compare.mockResolvedValue(true);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(BadRequestException);
       await expect(handler.execute(command)).rejects.toThrow('Customer account is not active');
-      expect(customerRepository.findByEmail).toHaveBeenCalledWith(customerEmail);
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
       expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -228,7 +209,7 @@ describe('AuthenticateCustomerHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -261,7 +242,7 @@ describe('AuthenticateCustomerHandler', () => {
       const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerRepository.findByEmail.mockResolvedValue(mockCustomer);
+      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
