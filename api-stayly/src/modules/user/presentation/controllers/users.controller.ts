@@ -44,7 +44,7 @@ export class UsersController {
   ) {}
 
   /**
-   * Creates a new administrative user with specified roles and permissions
+   * Creates a new administrative user
    */
   @Post()
   @Permissions('user:manage')
@@ -65,8 +65,6 @@ export class UsersController {
       dto.email,
       dto.password,
       dto.fullName,
-      dto.roles,
-      dto.permissions ?? [],
     );
     return this.commandBus.execute(command);
   }

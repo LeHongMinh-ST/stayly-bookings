@@ -7,15 +7,11 @@ import { randomUUID } from 'crypto';
 import { CreateUserCommand } from '../create-user.command';
 import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
-import type { IRolePermissionValidationPort } from '../../../../rbac/application/interfaces/role-permission-validation.port';
-import { ROLE_PERMISSION_VALIDATION_PORT } from '../../../../rbac/application/interfaces/role-permission-validation.port';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { UserRole } from '../../../domain/value-objects/user-role.vo';
-import { UserPermission } from '../../../domain/value-objects/user-permission.vo';
 import { User } from '../../../domain/entities/user.entity';
 import { UserResponseDto } from '../../dto/response/user-response.dto';
 
@@ -27,8 +23,6 @@ export class CreateUserHandler
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    @Inject(ROLE_PERMISSION_VALIDATION_PORT)
-    private readonly rolePermissionValidation: IRolePermissionValidationPort,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
   ) {}
@@ -43,18 +37,6 @@ export class CreateUserHandler
       throw new Error('User with email already exists');
     }
 
-    // Validate roles and permissions using RBAC module port
-    const [validatedRoleCodes, validatedPermissionCodes] = await Promise.all([
-      this.rolePermissionValidation.validateRoles(command.roles),
-      this.rolePermissionValidation.validatePermissions(command.permissions ?? []),
-    ]);
-
-    // Convert to local value objects
-    const normalizedRoles = validatedRoleCodes.map((code) => UserRole.from(code));
-    const normalizedPermissions = validatedPermissionCodes.map((code) =>
-      UserPermission.create(code),
-    );
-
     const passwordHashValue = await this.passwordHasher.hash(command.password);
     const passwordHash = PasswordHash.create(passwordHashValue);
 
@@ -63,8 +45,6 @@ export class CreateUserHandler
       email,
       fullName: command.fullName,
       passwordHash,
-      roles: normalizedRoles,
-      permissions: normalizedPermissions,
     });
 
     await this.userRepository.save(user);

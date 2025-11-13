@@ -1,15 +1,8 @@
 /**
  * CreateUserDto validates inbound request payload for creating users
  */
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsEmail,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -36,22 +29,4 @@ export class CreateUserDto {
   @IsString()
   @MinLength(2)
   fullName!: string;
-
-  @ApiProperty({
-    description: 'Array of role names assigned to the user',
-    example: ['OWNER', 'MANAGER'],
-    type: [String],
-  })
-  @IsArray()
-  @ArrayNotEmpty()
-  roles!: string[];
-
-  @ApiPropertyOptional({
-    description: 'Array of permission names (optional)',
-    example: ['user:manage', 'booking:read'],
-    type: [String],
-  })
-  @IsArray()
-  @IsOptional()
-  permissions?: string[];
 }

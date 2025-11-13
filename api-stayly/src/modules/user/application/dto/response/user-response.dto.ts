@@ -27,34 +27,11 @@ export class UserResponseDto {
   })
   status!: string;
 
-  @ApiProperty({
-    description: 'Array of role names',
-    example: ['OWNER', 'MANAGER'],
-    type: [String],
-  })
-  roles!: string[];
-
-  @ApiProperty({
-    description: 'Array of permission names',
-    example: ['user:manage', 'booking:read'],
-    type: [String],
-  })
-  permissions!: string[];
-
-  constructor(
-    id: string,
-    email: string,
-    fullName: string,
-    status: string,
-    roles: string[],
-    permissions: string[],
-  ) {
+  constructor(id: string, email: string, fullName: string, status: string) {
     this.id = id;
     this.email = email;
     this.fullName = fullName;
     this.status = status;
-    this.roles = roles;
-    this.permissions = permissions;
   }
 
   static fromAggregate(user: User): UserResponseDto {
@@ -63,8 +40,6 @@ export class UserResponseDto {
       user.getEmail().getValue(),
       user.getFullName(),
       user.getStatus().getValue(),
-      user.getRoles().map((role) => role.getValueAsString()),
-      user.getPermissions().map((permission) => permission.getValue()),
     );
   }
 }

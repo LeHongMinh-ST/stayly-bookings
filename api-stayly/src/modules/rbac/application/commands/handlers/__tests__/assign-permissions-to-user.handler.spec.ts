@@ -65,8 +65,6 @@ describe('AssignPermissionsToUserHandler', () => {
         'user@example.com',
         'User Name',
         'active',
-        [],
-        ['user:read', 'user:create'],
       );
 
       rolePermissionValidation.validatePermissions.mockResolvedValue(
@@ -118,8 +116,6 @@ describe('AssignPermissionsToUserHandler', () => {
         'user@example.com',
         'User Name',
         'active',
-        [],
-        [],
       );
 
       rolePermissionValidation.validatePermissions.mockResolvedValue([]);

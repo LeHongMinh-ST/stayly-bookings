@@ -6,7 +6,5 @@ export class CreateUserCommand {
     public readonly email: string,
     public readonly password: string,
     public readonly fullName: string,
-    public readonly roles: string[],
-    public readonly permissions: string[],
   ) {}
 }

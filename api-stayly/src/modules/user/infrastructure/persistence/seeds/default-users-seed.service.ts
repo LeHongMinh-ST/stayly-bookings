@@ -8,8 +8,6 @@ import type { IUserRepository } from '../../../domain/repositories/user.reposito
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import type { IRoleRepository } from '../../../../rbac/domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../../rbac/domain/repositories/role.repository.interface';
-import type { IPermissionRepository } from '../../../../rbac/domain/repositories/permission.repository.interface';
-import { PERMISSION_REPOSITORY } from '../../../../rbac/domain/repositories/permission.repository.interface';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
@@ -27,8 +25,6 @@ export class DefaultUsersSeedService {
     private readonly userRepository: IUserRepository,
     @Inject(ROLE_REPOSITORY)
     private readonly roleRepository: IRoleRepository,
-    @Inject(PERMISSION_REPOSITORY)
-    private readonly permissionRepository: IPermissionRepository,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
     private readonly configService: ConfigService,
