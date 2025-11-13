@@ -30,8 +30,7 @@ describe('Role', () => {
       expect(role.getDisplayName()).toBe(validDisplayName);
       expect(role.getIsSuperAdmin()).toBe(false);
       expect(role.getPermissions()).toEqual([]);
-      expect(role.getCreatedAt()).toBeInstanceOf(Date);
-      expect(role.getUpdatedAt()).toBeInstanceOf(Date);
+      expect(role.getPermissions()).toEqual([]);
     });
 
     it('should normalize code to lowercase', () => {
@@ -184,8 +183,6 @@ describe('Role', () => {
   describe('rehydrate', () => {
     it('should rehydrate Role from persisted data', () => {
       // Arrange
-      const createdAt = new Date('2024-01-01');
-      const updatedAt = new Date('2024-01-02');
       const permissions = [
         Permission.create('user:read'),
         Permission.create('user:create'),
@@ -196,8 +193,6 @@ describe('Role', () => {
         displayName: validDisplayName,
         isSuperAdmin: true,
         permissions,
-        createdAt,
-        updatedAt,
       };
 
       // Act
@@ -209,8 +204,6 @@ describe('Role', () => {
       expect(role.getDisplayName()).toBe(validDisplayName);
       expect(role.getIsSuperAdmin()).toBe(true);
       expect(role.getPermissions()).toHaveLength(2);
-      expect(role.getCreatedAt()).toEqual(createdAt);
-      expect(role.getUpdatedAt()).toEqual(updatedAt);
     });
   });
 
@@ -223,22 +216,12 @@ describe('Role', () => {
         displayName: validDisplayName,
       });
       const newDisplayName = 'Content Editor';
-      const oldUpdatedAt = role.getUpdatedAt();
-
-      // Wait a bit to ensure updatedAt changes
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(1000);
 
       // Act
       role.updateDisplayName(newDisplayName);
 
       // Assert
       expect(role.getDisplayName()).toBe(newDisplayName);
-      expect(role.getUpdatedAt().getTime()).toBeGreaterThan(
-        oldUpdatedAt.getTime(),
-      );
-
-      jest.useRealTimers();
     });
 
     it('should trim display name', () => {
@@ -341,30 +324,6 @@ describe('Role', () => {
       expect(role.getPermissions()[1].getValue()).toBe('user:update');
     });
 
-    it('should update updatedAt when assigning permissions', () => {
-      // Arrange
-      const role = Role.create({
-        id: validRoleId,
-        code: validCode,
-        displayName: validDisplayName,
-      });
-      const oldUpdatedAt = role.getUpdatedAt();
-      const permissions = [Permission.create('user:read')];
-
-      // Wait a bit
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(1000);
-
-      // Act
-      role.assignPermissions(permissions);
-
-      // Assert
-      expect(role.getUpdatedAt().getTime()).toBeGreaterThan(
-        oldUpdatedAt.getTime(),
-      );
-
-      jest.useRealTimers();
-    });
   });
 
   describe('removePermissions', () => {

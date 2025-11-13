@@ -3,7 +3,6 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ListRolesHandler } from '../list-roles.handler';
-import { ListRolesQuery } from '../../list-roles.query';
 import type { IRoleRepository } from '../../../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
 import { Role } from '../../../../domain/entities/role.entity';
@@ -62,31 +61,29 @@ describe('ListRolesHandler', () => {
         ],
       });
       const roles = [role1, role2];
-      const query = new ListRolesQuery();
       roleRepository.findAll.mockResolvedValue(roles);
 
       // Act
-      const result = await handler.execute(query);
+      const result = await handler.execute();
 
       // Assert
       expect(result).toBeDefined();
       expect(result).toHaveLength(2);
       expect(result[0].code).toBe('editor');
       expect(result[1].code).toBe('manager');
-      expect(roleRepository.findAll).toHaveBeenCalled();
+      expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
     });
 
     it('should return empty array when no roles exist', async () => {
       // Arrange
-      const query = new ListRolesQuery();
       roleRepository.findAll.mockResolvedValue([]);
 
       // Act
-      const result = await handler.execute(query);
+      const result = await handler.execute();
 
       // Assert
       expect(result).toEqual([]);
-      expect(roleRepository.findAll).toHaveBeenCalled();
+      expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
     });
 
     it('should map roles to DTOs correctly', async () => {
@@ -101,11 +98,10 @@ describe('ListRolesHandler', () => {
           Permission.create('user:create'),
         ],
       });
-      const query = new ListRolesQuery();
       roleRepository.findAll.mockResolvedValue([role]);
 
       // Act
-      const result = await handler.execute(query);
+      const result = await handler.execute();
 
       // Assert
       expect(result[0]).toMatchObject({
@@ -115,9 +111,6 @@ describe('ListRolesHandler', () => {
         isSuperAdmin: false,
         permissions: ['user:read', 'user:create'],
       });
-      expect(result[0].createdAt).toBeDefined();
-      expect(result[0].updatedAt).toBeDefined();
     });
   });
 });
-

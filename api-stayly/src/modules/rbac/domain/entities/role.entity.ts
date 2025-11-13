@@ -11,23 +11,17 @@ export interface CreateRoleProps {
   displayName: string;
   isSuperAdmin?: boolean;
   permissions?: Permission[];
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export class Role extends BaseEntity<RoleId> {
-  private updatedAt: Date;
-
   private constructor(
     id: RoleId,
     private code: string,
     private displayName: string,
     private readonly isSuperAdmin: boolean,
     private permissions: Permission[],
-    private readonly createdAt: Date,
   ) {
     super(id);
-    this.updatedAt = createdAt;
   }
 
   static create(props: CreateRoleProps): Role {
@@ -47,14 +41,12 @@ export class Role extends BaseEntity<RoleId> {
       );
     }
 
-    const now = new Date();
     const role = new Role(
       props.id,
       normalizedCode,
       props.displayName.trim(),
       props.isSuperAdmin ?? false,
       props.permissions ?? [],
-      props.createdAt ?? now,
     );
 
     return role;
@@ -66,19 +58,14 @@ export class Role extends BaseEntity<RoleId> {
     displayName: string;
     isSuperAdmin: boolean;
     permissions: Permission[];
-    createdAt: Date;
-    updatedAt: Date;
   }): Role {
-    const role = new Role(
+    return new Role(
       props.id,
       props.code,
       props.displayName,
       props.isSuperAdmin,
       props.permissions,
-      props.createdAt,
     );
-    role.updatedAt = props.updatedAt;
-    return role;
   }
 
   updateDisplayName(displayName: string): void {
@@ -86,7 +73,6 @@ export class Role extends BaseEntity<RoleId> {
       throw new Error('Role display name is required');
     }
     this.displayName = displayName.trim();
-    this.touch();
   }
 
   assignPermissions(permissions: Permission[]): void {
@@ -103,7 +89,6 @@ export class Role extends BaseEntity<RoleId> {
     }
 
     this.permissions = uniquePermissions;
-    this.touch();
   }
 
   removePermissions(permissionCodes: string[]): void {
@@ -111,7 +96,6 @@ export class Role extends BaseEntity<RoleId> {
     this.permissions = this.permissions.filter(
       (permission) => !codesToRemove.has(permission.getValue()),
     );
-    this.touch();
   }
 
   canDelete(): boolean {
@@ -137,18 +121,6 @@ export class Role extends BaseEntity<RoleId> {
 
   getPermissions(): Permission[] {
     return [...this.permissions];
-  }
-
-  getCreatedAt(): Date {
-    return this.createdAt;
-  }
-
-  getUpdatedAt(): Date {
-    return this.updatedAt;
-  }
-
-  private touch(): void {
-    this.updatedAt = new Date();
   }
 }
 

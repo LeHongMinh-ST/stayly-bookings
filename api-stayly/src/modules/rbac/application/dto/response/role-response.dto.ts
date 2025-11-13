@@ -21,18 +21,6 @@ export class RoleResponseDto {
   })
   permissions!: string[];
 
-  @ApiProperty({
-    description: 'Role creation timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  createdAt!: string;
-
-  @ApiProperty({
-    description: 'Last update timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  updatedAt!: string;
-
   static fromDomain(role: Role): RoleResponseDto {
     return {
       id: role.getId().getValue(),
@@ -40,8 +28,6 @@ export class RoleResponseDto {
       displayName: role.getDisplayName(),
       isSuperAdmin: role.getIsSuperAdmin(),
       permissions: role.getPermissions().map((p) => p.getValue()),
-      createdAt: role.getCreatedAt().toISOString(),
-      updatedAt: role.getUpdatedAt().toISOString(),
     };
   }
 
@@ -57,8 +43,6 @@ export class RoleResponseDto {
         : role.displayName,
       isSuperAdmin: false,
       permissions: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
   }
 }

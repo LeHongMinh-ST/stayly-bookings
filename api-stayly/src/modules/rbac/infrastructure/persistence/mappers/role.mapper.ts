@@ -22,8 +22,6 @@ export class RoleOrmMapper {
       displayName: entity.displayName,
       isSuperAdmin: entity.isSuperAdmin,
       permissions,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
     });
   }
 

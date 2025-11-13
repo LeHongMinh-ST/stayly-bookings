@@ -101,33 +101,6 @@ describe('UpdateRoleHandler', () => {
       expect(roleRepository.save).toHaveBeenCalled();
     });
 
-    it('should update updatedAt timestamp', async () => {
-      // Arrange
-      const role = Role.create({
-        id: roleId,
-        code,
-        displayName,
-      });
-      const oldUpdatedAt = role.getUpdatedAt();
-      const command = new UpdateRoleCommand(roleId.getValue(), newDisplayName);
-      roleRepository.findById.mockResolvedValue(role);
-      roleRepository.save.mockResolvedValue();
-
-      // Wait a bit
-      jest.useFakeTimers();
-      jest.advanceTimersByTime(1000);
-
-      // Act
-      await handler.execute(command);
-
-      // Assert
-      const savedRole = roleRepository.save.mock.calls[0][0];
-      expect(savedRole.getUpdatedAt().getTime()).toBeGreaterThan(
-        oldUpdatedAt.getTime(),
-      );
-
-      jest.useRealTimers();
-    });
   });
 });
 
