@@ -17,13 +17,9 @@ export interface CreateCustomerProps {
   dateOfBirth?: Date | null;
   status?: Status;
   emailVerifiedAt?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export class Customer extends BaseEntity<CustomerId> {
-  private updatedAt: Date;
-
   private constructor(
     id: CustomerId,
     private email: Email,
@@ -33,10 +29,8 @@ export class Customer extends BaseEntity<CustomerId> {
     private dateOfBirth: Date | null,
     private status: Status,
     private emailVerifiedAt: Date | null,
-    private readonly createdAt: Date,
   ) {
     super(id);
-    this.updatedAt = createdAt;
   }
 
   static register(props: CreateCustomerProps): Customer {
@@ -54,7 +48,6 @@ export class Customer extends BaseEntity<CustomerId> {
       props.dateOfBirth ?? null,
       props.status ?? Status.create(CustomerStatus.ACTIVE),
       props.emailVerifiedAt ?? null,
-      props.createdAt ?? now,
     );
 
     customer.recordEvent(
@@ -76,10 +69,8 @@ export class Customer extends BaseEntity<CustomerId> {
     dateOfBirth: Date | null;
     status: Status;
     emailVerifiedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
   }): Customer {
-    const customer = new Customer(
+    return new Customer(
       props.id,
       props.email,
       props.passwordHash,
@@ -88,10 +79,7 @@ export class Customer extends BaseEntity<CustomerId> {
       props.dateOfBirth,
       props.status,
       props.emailVerifiedAt,
-      props.createdAt,
     );
-    customer.updatedAt = props.updatedAt;
-    return customer;
   }
 
   rename(nextFullName: string): void {
@@ -99,27 +87,22 @@ export class Customer extends BaseEntity<CustomerId> {
       throw new Error('Customer full name is required');
     }
     this.fullName = nextFullName.trim();
-    this.touch();
   }
 
   updateContact(phone: string | null): void {
     this.phone = phone ? phone.trim() : null;
-    this.touch();
   }
 
   verifyEmail(at: Date): void {
     this.emailVerifiedAt = at;
-    this.touch();
   }
 
   changePassword(nextHash: PasswordHash): void {
     this.passwordHash = nextHash;
-    this.touch();
   }
 
   updateStatus(nextStatus: Status): void {
     this.status = nextStatus;
-    this.touch();
   }
 
   getId(): CustomerId {
@@ -160,17 +143,5 @@ export class Customer extends BaseEntity<CustomerId> {
 
   getPasswordHash(): PasswordHash {
     return this.passwordHash;
-  }
-
-  getCreatedAt(): Date {
-    return this.createdAt;
-  }
-
-  getUpdatedAt(): Date {
-    return this.updatedAt;
-  }
-
-  private touch(): void {
-    this.updatedAt = new Date();
   }
 }

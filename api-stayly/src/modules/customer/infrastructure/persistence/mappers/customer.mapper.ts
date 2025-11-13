@@ -19,8 +19,6 @@ export class CustomerOrmMapper {
       dateOfBirth: entity.dateOfBirth,
       status: Status.from(entity.status),
       emailVerifiedAt: entity.emailVerifiedAt,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
     });
   }
 

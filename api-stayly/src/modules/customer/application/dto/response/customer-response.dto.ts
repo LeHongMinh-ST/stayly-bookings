@@ -37,18 +37,6 @@ export class CustomerResponseDto {
   })
   emailVerifiedAt!: string | null;
 
-  @ApiProperty({
-    description: 'Account creation timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  createdAt!: string;
-
-  @ApiProperty({
-    description: 'Last update timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  updatedAt!: string;
-
   constructor(
     id: string,
     email: string,
@@ -56,8 +44,6 @@ export class CustomerResponseDto {
     phone: string | null,
     status: string,
     emailVerifiedAt: string | null,
-    createdAt: string,
-    updatedAt: string,
   ) {
     this.id = id;
     this.email = email;
@@ -65,8 +51,6 @@ export class CustomerResponseDto {
     this.phone = phone;
     this.status = status;
     this.emailVerifiedAt = emailVerifiedAt;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
   }
 
   static fromAggregate(customer: Customer): CustomerResponseDto {
@@ -77,8 +61,6 @@ export class CustomerResponseDto {
       customer.getPhone(),
       customer.getStatus().getValue(),
       customer.getEmailVerifiedAt()?.toISOString() ?? null,
-      customer.getCreatedAt().toISOString(),
-      customer.getUpdatedAt().toISOString(),
     );
   }
 }
