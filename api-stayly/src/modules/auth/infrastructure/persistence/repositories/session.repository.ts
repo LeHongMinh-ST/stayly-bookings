@@ -18,7 +18,7 @@ export class SessionRepository implements ISessionRepository {
 
   async save(session: Session): Promise<void> {
     const existing = await this.sessionRepo.findOne({
-      where: { id: session.getId() },
+      where: { id: session.getId().getValue() },
     });
     const entity = SessionOrmMapper.toOrm(session, existing ?? undefined);
     await this.sessionRepo.save(entity);

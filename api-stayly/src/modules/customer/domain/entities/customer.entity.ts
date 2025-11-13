@@ -1,9 +1,9 @@
 /**
  * Customer aggregate encapsulates guest registration and profile state
  */
+import { BaseEntity } from '../../../../common/domain/entities/base.entity';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
-import { DomainEvent } from '../../../../common/domain/interfaces/domain-event.interface';
 import { CustomerId } from '../value-objects/customer-id.vo';
 import { Status, CustomerStatus } from '../value-objects/customer-status.vo';
 import { CustomerRegisteredEvent } from '../events/customer-registered.event';
@@ -21,12 +21,11 @@ export interface CreateCustomerProps {
   updatedAt?: Date;
 }
 
-export class Customer {
-  private domainEvents: DomainEvent[] = [];
+export class Customer extends BaseEntity<CustomerId> {
   private updatedAt: Date;
 
   private constructor(
-    private readonly id: CustomerId,
+    id: CustomerId,
     private email: Email,
     private passwordHash: PasswordHash,
     private fullName: string,
@@ -36,6 +35,7 @@ export class Customer {
     private emailVerifiedAt: Date | null,
     private readonly createdAt: Date,
   ) {
+    super(id);
     this.updatedAt = createdAt;
   }
 
@@ -59,7 +59,7 @@ export class Customer {
 
     customer.recordEvent(
       new CustomerRegisteredEvent(
-        customer.id.getValue(),
+        customer.getId().getValue(),
         customer.email.getValue(),
         now,
       ),
@@ -123,7 +123,7 @@ export class Customer {
   }
 
   getId(): CustomerId {
-    return this.id;
+    return super.getId();
   }
 
   getEmail(): Email {
@@ -168,16 +168,6 @@ export class Customer {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
-  }
-
-  pullDomainEvents(): DomainEvent[] {
-    const events = [...this.domainEvents];
-    this.domainEvents = [];
-    return events;
-  }
-
-  private recordEvent(event: DomainEvent): void {
-    this.domainEvents.push(event);
   }
 
   private touch(): void {

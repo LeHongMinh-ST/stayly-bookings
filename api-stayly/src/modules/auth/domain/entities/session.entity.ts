@@ -1,13 +1,14 @@
 /**
  * Session aggregate manages refresh token lifecycle for authenticated principals
  */
-import { DomainEvent } from '../../../../common/domain/interfaces/domain-event.interface';
+import { BaseEntity } from '../../../../common/domain/entities/base.entity';
 import { RefreshToken } from '../value-objects/refresh-token.vo';
 import { SessionIssuedEvent } from '../events/session-issued.event';
 import { SessionRevokedEvent } from '../events/session-revoked.event';
+import { SessionId } from '../value-objects/session-id.vo';
 
 export interface CreateSessionProps {
-  id: string;
+  id: SessionId;
   userId: string;
   userType: 'user' | 'customer';
   refreshToken: RefreshToken;
@@ -17,13 +18,12 @@ export interface CreateSessionProps {
   revokedAt?: Date | null;
 }
 
-export class Session {
-  private domainEvents: DomainEvent[] = [];
+export class Session extends BaseEntity<SessionId> {
   private createdAt: Date;
   private revokedAt: Date | null;
 
   private constructor(
-    private readonly id: string,
+    id: SessionId,
     private readonly userId: string,
     private readonly userType: 'user' | 'customer',
     private refreshToken: RefreshToken,
@@ -32,6 +32,7 @@ export class Session {
     createdAt: Date,
     revokedAt: Date | null,
   ) {
+    super(id);
     this.createdAt = createdAt;
     this.revokedAt = revokedAt;
   }
@@ -50,13 +51,17 @@ export class Session {
     );
 
     session.recordEvent(
-      new SessionIssuedEvent(session.id, session.userId, createdAt),
+      new SessionIssuedEvent(
+        session.getId().getValue(),
+        session.userId,
+        createdAt,
+      ),
     );
     return session;
   }
 
   static rehydrate(props: {
-    id: string;
+    id: SessionId;
     userId: string;
     userType: 'user' | 'customer';
     refreshToken: RefreshToken;
@@ -86,7 +91,9 @@ export class Session {
       return;
     }
     this.revokedAt = at;
-    this.recordEvent(new SessionRevokedEvent(this.id, this.userId, at));
+    this.recordEvent(
+      new SessionRevokedEvent(this.getId().getValue(), this.userId, at),
+    );
   }
 
   isActive(referenceDate: Date = new Date()): boolean {
@@ -96,8 +103,8 @@ export class Session {
     return this.refreshToken.getExpiresAt().getTime() > referenceDate.getTime();
   }
 
-  getId(): string {
-    return this.id;
+  getId(): SessionId {
+    return super.getId();
   }
 
   getUserId(): string {
@@ -126,15 +133,5 @@ export class Session {
 
   getRevokedAt(): Date | null {
     return this.revokedAt;
-  }
-
-  pullDomainEvents(): DomainEvent[] {
-    const events = [...this.domainEvents];
-    this.domainEvents = [];
-    return events;
-  }
-
-  private recordEvent(event: DomainEvent): void {
-    this.domainEvents.push(event);
   }
 }

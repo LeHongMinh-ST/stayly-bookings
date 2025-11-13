@@ -1,19 +1,14 @@
 /**
- * CustomerId value object validates UUID identifiers for the customer aggregate
+ * CustomerId value object extends BaseId for consistent UUID validation
  */
-export class CustomerId {
-  private constructor(private readonly value: string) {}
+import { BaseId } from '../../../../common/domain/value-objects/base-id.vo';
 
-  static create(value: string): CustomerId {
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(value)) {
-      throw new Error('CustomerId must be a valid UUID');
-    }
-    return new CustomerId(value);
+export class CustomerId extends BaseId {
+  private constructor(value: string) {
+    super(value);
   }
 
-  getValue(): string {
-    return this.value;
+  static create(value: string): CustomerId {
+    return new CustomerId(value);
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Role aggregate root encapsulates role business logic
  */
-import { DomainEvent } from '../../../../common/domain/interfaces/domain-event.interface';
+import { BaseEntity } from '../../../../common/domain/entities/base.entity';
 import { RoleId } from '../value-objects/role-id.vo';
 import { Permission } from '../value-objects/permission.vo';
 
@@ -15,18 +15,18 @@ export interface CreateRoleProps {
   updatedAt?: Date;
 }
 
-export class Role {
-  private domainEvents: DomainEvent[] = [];
+export class Role extends BaseEntity<RoleId> {
   private updatedAt: Date;
 
   private constructor(
-    private readonly id: RoleId,
+    id: RoleId,
     private code: string,
     private displayName: string,
     private readonly isSuperAdmin: boolean,
     private permissions: Permission[],
     private readonly createdAt: Date,
   ) {
+    super(id);
     this.updatedAt = createdAt;
   }
 
@@ -120,7 +120,7 @@ export class Role {
   }
 
   getId(): RoleId {
-    return this.id;
+    return super.getId();
   }
 
   getCode(): string {
@@ -145,16 +145,6 @@ export class Role {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
-  }
-
-  pullDomainEvents(): DomainEvent[] {
-    const events = [...this.domainEvents];
-    this.domainEvents = [];
-    return events;
-  }
-
-  private recordEvent(event: DomainEvent): void {
-    this.domainEvents.push(event);
   }
 
   private touch(): void {

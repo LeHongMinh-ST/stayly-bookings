@@ -8,6 +8,7 @@ import { RevokeSessionCommand } from '../../revoke-session.command';
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
 import { Session } from '../../../../domain/entities/session.entity';
+import { SessionId } from '../../../../domain/value-objects/session-id.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
 import { randomUUID } from 'crypto';
 
@@ -26,7 +27,7 @@ describe('RevokeSessionHandler', () => {
   );
 
   const mockSession = Session.create({
-    id: sessionId,
+    id: SessionId.create(sessionId),
     userId: userId,
     refreshToken: refreshToken,
     userAgent: 'Mozilla/5.0',

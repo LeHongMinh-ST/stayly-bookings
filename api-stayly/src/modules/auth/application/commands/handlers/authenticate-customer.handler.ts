@@ -21,6 +21,7 @@ import type { ISessionRepository } from '../../../domain/repositories/session.re
 import { SESSION_REPOSITORY } from '../../../domain/repositories/session.repository.interface';
 import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
 import { Session } from '../../../domain/entities/session.entity';
+import { SessionId } from '../../../domain/value-objects/session-id.vo';
 import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
 import { TokenResponseDto } from '../../dto/response/token-response.dto';
 
@@ -87,7 +88,7 @@ export class AuthenticateCustomerHandler
       await this.tokenService.issueTokenPair(payload);
 
     const session = Session.create({
-      id: randomUUID(),
+      id: SessionId.create(randomUUID()),
       userId: customerId,
       userType: 'customer',
       refreshToken: tokenPair.refreshToken,

@@ -1,9 +1,9 @@
 /**
  * User aggregate encapsulates administration staff and owner accounts
  */
+import { BaseEntity } from '../../../../common/domain/entities/base.entity';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
-import { DomainEvent } from '../../../../common/domain/interfaces/domain-event.interface';
 import { UserId } from '../value-objects/user-id.vo';
 import { UserRole, UserRoleEnum } from '../value-objects/user-role.vo';
 import { UserPermission } from '../value-objects/user-permission.vo';
@@ -22,12 +22,11 @@ export interface CreateUserProps {
   updatedAt?: Date;
 }
 
-export class User {
-  private domainEvents: DomainEvent[] = [];
+export class User extends BaseEntity<UserId> {
   private updatedAt: Date;
 
   private constructor(
-    private readonly id: UserId,
+    id: UserId,
     private email: Email,
     private fullName: string,
     private passwordHash: PasswordHash,
@@ -36,6 +35,7 @@ export class User {
     private permissions: UserPermission[],
     private readonly createdAt: Date,
   ) {
+    super(id);
     this.updatedAt = createdAt;
   }
 
@@ -56,7 +56,7 @@ export class User {
       props.createdAt ?? now,
     );
 
-    user.recordEvent(new UserCreatedEvent(user.id.getValue(), now));
+    user.recordEvent(new UserCreatedEvent(user.getId().getValue(), now));
     return user;
   }
 
@@ -116,10 +116,6 @@ export class User {
     this.touch();
   }
 
-  getId(): UserId {
-    return this.id;
-  }
-
   getEmail(): Email {
     return this.email;
   }
@@ -158,16 +154,6 @@ export class User {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
-  }
-
-  pullDomainEvents(): DomainEvent[] {
-    const events = [...this.domainEvents];
-    this.domainEvents = [];
-    return events;
-  }
-
-  private recordEvent(event: DomainEvent): void {
-    this.domainEvents.push(event);
   }
 
   private touch(): void {

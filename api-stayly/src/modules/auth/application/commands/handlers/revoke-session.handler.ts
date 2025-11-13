@@ -27,6 +27,9 @@ export class RevokeSessionHandler
     if (!session) {
       return;
     }
-    await this.sessionRepository.revokeById(session.getId(), new Date());
+    await this.sessionRepository.revokeById(
+      session.getId().getValue(),
+      new Date(),
+    );
   }
 }

@@ -1,20 +1,15 @@
 /**
- * RoleId value object wraps UUID validation for role aggregate identifiers
+ * RoleId value object extends BaseId for shared UUID validation
  */
-export class RoleId {
-  private constructor(private readonly value: string) {}
+import { BaseId } from '../../../../common/domain/value-objects/base-id.vo';
 
-  static create(value: string): RoleId {
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-    if (!uuidRegex.test(value)) {
-      throw new Error('RoleId must be a valid UUID');
-    }
-    return new RoleId(value);
+export class RoleId extends BaseId {
+  private constructor(value: string) {
+    super(value);
   }
 
-  getValue(): string {
-    return this.value;
+  static create(value: string): RoleId {
+    return new RoleId(value);
   }
 }
 

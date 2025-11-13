@@ -16,6 +16,7 @@ import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
 import { TokenPair } from '../../../../domain/value-objects/token-pair.vo';
 import { Session } from '../../../../domain/entities/session.entity';
+import { SessionId } from '../../../../domain/value-objects/session-id.vo';
 import { randomUUID } from 'crypto';
 
 describe('RefreshTokenHandler', () => {
@@ -46,7 +47,7 @@ describe('RefreshTokenHandler', () => {
     tokenId,
   );
   const mockSession = Session.create({
-    id: randomUUID(),
+    id: SessionId.create(randomUUID()),
     userId: userId,
     refreshToken: mockRefreshToken,
     userAgent: userAgent,

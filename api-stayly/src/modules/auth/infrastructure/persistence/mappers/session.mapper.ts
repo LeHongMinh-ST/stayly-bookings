@@ -4,6 +4,7 @@
 import { RefreshToken } from '../../../domain/value-objects/refresh-token.vo';
 import { Session } from '../../../domain/entities/session.entity';
 import { SessionOrmEntity } from '../entities/session.orm-entity';
+import { SessionId } from '../../../domain/value-objects/session-id.vo';
 
 export class SessionOrmMapper {
   static toDomain(entity: SessionOrmEntity): Session {
@@ -14,7 +15,7 @@ export class SessionOrmMapper {
     );
 
     return Session.rehydrate({
-      id: entity.id,
+      id: SessionId.create(entity.id),
       userId: entity.userId,
       userType: entity.userType,
       refreshToken,
@@ -30,7 +31,7 @@ export class SessionOrmMapper {
     existing?: SessionOrmEntity,
   ): SessionOrmEntity {
     const entity = existing ?? new SessionOrmEntity();
-    entity.id = session.getId();
+    entity.id = session.getId().getValue();
     entity.userId = session.getUserId();
     entity.userType = session.getUserType();
     entity.tokenId = session.getRefreshToken().getTokenId();

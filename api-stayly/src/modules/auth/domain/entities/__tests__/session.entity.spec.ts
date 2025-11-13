@@ -1,5 +1,6 @@
 import { Session } from '../session.entity';
 import { RefreshToken } from '../../value-objects/refresh-token.vo';
+import { SessionId } from '../../value-objects/session-id.vo';
 
 const buildRefreshToken = () =>
   RefreshToken.create(
@@ -12,7 +13,7 @@ describe('Session aggregate', () => {
   it('creates session and records issued event', () => {
     const refreshToken = buildRefreshToken();
     const session = Session.create({
-      id: 'session-id-123',
+      id: SessionId.create('11111111-1111-4111-8111-111111111111'),
       userId: 'user-id-123',
       refreshToken,
       userAgent: 'Jest Test',
@@ -26,7 +27,7 @@ describe('Session aggregate', () => {
 
   it('revokes session and records revocation event', () => {
     const session = Session.create({
-      id: 'session-id-456',
+      id: SessionId.create('22222222-2222-4222-8222-222222222222'),
       userId: 'user-id-456',
       refreshToken: buildRefreshToken(),
     });

@@ -5,7 +5,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { IRoleAssignmentPort } from '../../application/interfaces/role-assignment.port';
-import { ROLE_ASSIGNMENT_PORT } from '../../application/interfaces/role-assignment.port';
 import { AssignRolesToUserCommand } from '../../application/commands/assign-roles-to-user.command';
 import type { IRoleRepository } from '../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../domain/repositories/role.repository.interface';
