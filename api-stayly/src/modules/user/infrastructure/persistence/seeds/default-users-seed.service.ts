@@ -2,19 +2,22 @@
  * DefaultUsersSeedService provides seeding logic for default admin user
  */
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import type { IRoleRepository } from '../../../../rbac/domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../../rbac/domain/repositories/role.repository.interface';
+import type { IUserRoleLinkPort } from '../../../../rbac/application/interfaces/user-role-link.port';
+import { USER_ROLE_LINK_PORT } from '../../../../rbac/application/interfaces/user-role-link.port';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
 import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { UserRole, UserRoleEnum } from '../../../domain/value-objects/user-role.vo';
+import { UserRoleEnum } from '../../../domain/value-objects/user-role.vo';
 
 @Injectable()
 export class DefaultUsersSeedService {
@@ -23,8 +26,7 @@ export class DefaultUsersSeedService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
-    @Inject(ROLE_REPOSITORY)
-    private readonly roleRepository: IRoleRepository,
+    private readonly moduleRef: ModuleRef,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
     private readonly configService: ConfigService,
@@ -52,8 +54,14 @@ export class DefaultUsersSeedService {
     }
 
     // Validate against RBAC catalog
-    const roles = await this.roleRepository.findAll();
-    const roleMap = new Map<string, typeof roles[0]>(roles.map((role) => [role.getCode(), role]));
+    const roleRepository = this.moduleRef.get<IRoleRepository>(
+      ROLE_REPOSITORY,
+      { strict: false },
+    );
+    const roles = await roleRepository.findAll();
+    const roleMap = new Map<string, typeof roles[0]>(
+      roles.map((role) => [role.getCode(), role]),
+    );
     const superAdminRoleFromCatalog = roleMap.get(UserRoleEnum.SUPER_ADMIN);
 
     if (!superAdminRoleFromCatalog) {
@@ -63,23 +71,32 @@ export class DefaultUsersSeedService {
       return;
     }
 
-    // Convert to local UserRole value object
-    const superAdminRole = UserRole.create(UserRoleEnum.SUPER_ADMIN);
-
-    // Super admin automatically has full permissions via PermissionsGuard
-    // No need to assign permissions explicitly
+    // Create user without roles/permissions (logic handled in RBAC module)
     const hashedPassword = await this.passwordHasher.hash(password);
+    const userId = UserId.create(randomUUID());
 
     const user = User.create({
-      id: UserId.create(randomUUID()),
+      id: userId,
       email: emailVo,
       fullName,
       passwordHash: PasswordHash.create(hashedPassword),
-      roles: [superAdminRole],
-      permissions: [], // Super admin has automatic full access, no permissions needed
     });
 
     await this.userRepository.save(user);
+
+    // Assign super_admin role via RBAC module port
+    // Use ModuleRef to get USER_ROLE_LINK_PORT from application context
+    // This avoids circular dependency between UserModule and RbacModule
+    // Super admin automatically has full permissions via PermissionsGuard
+    // No need to assign permissions explicitly
+    const userRoleLink = this.moduleRef.get<IUserRoleLinkPort>(
+      USER_ROLE_LINK_PORT,
+      { strict: false },
+    );
+    await userRoleLink.replaceUserRoles(userId.getValue(), [
+      UserRoleEnum.SUPER_ADMIN,
+    ]);
+
     this.logger.log(
       `Seeded default super admin account (${email}). Remember to rotate the seeded password.`,
     );
