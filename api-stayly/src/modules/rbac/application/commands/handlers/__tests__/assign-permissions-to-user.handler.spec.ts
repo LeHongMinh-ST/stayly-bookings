@@ -4,25 +4,44 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AssignPermissionsToUserHandler } from '../assign-permissions-to-user.handler';
 import { AssignPermissionsToUserCommand } from '../../assign-permissions-to-user.command';
-import type { IUserRolePermissionPort } from '../../../../../user/application/interfaces/user-role-permission.port';
-import { USER_ROLE_PERMISSION_PORT } from '../../../../../user/application/interfaces/user-role-permission.port';
 import type { IRolePermissionValidationPort } from '../../../interfaces/role-permission-validation.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from '../../../interfaces/role-permission-validation.port';
 import { UserResponseDto } from '../../../../../user/application/dto/response/user-response.dto';
 import { randomUUID } from 'crypto';
+import type { IUserRepository } from '../../../../../user/domain/repositories/user.repository.interface';
+import { USER_REPOSITORY } from '../../../../../user/domain/repositories/user.repository.interface';
+import { User } from '../../../../../user/domain/entities/user.entity';
+import { Email } from '../../../../../../common/domain/value-objects/email.vo';
+import { PasswordHash } from '../../../../../../common/domain/value-objects/password-hash.vo';
+import { UserId } from '../../../../../user/domain/value-objects/user-id.vo';
+import { UserRole, UserRoleEnum } from '../../../../../user/domain/value-objects/user-role.vo';
+import { UserPermission } from '../../../../../user/domain/value-objects/user-permission.vo';
 
 describe('AssignPermissionsToUserHandler', () => {
   let handler: AssignPermissionsToUserHandler;
-  let userRolePermissionPort: jest.Mocked<IUserRolePermissionPort>;
   let rolePermissionValidation: jest.Mocked<IRolePermissionValidationPort>;
+  let userRepository: jest.Mocked<IUserRepository>;
 
   const userId = randomUUID();
   const permissions = ['user:read', 'user:create'];
 
+  const buildUser = (): User =>
+    User.create({
+      id: UserId.create(userId),
+      email: Email.create('user@example.com'),
+      fullName: 'User Name',
+      passwordHash: PasswordHash.create('hashed-password-value-123456'),
+      roles: [UserRole.create(UserRoleEnum.STAFF)],
+      permissions: [],
+    });
+
   beforeEach(async () => {
-    const mockUserRolePermissionPort = {
-      updateUserRoles: jest.fn(),
-      updateUserPermissions: jest.fn(),
+    const mockUserRepository: jest.Mocked<IUserRepository> = {
+      save: jest.fn(),
+      findById: jest.fn(),
+      findByEmail: jest.fn(),
+      findMany: jest.fn(),
+      count: jest.fn(),
     };
 
     const mockRolePermissionValidation = {
@@ -34,8 +53,8 @@ describe('AssignPermissionsToUserHandler', () => {
       providers: [
         AssignPermissionsToUserHandler,
         {
-          provide: USER_ROLE_PERMISSION_PORT,
-          useValue: mockUserRolePermissionPort,
+          provide: USER_REPOSITORY,
+          useValue: mockUserRepository,
         },
         {
           provide: ROLE_PERMISSION_VALIDATION_PORT,
@@ -47,8 +66,8 @@ describe('AssignPermissionsToUserHandler', () => {
     handler = module.get<AssignPermissionsToUserHandler>(
       AssignPermissionsToUserHandler,
     );
-    userRolePermissionPort = module.get(USER_ROLE_PERMISSION_PORT);
     rolePermissionValidation = module.get(ROLE_PERMISSION_VALIDATION_PORT);
+    userRepository = module.get(USER_REPOSITORY);
   });
 
   afterEach(() => {
@@ -60,19 +79,12 @@ describe('AssignPermissionsToUserHandler', () => {
       // Arrange
       const command = new AssignPermissionsToUserCommand(userId, permissions);
       const validatedPermissions = ['user:read', 'user:create'];
-      const userResponse = new UserResponseDto(
-        userId,
-        'user@example.com',
-        'User Name',
-        'active',
-      );
+      const user = buildUser();
 
       rolePermissionValidation.validatePermissions.mockResolvedValue(
         validatedPermissions,
       );
-      userRolePermissionPort.updateUserPermissions.mockResolvedValue(
-        userResponse,
-      );
+      userRepository.findById.mockResolvedValue(user);
 
       // Act
       const result = await handler.execute(command);
@@ -82,9 +94,17 @@ describe('AssignPermissionsToUserHandler', () => {
       expect(rolePermissionValidation.validatePermissions).toHaveBeenCalledWith(
         permissions,
       );
-      expect(
-        userRolePermissionPort.updateUserPermissions,
-      ).toHaveBeenCalledWith(userId, validatedPermissions);
+      expect(userRepository.findById).toHaveBeenCalledTimes(1);
+      const userIdArg = userRepository.findById.mock.calls[0][0];
+      expect(userIdArg).toBeInstanceOf(UserId);
+      expect(userIdArg.getValue()).toEqual(userId);
+      expect(userRepository.save).toHaveBeenCalledWith(user);
+      expect(user.getPermissions().map((perm) => perm.getValue())).toEqual(
+        validatedPermissions.map((code) => UserPermission.create(code).getValue()),
+      );
+      expect(result).toEqual(
+        new UserResponseDto(userId, 'user@example.com', 'User Name', 'active'),
+      );
     });
 
     it('should throw error when permissions validation fails', async () => {
@@ -92,6 +112,7 @@ describe('AssignPermissionsToUserHandler', () => {
       const command = new AssignPermissionsToUserCommand(userId, [
         'invalid:permission',
       ]);
+      userRepository.findById.mockResolvedValue(buildUser());
       rolePermissionValidation.validatePermissions.mockRejectedValue(
         new Error('Unknown permission(s): invalid:permission'),
       );
@@ -103,25 +124,16 @@ describe('AssignPermissionsToUserHandler', () => {
       expect(rolePermissionValidation.validatePermissions).toHaveBeenCalledWith(
         ['invalid:permission'],
       );
-      expect(
-        userRolePermissionPort.updateUserPermissions,
-      ).not.toHaveBeenCalled();
+      expect(userRepository.save).not.toHaveBeenCalled();
     });
 
     it('should handle empty permissions array', async () => {
       // Arrange
       const command = new AssignPermissionsToUserCommand(userId, []);
-      const userResponse = new UserResponseDto(
-        userId,
-        'user@example.com',
-        'User Name',
-        'active',
-      );
+      const user = buildUser();
 
       rolePermissionValidation.validatePermissions.mockResolvedValue([]);
-      userRolePermissionPort.updateUserPermissions.mockResolvedValue(
-        userResponse,
-      );
+      userRepository.findById.mockResolvedValue(user);
 
       // Act
       const result = await handler.execute(command);
@@ -131,9 +143,24 @@ describe('AssignPermissionsToUserHandler', () => {
       expect(rolePermissionValidation.validatePermissions).toHaveBeenCalledWith(
         [],
       );
-      expect(
-        userRolePermissionPort.updateUserPermissions,
-      ).toHaveBeenCalledWith(userId, []);
+      expect(userRepository.save).toHaveBeenCalledWith(user);
+      expect(user.getPermissions()).toHaveLength(0);
+      expect(result).toEqual(
+        new UserResponseDto(userId, 'user@example.com', 'User Name', 'active'),
+      );
+    });
+
+    it('should throw error when user not found', async () => {
+      // Arrange
+      const command = new AssignPermissionsToUserCommand(userId, permissions);
+      rolePermissionValidation.validatePermissions.mockResolvedValue(
+        permissions,
+      );
+      userRepository.findById.mockResolvedValue(null);
+
+      // Act & Assert
+      await expect(handler.execute(command)).rejects.toThrow('User not found');
+      expect(userRepository.save).not.toHaveBeenCalled();
     });
   });
 });

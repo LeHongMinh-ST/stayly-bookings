@@ -3,11 +3,10 @@
  * Provides user administration capabilities for staff roles
  */
 
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SecurityModule } from '../../common/infrastructure/security/security.module';
-import { RbacModule } from '../rbac/rbac.module';
 import { CreateUserHandler } from './application/commands/handlers/create-user.handler';
 import { UpdateUserStatusHandler } from './application/commands/handlers/update-user-status.handler';
 import { GetUserHandler } from './application/queries/handlers/get-user.handler';
@@ -21,8 +20,6 @@ import { RoleOrmEntity } from '../rbac/infrastructure/persistence/entities/role.
 import { PermissionOrmEntity } from '../rbac/infrastructure/persistence/entities/permission.orm-entity';
 import { UserAuthenticationService } from './infrastructure/services/user-authentication.service';
 import { USER_AUTHENTICATION_PORT } from './application/interfaces/user-authentication.port';
-import { UserRolePermissionService } from './infrastructure/services/user-role-permission.service';
-import { USER_ROLE_PERMISSION_PORT } from './application/interfaces/user-role-permission.port';
 
 const commandHandlers = [CreateUserHandler, UpdateUserStatusHandler];
 
@@ -32,7 +29,6 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
   imports: [
     CqrsModule,
     SecurityModule,
-    forwardRef(() => RbacModule), // Import RbacModule to access role/permission repositories (forwardRef to avoid circular dependency)
     TypeOrmModule.forFeature([
       UserOrmEntity,
       RoleOrmEntity,
@@ -50,17 +46,12 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
       provide: USER_AUTHENTICATION_PORT,
       useClass: UserAuthenticationService,
     },
-    {
-      provide: USER_ROLE_PERMISSION_PORT,
-      useClass: UserRolePermissionService,
-    },
     // Seed services for CLI usage (they won't auto-run on bootstrap)
     DefaultUsersSeedService,
   ],
   exports: [
     USER_REPOSITORY,
     USER_AUTHENTICATION_PORT, // Export port for other modules (Port/Adapter Pattern)
-    USER_ROLE_PERMISSION_PORT, // Export port for RBAC module to update user roles/permissions
   ],
 })
 export class UserModule {}

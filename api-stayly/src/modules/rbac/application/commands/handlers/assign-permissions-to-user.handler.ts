@@ -4,11 +4,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AssignPermissionsToUserCommand } from '../assign-permissions-to-user.command';
-import type { IUserRolePermissionPort } from '../../../../user/application/interfaces/user-role-permission.port';
-import { USER_ROLE_PERMISSION_PORT } from '../../../../user/application/interfaces/user-role-permission.port';
 import type { IRolePermissionValidationPort } from '../../interfaces/role-permission-validation.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from '../../interfaces/role-permission-validation.port';
 import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
+import type { IUserRepository } from '../../../../user/domain/repositories/user.repository.interface';
+import { USER_REPOSITORY } from '../../../../user/domain/repositories/user.repository.interface';
+import { UserId } from '../../../../user/domain/value-objects/user-id.vo';
+import { UserPermission } from '../../../../user/domain/value-objects/user-permission.vo';
 
 @Injectable()
 @CommandHandler(AssignPermissionsToUserCommand)
@@ -16,8 +18,8 @@ export class AssignPermissionsToUserHandler
   implements ICommandHandler<AssignPermissionsToUserCommand, UserResponseDto>
 {
   constructor(
-    @Inject(USER_ROLE_PERMISSION_PORT)
-    private readonly userRolePermissionPort: IUserRolePermissionPort,
+    @Inject(USER_REPOSITORY)
+    private readonly userRepository: IUserRepository,
     @Inject(ROLE_PERMISSION_VALIDATION_PORT)
     private readonly rolePermissionValidation: IRolePermissionValidationPort,
   ) {}
@@ -29,16 +31,23 @@ export class AssignPermissionsToUserHandler
   async execute(
     command: AssignPermissionsToUserCommand,
   ): Promise<UserResponseDto> {
+    const userId = UserId.create(command.userId);
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
     // Validate permissions using RBAC validation port
     const validatedPermissionCodes =
       await this.rolePermissionValidation.validatePermissions(
         command.permissions,
       );
 
-    // Update user permissions using User module port (returns updated user DTO)
-    return this.userRolePermissionPort.updateUserPermissions(
-      command.userId,
-      validatedPermissionCodes,
+    const nextPermissions = validatedPermissionCodes.map((code) =>
+      UserPermission.create(code),
     );
+    user.assignPermissions(nextPermissions);
+    await this.userRepository.save(user);
+    return UserResponseDto.fromAggregate(user);
   }
 }

@@ -8,11 +8,8 @@ import type {
   IUserRolePermissionQueryPort,
   UserRolePermissionData,
 } from '../../application/interfaces/user-role-permission-query.port';
-import { USER_ROLE_PERMISSION_QUERY_PORT } from '../../application/interfaces/user-role-permission-query.port';
 import type { IRoleRepository } from '../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../domain/repositories/role.repository.interface';
-import type { IUserRolePermissionPort } from '../../../user/application/interfaces/user-role-permission.port';
-import { USER_ROLE_PERMISSION_PORT } from '../../../user/application/interfaces/user-role-permission.port';
 import type { IUserRepository } from '../../../user/domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../user/domain/repositories/user.repository.interface';
 import { UserId } from '../../../user/domain/value-objects/user-id.vo';
