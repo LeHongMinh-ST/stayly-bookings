@@ -24,15 +24,15 @@ describe('AssignRolesToUserHandler', () => {
   const userId = randomUUID();
   const roles = ['editor', 'manager'];
 
-const buildUser = (): User =>
-  User.create({
-    id: UserId.create(userId),
-    email: Email.create('user@example.com'),
-    fullName: 'User Name',
-    passwordHash: PasswordHash.create('hashed-password-value-123456'),
-    roles: [UserRole.create(UserRoleEnum.STAFF)],
-    permissions: [],
-  });
+  const buildUser = (): User =>
+    User.create({
+      id: UserId.create(userId),
+      email: Email.create('user@example.com'),
+      fullName: 'User Name',
+      passwordHash: PasswordHash.create('hashed-password-value-123456'),
+      roles: [UserRole.create(UserRoleEnum.STAFF)],
+      permissions: [],
+    });
 
   beforeEach(async () => {
     const mockUserRepository: jest.Mocked<IUserRepository> = {
@@ -91,10 +91,15 @@ const buildUser = (): User =>
       const userIdArg = userRepository.findById.mock.calls[0][0];
       expect(userIdArg).toBeInstanceOf(UserId);
       expect(userIdArg.getValue()).toEqual(userId);
-      expect(userRepository.save).toHaveBeenCalledWith(user);
-      expect(user.getRoles().map((role) => role.getValueAsString())).toEqual(
+      expect(userRepository.save).toHaveBeenCalledTimes(1);
+      const savedUser = userRepository.save.mock.calls[0][0];
+      expect(savedUser).toBeInstanceOf(User);
+      expect(savedUser.getRoles().map((role) => role.getValueAsString())).toEqual(
         validatedRoles,
       );
+      expect(user.getRoles().map((role) => role.getValueAsString())).toEqual([
+        UserRoleEnum.STAFF,
+      ]);
       expect(result).toEqual(
         new UserResponseDto(userId, 'user@example.com', 'User Name', 'active'),
       );

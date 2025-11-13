@@ -7,6 +7,7 @@ import { AssignRolesToUserCommand } from '../assign-roles-to-user.command';
 import type { IRolePermissionValidationPort } from '../../interfaces/role-permission-validation.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from '../../interfaces/role-permission-validation.port';
 import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
+import { User } from '../../../../user/domain/entities/user.entity';
 import type { IUserRepository } from '../../../../user/domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../../../user/domain/repositories/user.repository.interface';
 import { UserId } from '../../../../user/domain/value-objects/user-id.vo';
@@ -40,8 +41,16 @@ export class AssignRolesToUserHandler
       await this.rolePermissionValidation.validateRoles(command.roles);
 
     const nextRoles = validatedRoleCodes.map((code) => UserRole.from(code));
-    user.assignRoles(nextRoles);
-    await this.userRepository.save(user);
-    return UserResponseDto.fromAggregate(user);
+    const updatedUser = User.rehydrate({
+      id: user.getId(),
+      email: user.getEmail(),
+      fullName: user.getFullName(),
+      passwordHash: user.getPasswordHash(),
+      status: user.getStatus(),
+      roles: nextRoles,
+      permissions: user.getPermissions(),
+    });
+    await this.userRepository.save(updatedUser);
+    return UserResponseDto.fromAggregate(updatedUser);
   }
 }

@@ -11,6 +11,7 @@ import type { IUserRepository } from '../../../../user/domain/repositories/user.
 import { USER_REPOSITORY } from '../../../../user/domain/repositories/user.repository.interface';
 import { UserId } from '../../../../user/domain/value-objects/user-id.vo';
 import { UserPermission } from '../../../../user/domain/value-objects/user-permission.vo';
+import { User } from '../../../../user/domain/entities/user.entity';
 
 @Injectable()
 @CommandHandler(AssignPermissionsToUserCommand)
@@ -46,8 +47,16 @@ export class AssignPermissionsToUserHandler
     const nextPermissions = validatedPermissionCodes.map((code) =>
       UserPermission.create(code),
     );
-    user.assignPermissions(nextPermissions);
-    await this.userRepository.save(user);
-    return UserResponseDto.fromAggregate(user);
+    const updatedUser = User.rehydrate({
+      id: user.getId(),
+      email: user.getEmail(),
+      fullName: user.getFullName(),
+      passwordHash: user.getPasswordHash(),
+      status: user.getStatus(),
+      roles: user.getRoles(),
+      permissions: nextPermissions,
+    });
+    await this.userRepository.save(updatedUser);
+    return UserResponseDto.fromAggregate(updatedUser);
   }
 }

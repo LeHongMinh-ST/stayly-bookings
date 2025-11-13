@@ -98,10 +98,13 @@ describe('AssignPermissionsToUserHandler', () => {
       const userIdArg = userRepository.findById.mock.calls[0][0];
       expect(userIdArg).toBeInstanceOf(UserId);
       expect(userIdArg.getValue()).toEqual(userId);
-      expect(userRepository.save).toHaveBeenCalledWith(user);
-      expect(user.getPermissions().map((perm) => perm.getValue())).toEqual(
+      expect(userRepository.save).toHaveBeenCalledTimes(1);
+      const savedUser = userRepository.save.mock.calls[0][0];
+      expect(savedUser).toBeInstanceOf(User);
+      expect(savedUser.getPermissions().map((perm) => perm.getValue())).toEqual(
         validatedPermissions.map((code) => UserPermission.create(code).getValue()),
       );
+      expect(user.getPermissions()).toHaveLength(0);
       expect(result).toEqual(
         new UserResponseDto(userId, 'user@example.com', 'User Name', 'active'),
       );
@@ -143,7 +146,9 @@ describe('AssignPermissionsToUserHandler', () => {
       expect(rolePermissionValidation.validatePermissions).toHaveBeenCalledWith(
         [],
       );
-      expect(userRepository.save).toHaveBeenCalledWith(user);
+      expect(userRepository.save).toHaveBeenCalledTimes(1);
+      const savedUser = userRepository.save.mock.calls[0][0];
+      expect(savedUser.getPermissions()).toHaveLength(0);
       expect(user.getPermissions()).toHaveLength(0);
       expect(result).toEqual(
         new UserResponseDto(userId, 'user@example.com', 'User Name', 'active'),

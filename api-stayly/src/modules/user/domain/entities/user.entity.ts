@@ -5,8 +5,6 @@ import { BaseEntity } from '../../../../common/domain/entities/base.entity';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
 import { UserId } from '../value-objects/user-id.vo';
-import { UserRole, UserRoleEnum } from '../value-objects/user-role.vo';
-import { UserPermission } from '../value-objects/user-permission.vo';
 import { Status, UserStatus } from '../value-objects/user-status.vo';
 import { UserCreatedEvent } from '../events/user-created.event';
 
@@ -16,8 +14,6 @@ export interface CreateUserProps {
   fullName: string;
   passwordHash: PasswordHash;
   status?: Status;
-  roles?: UserRole[];
-  permissions?: UserPermission[];
 }
 
 export class User extends BaseEntity<UserId> {
@@ -27,8 +23,6 @@ export class User extends BaseEntity<UserId> {
     private fullName: string,
     private passwordHash: PasswordHash,
     private status: Status,
-    private roles: UserRole[],
-    private permissions: UserPermission[],
   ) {
     super(id);
   }
@@ -45,8 +39,6 @@ export class User extends BaseEntity<UserId> {
       props.fullName.trim(),
       props.passwordHash,
       props.status ?? Status.create(UserStatus.ACTIVE),
-      props.roles ?? [UserRole.create(UserRoleEnum.STAFF)],
-      props.permissions ?? [],
     );
 
     user.recordEvent(new UserCreatedEvent(user.getId().getValue(), now));
@@ -59,8 +51,6 @@ export class User extends BaseEntity<UserId> {
     fullName: string;
     passwordHash: PasswordHash;
     status: Status;
-    roles: UserRole[];
-    permissions: UserPermission[];
   }): User {
     return new User(
       props.id,
@@ -68,8 +58,6 @@ export class User extends BaseEntity<UserId> {
       props.fullName,
       props.passwordHash,
       props.status,
-      props.roles,
-      props.permissions,
     );
   }
 
@@ -78,17 +66,6 @@ export class User extends BaseEntity<UserId> {
       throw new Error('User full name is required');
     }
     this.fullName = fullName.trim();
-  }
-
-  assignRoles(nextRoles: UserRole[]): void {
-    if (!nextRoles.length) {
-      throw new Error('User must have at least one role');
-    }
-    this.roles = nextRoles;
-  }
-
-  assignPermissions(nextPermissions: UserPermission[]): void {
-    this.permissions = nextPermissions;
   }
 
   updateStatus(nextStatus: Status): void {
@@ -121,13 +98,5 @@ export class User extends BaseEntity<UserId> {
    */
   isActive(): boolean {
     return this.status.getValue() === UserStatus.ACTIVE;
-  }
-
-  getRoles(): UserRole[] {
-    return [...this.roles];
-  }
-
-  getPermissions(): UserPermission[] {
-    return [...this.permissions];
   }
 }
