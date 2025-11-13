@@ -1,13 +1,17 @@
 /**
- * CustomerAuthenticationAdapter adapts CustomerAuthenticationService from customer module
+ * CustomerAuthenticationAdapter adapts ICustomerAuthenticationPort from customer module
  * to ICustomerAuthenticationService interface for auth module
- * Following Adapter Pattern - adapters use services, not repositories
- * Services are exported from modules and provide what other modules need
+ * 
+ * Following Port/Adapter Pattern:
+ * - Port (interface) is defined in customer module application layer
+ * - Adapter is in infrastructure layer, so it CAN import from other modules
+ * - Application layer only depends on interface, not this adapter
+ * - Infrastructure layer handles cross-module communication
  */
 import { Inject, Injectable } from '@nestjs/common';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { CustomerAuthenticationService } from '../../../customer/infrastructure/services/customer-authentication.service';
-import { CUSTOMER_AUTHENTICATION_SERVICE } from '../../../customer/infrastructure/services/customer-authentication.service';
+import type { ICustomerAuthenticationPort } from '../../../customer/application/interfaces/customer-authentication.port';
+import { CUSTOMER_AUTHENTICATION_PORT } from '../../../customer/application/interfaces/customer-authentication.port';
 import type {
   ICustomerAuthenticationService,
   CustomerAuthenticationData,
@@ -16,16 +20,17 @@ import type {
 @Injectable()
 export class CustomerAuthenticationAdapter implements ICustomerAuthenticationService {
   constructor(
-    @Inject(CUSTOMER_AUTHENTICATION_SERVICE)
-    private readonly customerAuthenticationService: CustomerAuthenticationService,
+    @Inject(CUSTOMER_AUTHENTICATION_PORT)
+    private readonly customerAuthenticationPort: ICustomerAuthenticationPort,
   ) {}
 
   /**
-   * Delegates to CustomerAuthenticationService
-   * Adapter uses service, not repository directly
+   * Adapts customer module port to auth module interface
+   * Infrastructure layer handles the mapping between modules
    */
-  async findForAuthentication(email: Email): Promise<CustomerAuthenticationData | null> {
-    return this.customerAuthenticationService.findForAuthentication(email);
+  async findForAuthentication(
+    email: Email,
+  ): Promise<CustomerAuthenticationData | null> {
+    return this.customerAuthenticationPort.findForAuthentication(email);
   }
 }
-

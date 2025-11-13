@@ -1,26 +1,19 @@
 /**
  * CustomerAuthenticationService provides authentication-specific data for other modules
- * This service encapsulates customer authentication logic and exposes only necessary data
- * Following Service Pattern - modules communicate via services, not repositories
+ * This service implements ICustomerAuthenticationPort and encapsulates customer authentication logic
+ * Following Port/Adapter Pattern - service implements port defined in application layer
  */
 import { Inject, Injectable } from '@nestjs/common';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 import type { ICustomerRepository } from '../../domain/repositories/customer.repository.interface';
 import { CUSTOMER_REPOSITORY } from '../../domain/repositories/customer.repository.interface';
-
-/**
- * Customer authentication data required for authentication flow
- * Only exposes necessary fields, not the full Customer entity
- */
-export interface CustomerAuthenticationData {
-  id: string;
-  email: string;
-  passwordHash: string;
-  isActive: boolean;
-}
+import type {
+  ICustomerAuthenticationPort,
+  CustomerAuthenticationData,
+} from '../../application/interfaces/customer-authentication.port';
 
 @Injectable()
-export class CustomerAuthenticationService {
+export class CustomerAuthenticationService implements ICustomerAuthenticationPort {
   constructor(
     @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
@@ -29,9 +22,11 @@ export class CustomerAuthenticationService {
   /**
    * Finds customer by email for authentication purposes
    * Returns only authentication-relevant data, not full entity
-   * This method is designed to be used by other modules (e.g., auth module)
+   * This method implements the port interface for other modules (e.g., auth module)
    */
-  async findForAuthentication(email: Email): Promise<CustomerAuthenticationData | null> {
+  async findForAuthentication(
+    email: Email,
+  ): Promise<CustomerAuthenticationData | null> {
     const customer = await this.customerRepository.findByEmail(email);
     if (!customer) {
       return null;
@@ -45,6 +40,3 @@ export class CustomerAuthenticationService {
     };
   }
 }
-
-export const CUSTOMER_AUTHENTICATION_SERVICE = 'CUSTOMER_AUTHENTICATION_SERVICE';
-

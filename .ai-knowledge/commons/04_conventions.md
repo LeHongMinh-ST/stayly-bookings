@@ -38,6 +38,8 @@ Tài liệu này định nghĩa các conventions và best practices cho dự án
 - **Filters:** `{name}.filter.ts` (ví dụ: `http-exception.filter.ts`)
 - **Events:** `{name}.event.ts` (ví dụ: `booking-created.event.ts`)
 - **Mappers:** `{name}.mapper.ts` (ví dụ: `booking.mapper.ts`)
+- **Ports (Interfaces):** `{entity}-{purpose}.port.ts` (ví dụ: `user-authentication.port.ts`)
+- **Adapters:** `{entity}-{purpose}.adapter.ts` (ví dụ: `user-authentication.adapter.ts`)
 
 **Naming Pattern:**
 - Sử dụng **kebab-case** cho file names
@@ -62,6 +64,10 @@ Tài liệu này định nghĩa các conventions và best practices cho dự án
 - **Interceptors:** `{Purpose}Interceptor` (ví dụ: `LoggingInterceptor`, `CacheInterceptor`)
 - **Events:** `{Entity}{Action}Event` (ví dụ: `BookingCreatedEvent`, `PaymentSucceededEvent`)
 - **Exceptions:** `{Purpose}Error` hoặc `{Purpose}Exception` (ví dụ: `RoomNotFoundError`, `InvalidBookingStatusError`)
+- **Ports (Interfaces):** `I{Entity}{Purpose}Port` (ví dụ: `IUserAuthenticationPort`)
+- **Port Tokens:** `{ENTITY}_{PURPOSE}_PORT` (ví dụ: `USER_AUTHENTICATION_PORT`)
+- **Adapters:** `{Entity}{Purpose}Adapter` (ví dụ: `UserAuthenticationAdapter`)
+- **Module Interfaces:** `I{Entity}{Purpose}Service` (trong module cần dữ liệu, ví dụ: `IUserAuthenticationService`)
 
 ### 2.3. Variable & Function Naming
 
@@ -133,11 +139,17 @@ bounded-contexts/
     │   │   ├── {query}.query.ts
     │   │   └── handlers/
     │   │       └── {query}.handler.ts
+    │   ├── interfaces/          # Port interfaces for other modules
+    │   │   └── {entity}-{purpose}.port.ts
     │   └── dto/
     ├── infrastructure/
     │   ├── persistence/
     │   │   ├── repositories/
     │   │   └── entities/
+    │   ├── adapters/            # Adapters for other modules (Port/Adapter Pattern)
+    │   │   └── {entity}-{purpose}.adapter.ts
+    │   ├── services/             # Services implementing ports
+    │   │   └── {entity}-{purpose}.service.ts
     │   ├── kafka/
     │   └── external/
     └── presentation/

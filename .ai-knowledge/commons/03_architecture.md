@@ -1183,7 +1183,61 @@ async function bootstrap() {
 
 **Communication giữa Bounded Contexts:**
 
-- **Synchronous:** Import module và inject service (trong cùng process)
+- **Synchronous:** Port/Adapter Pattern (Recommended)
+  - **Port (Interface):** Định nghĩa trong `application/interfaces/` của module sở hữu dữ liệu
+  - **Adapter:** Implement trong `infrastructure/adapters/` của module cần dữ liệu
+  - **Nguyên tắc:**
+    - Application layer chỉ phụ thuộc vào interface (Port), không import từ module khác
+    - Infrastructure layer xử lý giao tiếp giữa các module (Adapter)
+    - Module sở hữu dữ liệu export Port, không export service trực tiếp
+    - Module cần dữ liệu tạo Adapter trong infrastructure layer
+  - **Ví dụ:**
+    ```typescript
+    // User Module - application/interfaces/user-authentication.port.ts
+    export interface IUserAuthenticationPort {
+      findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
+    }
+    export const USER_AUTHENTICATION_PORT = 'USER_AUTHENTICATION_PORT';
+    
+    // User Module - infrastructure/services/user-authentication.service.ts
+    @Injectable()
+    export class UserAuthenticationService implements IUserAuthenticationPort {
+      // Implementation
+    }
+    
+    // User Module - user.module.ts
+    @Module({
+      providers: [
+        { provide: USER_AUTHENTICATION_PORT, useClass: UserAuthenticationService },
+      ],
+      exports: [USER_AUTHENTICATION_PORT], // Export port, not service
+    })
+    export class UserModule {}
+    
+    // Auth Module - application/interfaces/user-authentication.service.interface.ts
+    export interface IUserAuthenticationService {
+      findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
+    }
+    
+    // Auth Module - infrastructure/adapters/user-authentication.adapter.ts
+    @Injectable()
+    export class UserAuthenticationAdapter implements IUserAuthenticationService {
+      constructor(
+        @Inject(USER_AUTHENTICATION_PORT)
+        private readonly userAuthPort: IUserAuthenticationPort,
+      ) {}
+      // Adapts user module port to auth module interface
+    }
+    
+    // Auth Module - application/commands/handlers/authenticate-user.handler.ts
+    @CommandHandler(AuthenticateUserCommand)
+    export class AuthenticateUserHandler {
+      constructor(
+        @Inject(USER_AUTHENTICATION_SERVICE)
+        private readonly userAuthService: IUserAuthenticationService, // Only depends on interface
+      ) {}
+    }
+    ```
 - **Asynchronous:** Domain Events qua Kafka (loose coupling)
 - **Shared Kernel:** Common code trong `common/` folder
 

@@ -1,28 +1,19 @@
 /**
  * UserAuthenticationService provides authentication-specific data for other modules
- * This service encapsulates user authentication logic and exposes only necessary data
- * Following Service Pattern - modules communicate via services, not repositories
+ * This service implements IUserAuthenticationPort and encapsulates user authentication logic
+ * Following Port/Adapter Pattern - service implements port defined in application layer
  */
 import { Inject, Injectable } from '@nestjs/common';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
-
-/**
- * User authentication data required for authentication flow
- * Only exposes necessary fields, not the full User entity
- */
-export interface UserAuthenticationData {
-  id: string;
-  email: string;
-  passwordHash: string;
-  isActive: boolean;
-  roles: string[];
-  permissions: string[];
-}
+import type {
+  IUserAuthenticationPort,
+  UserAuthenticationData,
+} from '../../application/interfaces/user-authentication.port';
 
 @Injectable()
-export class UserAuthenticationService {
+export class UserAuthenticationService implements IUserAuthenticationPort {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
@@ -31,9 +22,11 @@ export class UserAuthenticationService {
   /**
    * Finds user by email for authentication purposes
    * Returns only authentication-relevant data, not full entity
-   * This method is designed to be used by other modules (e.g., auth module)
+   * This method implements the port interface for other modules (e.g., auth module)
    */
-  async findForAuthentication(email: Email): Promise<UserAuthenticationData | null> {
+  async findForAuthentication(
+    email: Email,
+  ): Promise<UserAuthenticationData | null> {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       return null;
@@ -45,10 +38,9 @@ export class UserAuthenticationService {
       passwordHash: user.getPasswordHash().getValue(),
       isActive: user.isActive(),
       roles: user.getRoles().map((role) => role.getValue()),
-      permissions: user.getPermissions().map((permission) => permission.getValue()),
+      permissions: user
+        .getPermissions()
+        .map((permission) => permission.getValue()),
     };
   }
 }
-
-export const USER_AUTHENTICATION_SERVICE = 'USER_AUTHENTICATION_SERVICE';
-

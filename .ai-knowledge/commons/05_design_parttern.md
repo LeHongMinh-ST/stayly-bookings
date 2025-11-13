@@ -470,17 +470,97 @@ export class BookingConfirmedHandler {
 
 ---
 
-## 9. Adapter Pattern
+## 9. Adapter Pattern (Port/Adapter Pattern)
 
-**Mục đích:** Adapt external services (payment gateways, email services) cho domain interfaces
+**Mục đích:** 
+- Adapt external services (payment gateways, email services) cho domain interfaces
+- **Cross-module communication:** Decouple modules bằng Port/Adapter pattern
 
 **Implementation:**
+
+### 9.1. External Services Adapter
+
 - **Domain/Application Layer:** Interface cho external service
 - **Infrastructure Layer:** Adapter implement interface
 
 **Conventions:**
 - Interface: `I{Service}Adapter` hoặc `I{Service}Gateway`
 - Implementation: `{Provider}{Service}Adapter` (ví dụ: `VNPayPaymentAdapter`)
+
+### 9.2. Cross-Module Communication (Port/Adapter Pattern)
+
+**Nguyên tắc:**
+- **Port (Interface):** Định nghĩa trong `application/interfaces/` của module sở hữu dữ liệu
+- **Adapter:** Implement trong `infrastructure/adapters/` của module cần dữ liệu
+- **Application layer:** Chỉ phụ thuộc vào interface, không import từ module khác
+- **Infrastructure layer:** Xử lý giao tiếp giữa các module
+
+**Conventions:**
+- Port interface: `I{Entity}{Purpose}Port` (ví dụ: `IUserAuthenticationPort`)
+- Port token: `{ENTITY}_{PURPOSE}_PORT` (ví dụ: `USER_AUTHENTICATION_PORT`)
+- Adapter: `{Entity}{Purpose}Adapter` (ví dụ: `UserAuthenticationAdapter`)
+- Module interface: `I{Entity}{Purpose}Service` (trong module cần dữ liệu)
+
+**Example - Cross-Module Communication:**
+```typescript
+// User Module - application/interfaces/user-authentication.port.ts
+export interface IUserAuthenticationPort {
+  findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
+}
+export const USER_AUTHENTICATION_PORT = 'USER_AUTHENTICATION_PORT';
+
+// User Module - infrastructure/services/user-authentication.service.ts
+@Injectable()
+export class UserAuthenticationService implements IUserAuthenticationPort {
+  // Implementation
+}
+
+// User Module - user.module.ts
+@Module({
+  providers: [
+    { provide: USER_AUTHENTICATION_PORT, useClass: UserAuthenticationService },
+  ],
+  exports: [USER_AUTHENTICATION_PORT], // Export port, not service
+})
+export class UserModule {}
+
+// Auth Module - application/interfaces/user-authentication.service.interface.ts
+export interface IUserAuthenticationService {
+  findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
+}
+export const USER_AUTHENTICATION_SERVICE = 'USER_AUTHENTICATION_SERVICE';
+
+// Auth Module - infrastructure/adapters/user-authentication.adapter.ts
+@Injectable()
+export class UserAuthenticationAdapter implements IUserAuthenticationService {
+  constructor(
+    @Inject(USER_AUTHENTICATION_PORT)
+    private readonly userAuthPort: IUserAuthenticationPort,
+  ) {}
+  
+  async findForAuthentication(email: Email): Promise<UserAuthenticationData | null> {
+    return this.userAuthPort.findForAuthentication(email);
+  }
+}
+
+// Auth Module - auth.module.ts
+@Module({
+  imports: [UserModule],
+  providers: [
+    { provide: USER_AUTHENTICATION_SERVICE, useClass: UserAuthenticationAdapter },
+  ],
+})
+export class AuthModule {}
+
+// Auth Module - application/commands/handlers/authenticate-user.handler.ts
+@CommandHandler(AuthenticateUserCommand)
+export class AuthenticateUserHandler {
+  constructor(
+    @Inject(USER_AUTHENTICATION_SERVICE)
+    private readonly userAuthService: IUserAuthenticationService, // Only depends on interface
+  ) {}
+}
+```
 
 **Example:**
 ```typescript

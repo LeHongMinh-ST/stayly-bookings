@@ -1,13 +1,17 @@
 /**
- * UserAuthenticationAdapter adapts UserAuthenticationService from user module
+ * UserAuthenticationAdapter adapts IUserAuthenticationPort from user module
  * to IUserAuthenticationService interface for auth module
- * Following Adapter Pattern - adapters use services, not repositories
- * Services are exported from modules and provide what other modules need
+ * 
+ * Following Port/Adapter Pattern:
+ * - Port (interface) is defined in user module application layer
+ * - Adapter is in infrastructure layer, so it CAN import from other modules
+ * - Application layer only depends on interface, not this adapter
+ * - Infrastructure layer handles cross-module communication
  */
 import { Inject, Injectable } from '@nestjs/common';
 import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { UserAuthenticationService } from '../../../user/infrastructure/services/user-authentication.service';
-import { USER_AUTHENTICATION_SERVICE } from '../../../user/infrastructure/services/user-authentication.service';
+import type { IUserAuthenticationPort } from '../../../user/application/interfaces/user-authentication.port';
+import { USER_AUTHENTICATION_PORT } from '../../../user/application/interfaces/user-authentication.port';
 import type {
   IUserAuthenticationService,
   UserAuthenticationData,
@@ -16,16 +20,16 @@ import type {
 @Injectable()
 export class UserAuthenticationAdapter implements IUserAuthenticationService {
   constructor(
-    @Inject(USER_AUTHENTICATION_SERVICE)
-    private readonly userAuthenticationService: UserAuthenticationService,
+    @Inject(USER_AUTHENTICATION_PORT)
+    private readonly userAuthenticationPort: IUserAuthenticationPort,
   ) {}
 
   /**
-   * Delegates to UserAuthenticationService
-   * Adapter uses service, not repository directly
+   * Adapts user module port to auth module interface
+   * Infrastructure layer handles the mapping between modules
    */
   async findForAuthentication(email: Email): Promise<UserAuthenticationData | null> {
-    return this.userAuthenticationService.findForAuthentication(email);
+    return this.userAuthenticationPort.findForAuthentication(email);
   }
 }
 
