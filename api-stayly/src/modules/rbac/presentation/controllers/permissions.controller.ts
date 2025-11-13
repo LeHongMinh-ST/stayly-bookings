@@ -1,20 +1,12 @@
 /**
  * PermissionsController exposes endpoints for permission management and assignment
  */
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiBody,
   ApiParam,
 } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
@@ -23,8 +15,8 @@ import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
 // Using string literals for decorator (decorator accepts string[])
 import { ListPermissionsQuery } from '../../application/queries/list-permissions.query';
-import { AssignPermissionsToUserCommand } from '../../application/commands/assign-permissions-to-user.command';
-import { AssignPermissionsToUserDto } from '../../application/dto/request/assign-permissions-to-user.dto';
+import { AssignPermissionToUserCommand } from '../../application/commands/assign-permission-to-user.command';
+import { UnassignPermissionFromUserCommand } from '../../application/commands/unassign-permission-from-user.command';
 import { PermissionResponseDto } from '../../application/dto/response/permission-response.dto';
 import { UserResponseDto } from '../../../user/application/dto/response/user-response.dto';
 
@@ -59,31 +51,68 @@ export class PermissionsController {
   }
 
   /**
-   * Assigns permissions to a user
+   * Assigns a single permission to a user
    */
-  @Patch('users/:userId')
+  @Post(':permissionId/users/:userId')
   @Roles('super_admin')
   @Permissions('permission:assign')
-  @ApiOperation({ summary: 'Assign permissions to user' })
+  @ApiOperation({ summary: 'Assign a single permission to user' })
+  @ApiParam({
+    name: 'permissionId',
+    description: 'Permission unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   @ApiParam({
     name: 'userId',
     description: 'User unique identifier',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @ApiBody({ type: AssignPermissionsToUserDto })
   @ApiResponse({
     status: 200,
-    description: 'Permissions assigned successfully',
+    description: 'Permission assigned successfully',
     type: UserResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 404, description: 'Permission or user not found' })
   @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async assignPermissionsToUser(
+  async assignPermissionToUser(
+    @Param('permissionId') permissionId: string,
     @Param('userId') userId: string,
-    @Body() dto: AssignPermissionsToUserDto,
   ): Promise<UserResponseDto> {
-    const command = new AssignPermissionsToUserCommand(userId, dto.permissions);
+    const command = new AssignPermissionToUserCommand(permissionId, userId);
+    return this.commandBus.execute(command);
+  }
+
+  /**
+   * Unassigns a single permission from a user
+   */
+  @Delete(':permissionId/users/:userId')
+  @Roles('super_admin')
+  @Permissions('permission:assign')
+  @ApiOperation({ summary: 'Unassign a single permission from user' })
+  @ApiParam({
+    name: 'permissionId',
+    description: 'Permission unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Permission unassigned successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 404, description: 'Permission or user not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  async unassignPermissionFromUser(
+    @Param('permissionId') permissionId: string,
+    @Param('userId') userId: string,
+  ): Promise<UserResponseDto> {
+    const command = new UnassignPermissionFromUserCommand(permissionId, userId);
     return this.commandBus.execute(command);
   }
 }

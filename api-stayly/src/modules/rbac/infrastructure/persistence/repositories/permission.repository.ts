@@ -32,4 +32,14 @@ export class PermissionRepository implements IPermissionRepository {
     });
     return permissions.map((permission) => Permission.create(permission.code));
   }
+
+  async findById(id: string): Promise<Permission | null> {
+    const permission = await this.permissionRepo.findOne({
+      where: { id },
+    });
+    if (!permission) {
+      return null;
+    }
+    return Permission.create(permission.code);
+  }
 }

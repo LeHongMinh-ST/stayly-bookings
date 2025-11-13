@@ -9,6 +9,20 @@ export interface IUserRoleLinkPort {
    * @param roleCodes - Pre-validated role codes
    */
   replaceUserRoles(userId: string, roleCodes: string[]): Promise<void>;
+
+  /**
+   * Adds a single role to user (if not already assigned)
+   * @param userId - Target user identifier
+   * @param roleCode - Pre-validated role code
+   */
+  addRoleToUser(userId: string, roleCode: string): Promise<void>;
+
+  /**
+   * Removes a single role from user
+   * @param userId - Target user identifier
+   * @param roleCode - Pre-validated role code
+   */
+  removeRoleFromUser(userId: string, roleCode: string): Promise<void>;
 }
 
 export const USER_ROLE_LINK_PORT = 'USER_ROLE_LINK_PORT';

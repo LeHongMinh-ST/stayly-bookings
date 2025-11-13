@@ -7,8 +7,10 @@ import { Module, forwardRef } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from '../user/user.module';
-import { AssignRolesToUserHandler } from './application/commands/handlers/assign-roles-to-user.handler';
-import { AssignPermissionsToUserHandler } from './application/commands/handlers/assign-permissions-to-user.handler';
+import { AssignRoleToUserHandler } from './application/commands/handlers/assign-role-to-user.handler';
+import { UnassignRoleFromUserHandler } from './application/commands/handlers/unassign-role-from-user.handler';
+import { AssignPermissionToUserHandler } from './application/commands/handlers/assign-permission-to-user.handler';
+import { UnassignPermissionFromUserHandler } from './application/commands/handlers/unassign-permission-from-user.handler';
 import { CreateRoleHandler } from './application/commands/handlers/create-role.handler';
 import { UpdateRoleHandler } from './application/commands/handlers/update-role.handler';
 import { DeleteRoleHandler } from './application/commands/handlers/delete-role.handler';
@@ -23,14 +25,10 @@ import { PermissionRepository } from './infrastructure/persistence/repositories/
 import { RoleOrmEntity } from './infrastructure/persistence/entities/role.orm-entity';
 import { PermissionOrmEntity } from './infrastructure/persistence/entities/permission.orm-entity';
 import { RolePermissionSeedService } from './infrastructure/persistence/seeds/role-permission-seed.service';
-import { RoleAssignmentService } from './infrastructure/services/role-assignment.service';
-import { PermissionAssignmentService } from './infrastructure/services/permission-assignment.service';
 import { RolePermissionValidationService } from './infrastructure/services/role-permission-validation.service';
 import { UserRolePermissionQueryService } from './infrastructure/services/user-role-permission-query.service';
 import { UserRoleLinkService } from './infrastructure/services/user-role-link.service';
 import { UserPermissionLinkService } from './infrastructure/services/user-permission-link.service';
-import { ROLE_ASSIGNMENT_PORT } from './application/interfaces/role-assignment.port';
-import { PERMISSION_ASSIGNMENT_PORT } from './application/interfaces/permission-assignment.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from './application/interfaces/role-permission-validation.port';
 import { USER_ROLE_PERMISSION_QUERY_PORT } from './application/interfaces/user-role-permission-query.port';
 import { USER_ROLE_LINK_PORT } from './application/interfaces/user-role-link.port';
@@ -40,8 +38,14 @@ import { PermissionsController } from './presentation/controllers/permissions.co
 import { UserOrmEntity } from '../user/infrastructure/persistence/entities/user.orm-entity';
 
 const commandHandlers = [
-  AssignRolesToUserHandler,
-  AssignPermissionsToUserHandler,
+  CreateRoleHandler,
+  UpdateRoleHandler,
+  DeleteRoleHandler,
+  AssignPermissionsToRoleHandler,
+  AssignRoleToUserHandler,
+  UnassignRoleFromUserHandler,
+  AssignPermissionToUserHandler,
+  UnassignPermissionFromUserHandler,
 ];
 
 const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
@@ -64,14 +68,6 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
     { provide: PERMISSION_REPOSITORY, useClass: PermissionRepository },
     // Port implementations for other modules
     {
-      provide: ROLE_ASSIGNMENT_PORT,
-      useClass: RoleAssignmentService,
-    },
-    {
-      provide: PERMISSION_ASSIGNMENT_PORT,
-      useClass: PermissionAssignmentService,
-    },
-    {
       provide: ROLE_PERMISSION_VALIDATION_PORT,
       useClass: RolePermissionValidationService,
     },
@@ -93,8 +89,6 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
   exports: [
     ROLE_REPOSITORY,
     PERMISSION_REPOSITORY,
-    ROLE_ASSIGNMENT_PORT,
-    PERMISSION_ASSIGNMENT_PORT,
     ROLE_PERMISSION_VALIDATION_PORT, // Export port for User module to validate roles/permissions
     USER_ROLE_PERMISSION_QUERY_PORT, // Export port for Auth module to query user roles/permissions
     USER_ROLE_LINK_PORT,

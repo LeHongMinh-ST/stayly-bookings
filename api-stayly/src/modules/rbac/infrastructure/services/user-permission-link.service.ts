@@ -50,6 +50,63 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     user.permissions = permissions;
     await this.userRepository.save(user);
   }
+
+  /**
+   * Adds a single permission to user (if not already assigned)
+   */
+  async addPermissionToUser(
+    userId: string,
+    permissionCode: string,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['permissions'],
+    });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const normalizedCode = permissionCode.toLowerCase();
+    const permission = await this.permissionRepository.findOne({
+      where: { code: normalizedCode },
+    });
+    if (!permission) {
+      throw new Error('Permission not found');
+    }
+
+    // Check if permission already assigned
+    const existingPermission = user.permissions.find(
+      (p) => p.code === normalizedCode,
+    );
+    if (existingPermission) {
+      return; // Already assigned, no-op
+    }
+
+    user.permissions.push(permission);
+    await this.userRepository.save(user);
+  }
+
+  /**
+   * Removes a single permission from user
+   */
+  async removePermissionFromUser(
+    userId: string,
+    permissionCode: string,
+  ): Promise<void> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['permissions'],
+    });
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const normalizedCode = permissionCode.toLowerCase();
+    user.permissions = user.permissions.filter(
+      (p) => p.code !== normalizedCode,
+    );
+    await this.userRepository.save(user);
+  }
 }
 
 

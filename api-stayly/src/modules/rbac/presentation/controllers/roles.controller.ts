@@ -30,11 +30,11 @@ import { CreateRoleCommand } from '../../application/commands/create-role.comman
 import { UpdateRoleCommand } from '../../application/commands/update-role.command';
 import { DeleteRoleCommand } from '../../application/commands/delete-role.command';
 import { AssignPermissionsToRoleCommand } from '../../application/commands/assign-permissions-to-role.command';
-import { AssignRolesToUserCommand } from '../../application/commands/assign-roles-to-user.command';
+import { AssignRoleToUserCommand } from '../../application/commands/assign-role-to-user.command';
+import { UnassignRoleFromUserCommand } from '../../application/commands/unassign-role-from-user.command';
 import { CreateRoleDto } from '../../application/dto/request/create-role.dto';
 import { UpdateRoleDto } from '../../application/dto/request/update-role.dto';
 import { AssignPermissionsToRoleDto } from '../../application/dto/request/assign-permissions-to-role.dto';
-import { AssignRolesToUserDto } from '../../application/dto/request/assign-roles-to-user.dto';
 import { RoleResponseDto } from '../../application/dto/response/role-response.dto';
 import { UserResponseDto } from '../../../user/application/dto/response/user-response.dto';
 
@@ -65,28 +65,6 @@ export class RolesController {
   }
 
   /**
-   * Gets a single role by ID
-   */
-  @Get(':id')
-  @Permissions('role:read')
-  @ApiOperation({ summary: 'Get role by ID' })
-  @ApiParam({
-    name: 'id',
-    description: 'Role unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns role details',
-    type: RoleResponseDto,
-  })
-  @ApiResponse({ status: 404, description: 'Role not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async getRole(@Param('id') id: string): Promise<RoleResponseDto> {
-    return this.queryBus.execute(new GetRoleQuery(id));
-  }
-
-  /**
    * Creates a new role
    */
   @Post()
@@ -107,6 +85,94 @@ export class RolesController {
       dto.permissions,
     );
     return this.commandBus.execute(command);
+  }
+
+  /**
+   * Assigns a single role to a user
+   */
+  @Post(':roleId/users/:userId')
+  @Roles('super_admin')
+  @Permissions('role:assign')
+  @ApiOperation({ summary: 'Assign a single role to user' })
+  @ApiParam({
+    name: 'roleId',
+    description: 'Role unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Role assigned successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 404, description: 'Role or user not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  async assignRoleToUser(
+    @Param('roleId') roleId: string,
+    @Param('userId') userId: string,
+  ): Promise<UserResponseDto> {
+    const command = new AssignRoleToUserCommand(roleId, userId);
+    return this.commandBus.execute(command);
+  }
+
+  /**
+   * Unassigns a single role from a user
+   */
+  @Delete(':roleId/users/:userId')
+  @Roles('super_admin')
+  @Permissions('role:assign')
+  @ApiOperation({ summary: 'Unassign a single role from user' })
+  @ApiParam({
+    name: 'roleId',
+    description: 'Role unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Role unassigned successfully',
+    type: UserResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 404, description: 'Role or user not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  async unassignRoleFromUser(
+    @Param('roleId') roleId: string,
+    @Param('userId') userId: string,
+  ): Promise<UserResponseDto> {
+    const command = new UnassignRoleFromUserCommand(roleId, userId);
+    return this.commandBus.execute(command);
+  }
+
+  /**
+   * Gets a single role by ID
+   */
+  @Get(':id')
+  @Permissions('role:read')
+  @ApiOperation({ summary: 'Get role by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'Role unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns role details',
+    type: RoleResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Role not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  async getRole(@Param('id') id: string): Promise<RoleResponseDto> {
+    return this.queryBus.execute(new GetRoleQuery(id));
   }
 
   /**
@@ -187,35 +253,6 @@ export class RolesController {
     @Body() dto: AssignPermissionsToRoleDto,
   ): Promise<RoleResponseDto> {
     const command = new AssignPermissionsToRoleCommand(id, dto.permissions);
-    return this.commandBus.execute(command);
-  }
-
-  /**
-   * Assigns roles to a user
-   */
-  @Patch('users/:userId')
-  @Roles('super_admin')
-  @Permissions('role:assign')
-  @ApiOperation({ summary: 'Assign roles to user' })
-  @ApiParam({
-    name: 'userId',
-    description: 'User unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiBody({ type: AssignRolesToUserDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Roles assigned successfully',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async assignRolesToUser(
-    @Param('userId') userId: string,
-    @Body() dto: AssignRolesToUserDto,
-  ): Promise<UserResponseDto> {
-    const command = new AssignRolesToUserCommand(userId, dto.roles);
     return this.commandBus.execute(command);
   }
 }
