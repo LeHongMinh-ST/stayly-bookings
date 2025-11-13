@@ -58,7 +58,11 @@ export class Customer {
     );
 
     customer.recordEvent(
-      new CustomerRegisteredEvent(customer.id.getValue(), customer.email.getValue(), now),
+      new CustomerRegisteredEvent(
+        customer.id.getValue(),
+        customer.email.getValue(),
+        now,
+      ),
     );
     return customer;
   }

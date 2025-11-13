@@ -1,7 +1,7 @@
 /**
  * CustomerAuthenticationAdapter adapts ICustomerAuthenticationPort from customer module
  * to ICustomerAuthenticationService interface for auth module
- * 
+ *
  * Following Port/Adapter Pattern:
  * - Port (interface) is defined in customer module application layer
  * - Adapter is in infrastructure layer, so it CAN import from other modules
@@ -18,7 +18,9 @@ import type {
 } from '../../application/interfaces/customer-authentication.service.interface';
 
 @Injectable()
-export class CustomerAuthenticationAdapter implements ICustomerAuthenticationService {
+export class CustomerAuthenticationAdapter
+  implements ICustomerAuthenticationService
+{
   constructor(
     @Inject(CUSTOMER_AUTHENTICATION_PORT)
     private readonly customerAuthenticationPort: ICustomerAuthenticationPort,

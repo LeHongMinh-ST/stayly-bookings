@@ -5,8 +5,8 @@ import { Email } from '../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
 import { DomainEvent } from '../../../../common/domain/interfaces/domain-event.interface';
 import { UserId } from '../value-objects/user-id.vo';
-import { Permission } from '../value-objects/permission.vo';
-import { Role, UserRole } from '../value-objects/role.vo';
+import { UserRole, UserRoleEnum } from '../value-objects/user-role.vo';
+import { UserPermission } from '../value-objects/user-permission.vo';
 import { Status, UserStatus } from '../value-objects/user-status.vo';
 import { UserCreatedEvent } from '../events/user-created.event';
 
@@ -16,8 +16,8 @@ export interface CreateUserProps {
   fullName: string;
   passwordHash: PasswordHash;
   status?: Status;
-  roles?: Role[];
-  permissions?: Permission[];
+  roles?: UserRole[];
+  permissions?: UserPermission[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -32,8 +32,8 @@ export class User {
     private fullName: string,
     private passwordHash: PasswordHash,
     private status: Status,
-    private roles: Role[],
-    private permissions: Permission[],
+    private roles: UserRole[],
+    private permissions: UserPermission[],
     private readonly createdAt: Date,
   ) {
     this.updatedAt = createdAt;
@@ -51,7 +51,7 @@ export class User {
       props.fullName.trim(),
       props.passwordHash,
       props.status ?? Status.create(UserStatus.ACTIVE),
-      props.roles ?? [Role.create(UserRole.STAFF)],
+      props.roles ?? [UserRole.create(UserRoleEnum.STAFF)],
       props.permissions ?? [],
       props.createdAt ?? now,
     );
@@ -66,8 +66,8 @@ export class User {
     fullName: string;
     passwordHash: PasswordHash;
     status: Status;
-    roles: Role[];
-    permissions: Permission[];
+    roles: UserRole[];
+    permissions: UserPermission[];
     createdAt: Date;
     updatedAt: Date;
   }): User {
@@ -93,7 +93,7 @@ export class User {
     this.touch();
   }
 
-  assignRoles(nextRoles: Role[]): void {
+  assignRoles(nextRoles: UserRole[]): void {
     if (!nextRoles.length) {
       throw new Error('User must have at least one role');
     }
@@ -101,7 +101,7 @@ export class User {
     this.touch();
   }
 
-  assignPermissions(nextPermissions: Permission[]): void {
+  assignPermissions(nextPermissions: UserPermission[]): void {
     this.permissions = nextPermissions;
     this.touch();
   }
@@ -144,11 +144,11 @@ export class User {
     return this.status.getValue() === UserStatus.ACTIVE;
   }
 
-  getRoles(): Role[] {
+  getRoles(): UserRole[] {
     return [...this.roles];
   }
 
-  getPermissions(): Permission[] {
+  getPermissions(): UserPermission[] {
     return [...this.permissions];
   }
 

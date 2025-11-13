@@ -28,6 +28,10 @@ export class JwtPayload {
   }
 
   getProps(): JwtPayloadProps {
-    return { ...this.props, roles: [...this.props.roles], permissions: [...this.props.permissions] };
+    return {
+      ...this.props,
+      roles: [...this.props.roles],
+      permissions: [...this.props.permissions],
+    };
   }
 }

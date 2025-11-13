@@ -1,0 +1,85 @@
+/**
+ * RoleRepository provides persistence capabilities for role aggregate
+ */
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
+import { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
+import { Role } from '../../../domain/entities/role.entity';
+import { RoleId } from '../../../domain/value-objects/role-id.vo';
+import { RoleOrmEntity } from '../entities/role.orm-entity';
+import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { RoleOrmMapper } from '../mappers/role.mapper';
+
+@Injectable()
+export class RoleRepository implements IRoleRepository {
+  constructor(
+    @InjectRepository(RoleOrmEntity)
+    private readonly roleRepo: Repository<RoleOrmEntity>,
+    @InjectRepository(PermissionOrmEntity)
+    private readonly permissionRepo: Repository<PermissionOrmEntity>,
+  ) {}
+
+  async findAll(): Promise<Role[]> {
+    const roles = await this.roleRepo.find({
+      relations: ['permissions'],
+      order: { code: 'ASC' },
+    });
+    return roles.map((role) => RoleOrmMapper.toDomain(role));
+  }
+
+  async findById(id: RoleId): Promise<Role | null> {
+    const entity = await this.roleRepo.findOne({
+      where: { id: id.getValue() },
+      relations: ['permissions'],
+    });
+    if (!entity) {
+      return null;
+    }
+    return RoleOrmMapper.toDomain(entity);
+  }
+
+  async findByCode(code: string): Promise<Role | null> {
+    const entity = await this.roleRepo.findOne({
+      where: { code: code.toLowerCase() },
+      relations: ['permissions'],
+    });
+    if (!entity) {
+      return null;
+    }
+    return RoleOrmMapper.toDomain(entity);
+  }
+
+  async save(role: Role): Promise<void> {
+    const permissionCodes = role.getPermissions().map((p) => p.getValue());
+    const permissions = permissionCodes.length
+      ? await this.permissionRepo.find({ where: { code: In(permissionCodes) } })
+      : [];
+
+    if (permissions.length !== permissionCodes.length) {
+      throw new Error('One or more permissions are missing from catalog');
+    }
+
+    const existing = await this.roleRepo.findOne({
+      where: { id: role.getId().getValue() },
+      relations: ['permissions'],
+    });
+
+    const entity = RoleOrmMapper.toOrm(role, permissions, existing ?? undefined);
+    await this.roleRepo.save(entity);
+  }
+
+  async delete(role: Role): Promise<void> {
+    if (!role.canDelete()) {
+      throw new Error('Cannot delete super admin role');
+    }
+    await this.roleRepo.delete(role.getId().getValue());
+  }
+
+  async exists(role: Role): Promise<boolean> {
+    const count = await this.roleRepo.count({
+      where: { code: role.getCode() },
+    });
+    return count > 0;
+  }
+}

@@ -8,7 +8,10 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class JwtCustomerStrategy extends PassportStrategy(Strategy, 'jwt-customer') {
+export class JwtCustomerStrategy extends PassportStrategy(
+  Strategy,
+  'jwt-customer',
+) {
   constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -23,8 +26,14 @@ export class JwtCustomerStrategy extends PassportStrategy(Strategy, 'jwt-custome
     }
 
     // Only allow customer type, reject user (admin/staff)
-    if (payload.userType === 'user' || (!payload.userType && payload.roles?.some((r: string) => r !== 'customer'))) {
-      throw new UnauthorizedException('Admin tokens are not allowed for customer endpoints');
+    if (
+      payload.userType === 'user' ||
+      (!payload.userType &&
+        payload.roles?.some((r: string) => r !== 'customer'))
+    ) {
+      throw new UnauthorizedException(
+        'Admin tokens are not allowed for customer endpoints',
+      );
     }
 
     return {
@@ -36,4 +45,3 @@ export class JwtCustomerStrategy extends PassportStrategy(Strategy, 'jwt-custome
     };
   }
 }
-

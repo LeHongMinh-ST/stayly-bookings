@@ -26,8 +26,9 @@ export interface ICustomerAuthenticationPort {
    * Finds customer by email for authentication purposes
    * Returns only authentication-relevant data, not full entity
    */
-  findForAuthentication(email: Email): Promise<CustomerAuthenticationData | null>;
+  findForAuthentication(
+    email: Email,
+  ): Promise<CustomerAuthenticationData | null>;
 }
 
 export const CUSTOMER_AUTHENTICATION_PORT = 'CUSTOMER_AUTHENTICATION_PORT';
-

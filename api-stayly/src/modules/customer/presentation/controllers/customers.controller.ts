@@ -2,7 +2,13 @@
  * CustomersController exposes signup and profile endpoints for customers
  */
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
@@ -33,7 +39,9 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  async register(@Body() dto: RegisterCustomerDto): Promise<CustomerResponseDto> {
+  async register(
+    @Body() dto: RegisterCustomerDto,
+  ): Promise<CustomerResponseDto> {
     const command = new RegisterCustomerCommand(
       dto.email,
       dto.password,
@@ -56,7 +64,9 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async me(@CurrentUser('id') customerId: string): Promise<CustomerResponseDto> {
+  async me(
+    @CurrentUser('id') customerId: string,
+  ): Promise<CustomerResponseDto> {
     return this.queryBus.execute(new GetCustomerProfileQuery(customerId));
   }
 }

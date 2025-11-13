@@ -111,7 +111,11 @@ describe('AuthenticateUserHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
@@ -125,10 +129,17 @@ describe('AuthenticateUserHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.accessToken).toBe('access-token-long-enough');
-      expect(result.refreshToken).toBe('refresh-token-long-enough-to-pass-validation');
+      expect(result.refreshToken).toBe(
+        'refresh-token-long-enough-to-pass-validation',
+      );
       expect(result.tokenType).toBe('Bearer');
-      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(
+        userEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        password,
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
     });
@@ -145,9 +156,15 @@ describe('AuthenticateUserHandler', () => {
       userAuthService.findForAuthentication.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
-      await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
+      await expect(handler.execute(command)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Invalid credentials',
+      );
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(
+        userEmail,
+      );
       expect(passwordHasher.compare).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -165,10 +182,19 @@ describe('AuthenticateUserHandler', () => {
       passwordHasher.compare.mockResolvedValue(false);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
-      await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith('WrongPassword', hashedPassword);
+      await expect(handler.execute(command)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Invalid credentials',
+      );
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(
+        userEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        'WrongPassword',
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -190,10 +216,19 @@ describe('AuthenticateUserHandler', () => {
       passwordHasher.compare.mockResolvedValue(true);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(BadRequestException);
-      await expect(handler.execute(command)).rejects.toThrow('User is not active');
-      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(userEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
+      await expect(handler.execute(command)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'User is not active',
+      );
+      expect(userAuthService.findForAuthentication).toHaveBeenCalledWith(
+        userEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        password,
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -208,7 +243,11 @@ describe('AuthenticateUserHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
@@ -221,7 +260,7 @@ describe('AuthenticateUserHandler', () => {
 
       // Assert
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
-      const payload = tokenService.issueTokenPair.mock.calls[0][0] as JwtPayload;
+      const payload = tokenService.issueTokenPair.mock.calls[0][0];
       const payloadProps = payload.getProps();
       expect(payloadProps.userType).toBe('user');
       expect(payloadProps.sub).toBe(userId);
@@ -241,7 +280,11 @@ describe('AuthenticateUserHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
@@ -271,7 +314,11 @@ describe('AuthenticateUserHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
@@ -290,4 +337,3 @@ describe('AuthenticateUserHandler', () => {
     });
   });
 });
-

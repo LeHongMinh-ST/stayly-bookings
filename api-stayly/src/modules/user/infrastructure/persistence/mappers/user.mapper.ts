@@ -5,12 +5,15 @@ import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
 import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { Role } from '../../../domain/value-objects/role.vo';
-import { Permission } from '../../../domain/value-objects/permission.vo';
-import { Status, UserStatus } from '../../../domain/value-objects/user-status.vo';
+import { UserRole } from '../../../domain/value-objects/user-role.vo';
+import { UserPermission } from '../../../domain/value-objects/user-permission.vo';
+import {
+  Status,
+  UserStatus,
+} from '../../../domain/value-objects/user-status.vo';
 import { UserOrmEntity } from '../entities/user.orm-entity';
-import { RoleOrmEntity } from '../entities/role.orm-entity';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { RoleOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/role.orm-entity';
+import { PermissionOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/permission.orm-entity';
 
 export class UserOrmMapper {
   /**
@@ -23,9 +26,9 @@ export class UserOrmMapper {
       fullName: entity.fullName,
       passwordHash: PasswordHash.create(entity.passwordHash),
       status: Status.from(entity.status),
-      roles: (entity.roles || []).map((role) => Role.from(role.code)),
+      roles: (entity.roles || []).map((role) => UserRole.from(role.code)),
       permissions: (entity.permissions || []).map((permission) =>
-        Permission.create(permission.code),
+        UserPermission.create(permission.code),
       ),
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,

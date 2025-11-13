@@ -27,4 +27,3 @@ export interface IUserAuthenticationService {
 }
 
 export const USER_AUTHENTICATION_SERVICE = 'USER_AUTHENTICATION_SERVICE';
-

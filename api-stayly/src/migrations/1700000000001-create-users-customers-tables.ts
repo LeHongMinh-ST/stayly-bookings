@@ -1,6 +1,13 @@
-import { MigrationInterface, QueryRunner, Table, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateUsersCustomersTables1700000000001 implements MigrationInterface {
+export class CreateUsersCustomersTables1700000000001
+  implements MigrationInterface
+{
   name = 'CreateUsersCustomersTables1700000000001';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -15,32 +22,32 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()'
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'code',
             type: 'varchar',
             isNullable: false,
-            isUnique: true
+            isUnique: true,
           },
           {
             name: 'display_name',
             type: 'varchar',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'created_at',
             type: 'timestamp with time zone',
-            default: 'now()'
+            default: 'now()',
           },
           {
             name: 'updated_at',
             type: 'timestamp with time zone',
-            default: 'now()'
-          }
-        ]
+            default: 'now()',
+          },
+        ],
       }),
-      true
+      true,
     );
 
     await queryRunner.createTable(
@@ -52,32 +59,32 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()'
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'code',
             type: 'varchar',
             isNullable: false,
-            isUnique: true
+            isUnique: true,
           },
           {
             name: 'description',
             type: 'text',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'created_at',
             type: 'timestamp with time zone',
-            default: 'now()'
+            default: 'now()',
           },
           {
             name: 'updated_at',
             type: 'timestamp with time zone',
-            default: 'now()'
-          }
-        ]
+            default: 'now()',
+          },
+        ],
       }),
-      true
+      true,
     );
 
     await queryRunner.createTable(
@@ -89,43 +96,43 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()'
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'email',
             type: 'varchar',
             isNullable: false,
-            isUnique: true
+            isUnique: true,
           },
           {
             name: 'full_name',
             type: 'varchar',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'password_hash',
             type: 'varchar',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'status',
             type: 'varchar',
             isNullable: false,
-            default: "'active'"
+            default: "'active'",
           },
           {
             name: 'created_at',
             type: 'timestamp with time zone',
-            default: 'now()'
+            default: 'now()',
           },
           {
             name: 'updated_at',
             type: 'timestamp with time zone',
-            default: 'now()'
-          }
-        ]
+            default: 'now()',
+          },
+        ],
       }),
-      true
+      true,
     );
 
     await queryRunner.createTable(
@@ -135,15 +142,15 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
           {
             name: 'user_id',
             type: 'uuid',
-            isPrimary: true
+            isPrimary: true,
           },
           {
             name: 'role_id',
             type: 'uuid',
-            isPrimary: true
-          }
-        ]
-      })
+            isPrimary: true,
+          },
+        ],
+      }),
     );
 
     await queryRunner.createTable(
@@ -153,15 +160,15 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
           {
             name: 'user_id',
             type: 'uuid',
-            isPrimary: true
+            isPrimary: true,
           },
           {
             name: 'permission_id',
             type: 'uuid',
-            isPrimary: true
-          }
-        ]
-      })
+            isPrimary: true,
+          },
+        ],
+      }),
     );
 
     await queryRunner.createTable(
@@ -173,58 +180,58 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()'
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'email',
             type: 'varchar',
             isNullable: false,
-            isUnique: true
+            isUnique: true,
           },
           {
             name: 'full_name',
             type: 'varchar',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'password_hash',
             type: 'varchar',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'phone',
             type: 'varchar',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'date_of_birth',
             type: 'date',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'status',
             type: 'varchar',
             isNullable: false,
-            default: "'active'"
+            default: "'active'",
           },
           {
             name: 'email_verified_at',
             type: 'timestamp with time zone',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'created_at',
             type: 'timestamp with time zone',
-            default: 'now()'
+            default: 'now()',
           },
           {
             name: 'updated_at',
             type: 'timestamp with time zone',
-            default: 'now()'
-          }
-        ]
+            default: 'now()',
+          },
+        ],
       }),
-      true
+      true,
     );
 
     await queryRunner.createTable(
@@ -236,57 +243,57 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
             type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()'
+            default: 'uuid_generate_v4()',
           },
           {
             name: 'user_id',
             type: 'uuid',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'token_id',
             type: 'uuid',
             isNullable: false,
-            isUnique: true
+            isUnique: true,
           },
           {
             name: 'refresh_token',
             type: 'text',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'refresh_token_expires_at',
             type: 'timestamp with time zone',
-            isNullable: false
+            isNullable: false,
           },
           {
             name: 'user_agent',
             type: 'text',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'ip_address',
             type: 'varchar',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'revoked_at',
             type: 'timestamp with time zone',
-            isNullable: true
+            isNullable: true,
           },
           {
             name: 'created_at',
             type: 'timestamp with time zone',
-            default: 'now()'
+            default: 'now()',
           },
           {
             name: 'updated_at',
             type: 'timestamp with time zone',
-            default: 'now()'
-          }
-        ]
+            default: 'now()',
+          },
+        ],
       }),
-      true
+      true,
     );
 
     await queryRunner.createForeignKey(
@@ -295,8 +302,8 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
         columnNames: ['user_id'],
         referencedTableName: 'users',
         referencedColumnNames: ['id'],
-        onDelete: 'CASCADE'
-      })
+        onDelete: 'CASCADE',
+      }),
     );
 
     await queryRunner.createForeignKey(
@@ -305,8 +312,8 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
         columnNames: ['role_id'],
         referencedTableName: 'roles',
         referencedColumnNames: ['id'],
-        onDelete: 'CASCADE'
-      })
+        onDelete: 'CASCADE',
+      }),
     );
 
     await queryRunner.createForeignKey(
@@ -315,8 +322,8 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
         columnNames: ['user_id'],
         referencedTableName: 'users',
         referencedColumnNames: ['id'],
-        onDelete: 'CASCADE'
-      })
+        onDelete: 'CASCADE',
+      }),
     );
 
     await queryRunner.createForeignKey(
@@ -325,8 +332,8 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
         columnNames: ['permission_id'],
         referencedTableName: 'permissions',
         referencedColumnNames: ['id'],
-        onDelete: 'CASCADE'
-      })
+        onDelete: 'CASCADE',
+      }),
     );
 
     await queryRunner.createForeignKey(
@@ -335,8 +342,8 @@ export class CreateUsersCustomersTables1700000000001 implements MigrationInterfa
         columnNames: ['user_id'],
         referencedTableName: 'users',
         referencedColumnNames: ['id'],
-        onDelete: 'CASCADE'
-      })
+        onDelete: 'CASCADE',
+      }),
     );
   }
 

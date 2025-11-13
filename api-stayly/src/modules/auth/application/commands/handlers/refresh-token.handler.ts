@@ -1,7 +1,12 @@
 /**
  * RefreshTokenHandler validates refresh token and rotates credentials
  */
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { RefreshTokenCommand } from '../refresh-token.command';
@@ -29,7 +34,9 @@ export class RefreshTokenHandler
    * Executes refresh flow ensuring session validity
    */
   async execute(command: RefreshTokenCommand): Promise<TokenResponseDto> {
-    const payload = await this.tokenService.verifyRefreshToken(command.refreshToken);
+    const payload = await this.tokenService.verifyRefreshToken(
+      command.refreshToken,
+    );
     const session = await this.loadSession(payload);
 
     if (!session.isActive()) {
@@ -61,7 +68,9 @@ export class RefreshTokenHandler
     if (!props.tokenId) {
       throw new BadRequestException('Refresh token missing token identifier');
     }
-    const session = await this.sessionRepository.findActiveByTokenId(props.tokenId);
+    const session = await this.sessionRepository.findActiveByTokenId(
+      props.tokenId,
+    );
     if (!session) {
       throw new NotFoundException('Refresh session not found');
     }

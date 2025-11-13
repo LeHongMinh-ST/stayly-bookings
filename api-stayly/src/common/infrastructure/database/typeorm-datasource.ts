@@ -1,4 +1,3 @@
-
 import { DataSource } from 'typeorm';
 import { config as loadEnv } from 'dotenv';
 import { join } from 'path';
@@ -23,7 +22,12 @@ const dataSource = new DataSource({
   database: databaseName,
   synchronize: false,
   logging,
-  entities: [join(rootDir, 'src/modules/**/infrastructure/persistence/entities/*{.ts,.js}')],
+  entities: [
+    join(
+      rootDir,
+      'src/modules/**/infrastructure/persistence/entities/*{.ts,.js}',
+    ),
+  ],
   migrations: [join(rootDir, 'src/migrations/*{.ts,.js}')],
 });
 

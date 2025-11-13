@@ -25,4 +25,3 @@ import { KafkaConsumerService } from './kafka.consumer.service';
   exports: [KafkaProducerService, KafkaConsumerService],
 })
 export class KafkaModule {}
-

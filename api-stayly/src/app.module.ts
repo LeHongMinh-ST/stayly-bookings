@@ -16,6 +16,7 @@ import { DatabaseModule } from './common/infrastructure/database/database.module
 import { CacheModuleConfig } from './common/infrastructure/cache/cache.module';
 import { KafkaModule } from './common/infrastructure/kafka/kafka.module';
 import { LoggerModuleConfig } from './common/infrastructure/logger/logger.module';
+import { SecurityModule } from './common/infrastructure/security/security.module';
 
 // Guards
 import { RolesGuard } from './common/guards/roles.guard';
@@ -33,6 +34,7 @@ import { ValidationPipe } from './common/pipes/validation.pipe';
 
 // Bounded Context Modules
 import { AuthModule } from './modules/auth/auth.module';
+import { RbacModule } from './modules/rbac/rbac.module';
 import { UserModule } from './modules/user/user.module';
 import { CustomerModule } from './modules/customer/customer.module';
 
@@ -53,9 +55,11 @@ import { CustomerModule } from './modules/customer/customer.module';
     CacheModuleConfig,
     KafkaModule,
     LoggerModuleConfig,
+    SecurityModule, // Import SecurityModule to provide ROLE_REPOSITORY for PermissionsGuard
 
     // Bounded contexts
     AuthModule,
+    RbacModule, // Import RbacModule before UserModule to ensure proper dependency resolution
     UserModule,
     CustomerModule,
   ],

@@ -10,8 +10,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { RoleOrmEntity } from './role.orm-entity';
-import { PermissionOrmEntity } from './permission.orm-entity';
+import { RoleOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/role.orm-entity';
+import { PermissionOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/permission.orm-entity';
 
 @Entity({ name: 'users' })
 export class UserOrmEntity {

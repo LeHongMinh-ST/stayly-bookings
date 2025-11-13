@@ -40,4 +40,3 @@ export class KafkaProducerService implements OnModuleInit {
     await Promise.all(promises);
   }
 }
-

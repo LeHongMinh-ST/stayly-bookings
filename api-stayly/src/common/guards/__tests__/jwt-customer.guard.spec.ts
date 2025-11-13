@@ -70,7 +70,10 @@ describe('JwtCustomerGuard', () => {
     it('should call parent canActivate when route is not public', () => {
       // Arrange
       reflector.getAllAndOverride.mockReturnValue(false);
-      const parentCanActivate = jest.spyOn(Object.getPrototypeOf(JwtCustomerGuard.prototype), 'canActivate');
+      const parentCanActivate = jest.spyOn(
+        Object.getPrototypeOf(JwtCustomerGuard.prototype),
+        'canActivate',
+      );
       parentCanActivate.mockReturnValue(true);
 
       // Act
@@ -108,7 +111,9 @@ describe('JwtCustomerGuard', () => {
 
       // Act & Assert
       expect(() => guard.handleRequest(err, user, info)).toThrow(Error);
-      expect(() => guard.handleRequest(err, user, info)).toThrow('Token expired');
+      expect(() => guard.handleRequest(err, user, info)).toThrow(
+        'Token expired',
+      );
     });
 
     it('should throw UnauthorizedException when user is null', () => {
@@ -118,8 +123,12 @@ describe('JwtCustomerGuard', () => {
       const info = null;
 
       // Act & Assert
-      expect(() => guard.handleRequest(err, user, info)).toThrow(UnauthorizedException);
-      expect(() => guard.handleRequest(err, user, info)).toThrow('Invalid or expired token');
+      expect(() => guard.handleRequest(err, user, info)).toThrow(
+        UnauthorizedException,
+      );
+      expect(() => guard.handleRequest(err, user, info)).toThrow(
+        'Invalid or expired token',
+      );
     });
 
     it('should throw UnauthorizedException when user is admin/staff', () => {
@@ -129,7 +138,9 @@ describe('JwtCustomerGuard', () => {
       const info = null;
 
       // Act & Assert
-      expect(() => guard.handleRequest(err, user, info)).toThrow(UnauthorizedException);
+      expect(() => guard.handleRequest(err, user, info)).toThrow(
+        UnauthorizedException,
+      );
       expect(() => guard.handleRequest(err, user, info)).toThrow(
         'Admin tokens are not allowed for customer endpoints',
       );
@@ -166,11 +177,12 @@ describe('JwtCustomerGuard', () => {
       const info = null;
 
       // Act & Assert
-      expect(() => guard.handleRequest(err, userWithOnlyAdminRole, info)).toThrow(UnauthorizedException);
-      expect(() => guard.handleRequest(err, userWithOnlyAdminRole, info)).toThrow(
-        'Admin tokens are not allowed for customer endpoints',
-      );
+      expect(() =>
+        guard.handleRequest(err, userWithOnlyAdminRole, info),
+      ).toThrow(UnauthorizedException);
+      expect(() =>
+        guard.handleRequest(err, userWithOnlyAdminRole, info),
+      ).toThrow('Admin tokens are not allowed for customer endpoints');
     });
   });
 });
-

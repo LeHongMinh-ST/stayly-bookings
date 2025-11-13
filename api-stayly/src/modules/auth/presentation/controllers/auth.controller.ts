@@ -2,8 +2,21 @@
  * UserAuthController manages authentication flows for admin/staff users (login, refresh, logout)
  * Only accessible by users from users table (Super Admin, Owner, Manager, Staff)
  */
-import { Body, Controller, Inject, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CommandBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { JwtUserGuard } from '../../../../common/guards/jwt-user.guard';
@@ -31,7 +44,9 @@ export class UserAuthController {
    */
   @Post('login')
   @Public()
-  @ApiOperation({ summary: 'Authenticate admin/staff user and get access tokens' })
+  @ApiOperation({
+    summary: 'Authenticate admin/staff user and get access tokens',
+  })
   @ApiBody({ type: LoginDto })
   @ApiResponse({
     status: 200,
@@ -59,16 +74,22 @@ export class UserAuthController {
    */
   @Post('refresh')
   @Public()
-  @ApiOperation({ summary: 'Refresh access token using refresh token (admin/staff only)' })
+  @ApiOperation({
+    summary: 'Refresh access token using refresh token (admin/staff only)',
+  })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
     status: 200,
-    description: 'Token refresh successful, returns new access and refresh tokens',
+    description:
+      'Token refresh successful, returns new access and refresh tokens',
     type: TokenResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  async refresh(@Body() dto: RefreshTokenDto, @Request() req: any): Promise<TokenResponseDto> {
+  async refresh(
+    @Body() dto: RefreshTokenDto,
+    @Request() req: any,
+  ): Promise<TokenResponseDto> {
     const command = new RefreshTokenCommand(
       dto.refreshToken,
       req.headers['user-agent'],
@@ -84,7 +105,9 @@ export class UserAuthController {
   @Post('logout')
   @UseGuards(JwtUserGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Logout and revoke refresh token session (admin/staff only)' })
+  @ApiOperation({
+    summary: 'Logout and revoke refresh token session (admin/staff only)',
+  })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
     status: 200,
@@ -93,7 +116,9 @@ export class UserAuthController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(@Body() dto: RefreshTokenDto): Promise<void> {
-    const payload = await this.tokenService.verifyRefreshToken(dto.refreshToken);
+    const payload = await this.tokenService.verifyRefreshToken(
+      dto.refreshToken,
+    );
     const tokenId = payload.getProps().tokenId;
     if (!tokenId) {
       return;

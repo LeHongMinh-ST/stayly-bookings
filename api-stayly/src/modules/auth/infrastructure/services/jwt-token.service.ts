@@ -31,17 +31,24 @@ export class JwtTokenService implements TokenService {
       throw new Error('jwt.refreshSecret is not configured');
     }
     this.refreshSecret = refreshSecret;
-    const refreshExpiresInConfig = this.configService.get<string | number>('jwt.refreshExpiresIn');
-    this.refreshExpiresInRaw = (refreshExpiresInConfig ?? '7d') as JwtSignOptions['expiresIn'];
+    const refreshExpiresInConfig = this.configService.get<string | number>(
+      'jwt.refreshExpiresIn',
+    );
+    this.refreshExpiresInRaw = (refreshExpiresInConfig ??
+      '7d') as JwtSignOptions['expiresIn'];
     this.accessExpiresInSeconds = this.resolveSeconds(
       this.configService.get<string | number>('jwt.expiresIn') ?? '15m',
     );
-    this.refreshExpiresInSeconds = this.resolveSeconds(this.refreshExpiresInRaw as string | number | undefined);
+    this.refreshExpiresInSeconds = this.resolveSeconds(
+      this.refreshExpiresInRaw as string | number | undefined,
+    );
   }
 
   async issueAccessToken(payload: JwtPayload): Promise<AccessToken> {
     const payloadProps = payload.getProps();
-    const expiresIn = (this.accessExpiresInSeconds > 0 ? this.accessExpiresInSeconds : undefined) as JwtSignOptions['expiresIn'];
+    const expiresIn = (
+      this.accessExpiresInSeconds > 0 ? this.accessExpiresInSeconds : undefined
+    ) as JwtSignOptions['expiresIn'];
     const token = await this.jwtService.signAsync(payloadProps, {
       expiresIn,
     });
@@ -54,7 +61,9 @@ export class JwtTokenService implements TokenService {
       secret: this.refreshSecret,
       expiresIn: this.refreshExpiresInRaw,
     });
-    const expiresAt = new Date(Date.now() + this.refreshExpiresInSeconds * 1000);
+    const expiresAt = new Date(
+      Date.now() + this.refreshExpiresInSeconds * 1000,
+    );
     if (!payloadProps.tokenId) {
       throw new Error('Refresh token requires tokenId claim');
     }

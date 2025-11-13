@@ -2,7 +2,10 @@
  * AccessToken value object wraps JWT string to enforce minimal validation
  */
 export class AccessToken {
-  private constructor(private readonly value: string, private readonly expiresInSeconds: number) {}
+  private constructor(
+    private readonly value: string,
+    private readonly expiresInSeconds: number,
+  ) {}
 
   static create(value: string, expiresInSeconds: number): AccessToken {
     if (!value || value.length < 20) {

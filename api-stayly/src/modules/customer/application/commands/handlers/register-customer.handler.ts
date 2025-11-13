@@ -5,12 +5,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { RegisterCustomerCommand } from '../register-customer.command';
-import type {
-  ICustomerRepository,
-} from '../../../domain/repositories/customer.repository.interface';
-import {
-  CUSTOMER_REPOSITORY,
-} from '../../../domain/repositories/customer.repository.interface';
+import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
+import { CUSTOMER_REPOSITORY } from '../../../domain/repositories/customer.repository.interface';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
@@ -22,18 +18,21 @@ import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
 @Injectable()
 @CommandHandler(RegisterCustomerCommand)
 export class RegisterCustomerHandler
-  implements ICommandHandler<RegisterCustomerCommand, CustomerResponseDto> {
+  implements ICommandHandler<RegisterCustomerCommand, CustomerResponseDto>
+{
   constructor(
     @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
-  ) { }
+  ) {}
 
   /**
    * Executes customer registration ensuring email uniqueness and hashing password
    */
-  async execute(command: RegisterCustomerCommand): Promise<CustomerResponseDto> {
+  async execute(
+    command: RegisterCustomerCommand,
+  ): Promise<CustomerResponseDto> {
     const email = Email.create(command.email);
     const existingCustomer = await this.customerRepository.findByEmail(email);
     if (existingCustomer) {

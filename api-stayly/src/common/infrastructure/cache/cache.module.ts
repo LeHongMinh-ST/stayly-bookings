@@ -20,4 +20,3 @@ import { getCacheConfig } from './cache.config';
   exports: [CacheModule],
 })
 export class CacheModuleConfig {}
-

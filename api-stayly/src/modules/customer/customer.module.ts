@@ -21,7 +21,11 @@ const commandHandlers = [RegisterCustomerHandler];
 const queryHandlers = [GetCustomerProfileHandler];
 
 @Module({
-  imports: [CqrsModule, SecurityModule, TypeOrmModule.forFeature([CustomerOrmEntity])],
+  imports: [
+    CqrsModule,
+    SecurityModule,
+    TypeOrmModule.forFeature([CustomerOrmEntity]),
+  ],
   controllers: [CustomersController],
   providers: [
     ...commandHandlers,

@@ -1,6 +1,7 @@
 /**
  * Roles Guard
  * Validates user roles for route access
+ * Only applies to user (admin/staff), not customer
  */
 
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
@@ -17,7 +18,7 @@ export class RolesGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    if (!requiredRoles) {
+    if (!requiredRoles || requiredRoles.length === 0) {
       return true; // No roles required
     }
 
@@ -26,8 +27,14 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
+    // Only apply role check to user (admin/staff), not customer
+    // Customer endpoints should use JwtCustomerGuard without role checks
+    if (user.userType === 'customer') {
+      return false; // Roles guard only for user type
+    }
+
     // Check if user has at least one of the required roles
-    return requiredRoles.some((role) => user.roles?.includes(role));
+    const userRoles = user.roles || [];
+    return requiredRoles.some((role) => userRoles.includes(role));
   }
 }
-

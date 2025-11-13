@@ -77,8 +77,12 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
-      await expect(strategy.validate(payload)).rejects.toThrow('Invalid token payload');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        'Invalid token payload',
+      );
     });
 
     it('should throw UnauthorizedException when payload missing email', async () => {
@@ -89,8 +93,12 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
-      await expect(strategy.validate(payload)).rejects.toThrow('Invalid token payload');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        'Invalid token payload',
+      );
     });
 
     it('should throw UnauthorizedException when userType is user', async () => {
@@ -104,7 +112,9 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
       await expect(strategy.validate(payload)).rejects.toThrow(
         'Admin tokens are not allowed for customer endpoints',
       );
@@ -120,7 +130,9 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
       await expect(strategy.validate(payload)).rejects.toThrow(
         'Admin tokens are not allowed for customer endpoints',
       );
@@ -148,4 +160,3 @@ describe('JwtCustomerStrategy', () => {
     });
   });
 });
-

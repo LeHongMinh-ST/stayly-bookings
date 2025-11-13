@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../../app.module';
-import { RolePermissionSeedService } from '../../modules/user/infrastructure/persistence/seeds/role-permission-seed.service';
+import { RolePermissionSeedService } from '../../modules/rbac/infrastructure/persistence/seeds/role-permission-seed.service';
 import { DefaultUsersSeedService } from '../../modules/user/infrastructure/persistence/seeds/default-users-seed.service';
 import { DefaultCustomersSeedService } from '../../modules/customer/infrastructure/persistence/seeds/default-customers-seed.service';
 
@@ -44,7 +44,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  // eslint-disable-next-line no-console
   console.error('Seeding failed:', error);
   process.exit(1);
 });

@@ -3,9 +3,9 @@
  * Exports cache manager configuration
  */
 
-import { CacheModuleOptions } from "@nestjs/cache-manager";
-import { ConfigService } from "@nestjs/config";
-import { redisStore } from "cache-manager-redis-yet";
+import { CacheModuleOptions } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { redisStore } from 'cache-manager-redis-yet';
 
 /**
  * Get Redis cache configuration
@@ -16,10 +16,10 @@ export const getCacheConfig = (
   return {
     store: redisStore,
     socket: {
-      host: configService.get<string>("redis.host"),
-      port: configService.get<number>("redis.port"),
+      host: configService.get<string>('redis.host'),
+      port: configService.get<number>('redis.port'),
     },
-    password: configService.get<string>("redis.password"),
-    ttl: configService.get<number>("redis.ttl")! * 1000,
+    password: configService.get<string>('redis.password'),
+    ttl: configService.get<number>('redis.ttl')! * 1000,
   };
 };

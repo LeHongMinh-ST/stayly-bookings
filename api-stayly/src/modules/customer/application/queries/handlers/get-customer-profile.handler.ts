@@ -4,9 +4,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetCustomerProfileQuery } from '../get-customer-profile.query';
-import {
-  CUSTOMER_REPOSITORY,
-} from '../../../domain/repositories/customer.repository.interface';
+import { CUSTOMER_REPOSITORY } from '../../../domain/repositories/customer.repository.interface';
 import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
 import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
 import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
@@ -14,11 +12,12 @@ import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
 @Injectable()
 @QueryHandler(GetCustomerProfileQuery)
 export class GetCustomerProfileHandler
-  implements IQueryHandler<GetCustomerProfileQuery, CustomerResponseDto> {
+  implements IQueryHandler<GetCustomerProfileQuery, CustomerResponseDto>
+{
   constructor(
     @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,
-  ) { }
+  ) {}
 
   /**
    * Executes retrieval logic returning customer profile DTO

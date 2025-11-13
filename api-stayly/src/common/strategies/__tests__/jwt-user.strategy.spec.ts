@@ -77,8 +77,12 @@ describe('JwtUserStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
-      await expect(strategy.validate(payload)).rejects.toThrow('Invalid token payload');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        'Invalid token payload',
+      );
     });
 
     it('should throw UnauthorizedException when payload missing email', async () => {
@@ -89,8 +93,12 @@ describe('JwtUserStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
-      await expect(strategy.validate(payload)).rejects.toThrow('Invalid token payload');
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        'Invalid token payload',
+      );
     });
 
     it('should throw UnauthorizedException when userType is customer', async () => {
@@ -104,7 +112,9 @@ describe('JwtUserStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(UnauthorizedException);
+      await expect(strategy.validate(payload)).rejects.toThrow(
+        UnauthorizedException,
+      );
       await expect(strategy.validate(payload)).rejects.toThrow(
         'Customer tokens are not allowed for admin endpoints',
       );
@@ -132,4 +142,3 @@ describe('JwtUserStrategy', () => {
     });
   });
 });
-

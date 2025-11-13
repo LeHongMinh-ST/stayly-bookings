@@ -1,0 +1,64 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { Role } from '../../../domain/entities/role.entity';
+
+export class RoleResponseDto {
+  @ApiProperty({ description: 'Role unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  id!: string;
+
+  @ApiProperty({ description: 'Role code', example: 'super_admin' })
+  code!: string;
+
+  @ApiProperty({ description: 'Display name for the role', example: 'Super Admin' })
+  displayName!: string;
+
+  @ApiProperty({ description: 'Whether this is the super admin role', example: false })
+  isSuperAdmin!: boolean;
+
+  @ApiProperty({
+    description: 'Array of permission codes assigned to this role',
+    example: ['user:manage', 'booking:read'],
+    type: [String],
+  })
+  permissions!: string[];
+
+  @ApiProperty({
+    description: 'Role creation timestamp',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  createdAt!: string;
+
+  @ApiProperty({
+    description: 'Last update timestamp',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  updatedAt!: string;
+
+  static fromDomain(role: Role): RoleResponseDto {
+    return {
+      id: role.getId().getValue(),
+      code: role.getCode(),
+      displayName: role.getDisplayName(),
+      isSuperAdmin: role.getIsSuperAdmin(),
+      permissions: role.getPermissions().map((p) => p.getValue()),
+      createdAt: role.getCreatedAt().toISOString(),
+      updatedAt: role.getUpdatedAt().toISOString(),
+    };
+  }
+
+  // Backward compatibility method (deprecated)
+  static fromValueObject(role: any): RoleResponseDto {
+    // This method is kept for backward compatibility
+    // Should be removed after all code is migrated to use domain entities
+    return {
+      id: '',
+      code: role.getValue ? role.getValue() : role.code,
+      displayName: role.getValue
+        ? role.getValue().replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+        : role.displayName,
+      isSuperAdmin: false,
+      permissions: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+}

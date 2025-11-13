@@ -86,7 +86,9 @@ describe('AuthenticateCustomerHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<AuthenticateCustomerHandler>(AuthenticateCustomerHandler);
+    handler = module.get<AuthenticateCustomerHandler>(
+      AuthenticateCustomerHandler,
+    );
     customerAuthService = module.get(CUSTOMER_AUTHENTICATION_SERVICE);
     passwordHasher = module.get(PASSWORD_HASHER);
     tokenService = module.get(TOKEN_SERVICE);
@@ -109,10 +111,16 @@ describe('AuthenticateCustomerHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
+      customerAuthService.findForAuthentication.mockResolvedValue(
+        mockCustomerData,
+      );
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -123,10 +131,17 @@ describe('AuthenticateCustomerHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.accessToken).toBe('access-token-long-enough');
-      expect(result.refreshToken).toBe('refresh-token-long-enough-to-pass-validation');
+      expect(result.refreshToken).toBe(
+        'refresh-token-long-enough-to-pass-validation',
+      );
       expect(result.tokenType).toBe('Bearer');
-      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(
+        customerEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        password,
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
     });
@@ -143,9 +158,15 @@ describe('AuthenticateCustomerHandler', () => {
       customerAuthService.findForAuthentication.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
-      await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
+      await expect(handler.execute(command)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Invalid credentials',
+      );
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(
+        customerEmail,
+      );
       expect(passwordHasher.compare).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
@@ -159,14 +180,25 @@ describe('AuthenticateCustomerHandler', () => {
         ipAddress,
       );
 
-      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
+      customerAuthService.findForAuthentication.mockResolvedValue(
+        mockCustomerData,
+      );
       passwordHasher.compare.mockResolvedValue(false);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(UnauthorizedException);
-      await expect(handler.execute(command)).rejects.toThrow('Invalid credentials');
-      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith('WrongPassword', hashedPassword);
+      await expect(handler.execute(command)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Invalid credentials',
+      );
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(
+        customerEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        'WrongPassword',
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -184,14 +216,25 @@ describe('AuthenticateCustomerHandler', () => {
         ipAddress,
       );
 
-      customerAuthService.findForAuthentication.mockResolvedValue(inactiveCustomerData);
+      customerAuthService.findForAuthentication.mockResolvedValue(
+        inactiveCustomerData,
+      );
       passwordHasher.compare.mockResolvedValue(true);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(BadRequestException);
-      await expect(handler.execute(command)).rejects.toThrow('Customer account is not active');
-      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(customerEmail);
-      expect(passwordHasher.compare).toHaveBeenCalledWith(password, hashedPassword);
+      await expect(handler.execute(command)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Customer account is not active',
+      );
+      expect(customerAuthService.findForAuthentication).toHaveBeenCalledWith(
+        customerEmail,
+      );
+      expect(passwordHasher.compare).toHaveBeenCalledWith(
+        password,
+        hashedPassword,
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -206,10 +249,16 @@ describe('AuthenticateCustomerHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
+      customerAuthService.findForAuthentication.mockResolvedValue(
+        mockCustomerData,
+      );
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -219,7 +268,7 @@ describe('AuthenticateCustomerHandler', () => {
 
       // Assert
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
-      const payload = tokenService.issueTokenPair.mock.calls[0][0] as JwtPayload;
+      const payload = tokenService.issueTokenPair.mock.calls[0][0];
       const payloadProps = payload.getProps();
       expect(payloadProps.userType).toBe('customer');
       expect(payloadProps.sub).toBe(customerId);
@@ -239,10 +288,16 @@ describe('AuthenticateCustomerHandler', () => {
 
       const accessToken = AccessToken.create('access-token-long-enough', 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
-      const refreshToken = RefreshToken.create('refresh-token-long-enough-to-pass-validation', expiresAt, randomUUID());
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
       const tokenPair = new TokenPair(accessToken, refreshToken);
 
-      customerAuthService.findForAuthentication.mockResolvedValue(mockCustomerData);
+      customerAuthService.findForAuthentication.mockResolvedValue(
+        mockCustomerData,
+      );
       passwordHasher.compare.mockResolvedValue(true);
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
@@ -259,4 +314,3 @@ describe('AuthenticateCustomerHandler', () => {
     });
   });
 });
-

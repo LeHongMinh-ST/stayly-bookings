@@ -13,7 +13,9 @@ import type {
 } from '../../application/interfaces/customer-authentication.port';
 
 @Injectable()
-export class CustomerAuthenticationService implements ICustomerAuthenticationPort {
+export class CustomerAuthenticationService
+  implements ICustomerAuthenticationPort
+{
   constructor(
     @Inject(CUSTOMER_REPOSITORY)
     private readonly customerRepository: ICustomerRepository,

@@ -1,8 +1,16 @@
 /**
  * PermissionOrmEntity stores fine-grained permission catalog entries
  */
-import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { UserOrmEntity } from './user.orm-entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import type { UserOrmEntity } from '../../../../user/infrastructure/persistence/entities/user.orm-entity';
+import { RoleOrmEntity } from './role.orm-entity';
 
 @Entity({ name: 'permissions' })
 export class PermissionOrmEntity {
@@ -21,6 +29,10 @@ export class PermissionOrmEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt!: Date;
 
-  @ManyToMany(() => UserOrmEntity, (user) => user.permissions)
+  @ManyToMany('UserOrmEntity', 'permissions')
   users!: UserOrmEntity[];
+
+  @ManyToMany(() => RoleOrmEntity, (role) => role.permissions)
+  roles!: RoleOrmEntity[];
 }
+

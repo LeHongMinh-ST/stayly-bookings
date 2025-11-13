@@ -24,7 +24,10 @@ export class CustomerOrmMapper {
     });
   }
 
-  static toOrm(aggregate: Customer, existing?: CustomerOrmEntity): CustomerOrmEntity {
+  static toOrm(
+    aggregate: Customer,
+    existing?: CustomerOrmEntity,
+  ): CustomerOrmEntity {
     const entity = existing ?? new CustomerOrmEntity();
     entity.id = aggregate.getId().getValue();
     entity.email = aggregate.getEmail().getValue();

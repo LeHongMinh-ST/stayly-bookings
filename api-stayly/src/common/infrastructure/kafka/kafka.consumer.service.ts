@@ -20,4 +20,3 @@ export class KafkaConsumerService {
     // Base implementation - should be overridden by specific handlers
   }
 }
-

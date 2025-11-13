@@ -2,7 +2,11 @@ import { Session } from '../session.entity';
 import { RefreshToken } from '../../value-objects/refresh-token.vo';
 
 const buildRefreshToken = () =>
-  RefreshToken.create('refresh-token-value-1234567890', new Date(Date.now() + 3600 * 1000), 'token-id-123');
+  RefreshToken.create(
+    'refresh-token-value-1234567890',
+    new Date(Date.now() + 3600 * 1000),
+    'token-id-123',
+  );
 
 describe('Session aggregate', () => {
   it('creates session and records issued event', () => {

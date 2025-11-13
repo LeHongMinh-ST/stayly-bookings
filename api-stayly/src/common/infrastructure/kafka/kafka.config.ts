@@ -15,7 +15,9 @@ export const getKafkaConfig = (configService: ConfigService): KafkaOptions => {
     options: {
       client: {
         clientId: configService.get<string>('kafka.clientId', 'default-client'),
-        brokers: configService.get<string[]>('kafka.brokers', ['localhost:9092']),
+        brokers: configService.get<string[]>('kafka.brokers', [
+          'localhost:9092',
+        ]),
       },
       consumer: {
         groupId: configService.get<string>('kafka.groupId', 'default-group'),
@@ -23,4 +25,3 @@ export const getKafkaConfig = (configService: ConfigService): KafkaOptions => {
     },
   };
 };
-

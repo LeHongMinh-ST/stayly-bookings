@@ -11,12 +11,16 @@ import type {
   IUserAuthenticationPort,
   UserAuthenticationData,
 } from '../../application/interfaces/user-authentication.port';
+import type { IRoleRepository } from '../../../rbac/domain/repositories/role.repository.interface';
+import { ROLE_REPOSITORY } from '../../../rbac/domain/repositories/role.repository.interface';
 
 @Injectable()
 export class UserAuthenticationService implements IUserAuthenticationPort {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
+    @Inject(ROLE_REPOSITORY)
+    private readonly roleRepository: IRoleRepository,
   ) {}
 
   /**
@@ -32,15 +36,34 @@ export class UserAuthenticationService implements IUserAuthenticationPort {
       return null;
     }
 
+    // Get permissions directly assigned to user
+    const directPermissions = user
+      .getPermissions()
+      .map((permission) => permission.getValue());
+
+    // Get role codes
+    const roleCodes = user.getRoles().map((role) => role.getValueAsString());
+
+    // Load roles with permissions to get permissions from roles
+    const allPermissions = new Set<string>(directPermissions);
+    if (roleCodes.length > 0) {
+      const roles = await this.roleRepository.findAll();
+      const userRoles = roles.filter((role) =>
+        roleCodes.includes(role.getCode()),
+      );
+      for (const role of userRoles) {
+        const rolePermissions = role.getPermissions().map((p) => p.getValue());
+        rolePermissions.forEach((perm) => allPermissions.add(perm));
+      }
+    }
+
     return {
       id: user.getId().getValue(),
       email: user.getEmail().getValue(),
       passwordHash: user.getPasswordHash().getValue(),
       isActive: user.isActive(),
-      roles: user.getRoles().map((role) => role.getValue()),
-      permissions: user
-        .getPermissions()
-        .map((permission) => permission.getValue()),
+      roles: roleCodes,
+      permissions: Array.from(allPermissions),
     };
   }
 }

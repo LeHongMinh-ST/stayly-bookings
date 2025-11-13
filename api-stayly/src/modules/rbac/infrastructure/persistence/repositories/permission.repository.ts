@@ -16,7 +16,9 @@ export class PermissionRepository implements IPermissionRepository {
   ) {}
 
   async findAll(): Promise<Permission[]> {
-    const permissions = await this.permissionRepo.find({ order: { code: 'ASC' } });
+    const permissions = await this.permissionRepo.find({
+      order: { code: 'ASC' },
+    });
     return permissions.map((permission) => Permission.create(permission.code));
   }
 

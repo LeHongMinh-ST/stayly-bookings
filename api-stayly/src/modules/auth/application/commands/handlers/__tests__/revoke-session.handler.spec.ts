@@ -19,7 +19,11 @@ describe('RevokeSessionHandler', () => {
   const userId = randomUUID();
   const sessionId = randomUUID();
   const expiresAt = new Date(Date.now() + 604800 * 1000);
-  const refreshToken = RefreshToken.create('refresh-token-value-long-enough-to-pass-validation', expiresAt, randomUUID());
+  const refreshToken = RefreshToken.create(
+    'refresh-token-value-long-enough-to-pass-validation',
+    expiresAt,
+    randomUUID(),
+  );
 
   const mockSession = Session.create({
     id: sessionId,
@@ -68,8 +72,13 @@ describe('RevokeSessionHandler', () => {
       await handler.execute(command);
 
       // Assert
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(tokenId);
-      expect(sessionRepository.revokeById).toHaveBeenCalledWith(sessionId, expect.any(Date));
+      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+        tokenId,
+      );
+      expect(sessionRepository.revokeById).toHaveBeenCalledWith(
+        sessionId,
+        expect.any(Date),
+      );
     });
 
     it('should do nothing when session not found', async () => {
@@ -82,7 +91,9 @@ describe('RevokeSessionHandler', () => {
       await handler.execute(command);
 
       // Assert
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(tokenId);
+      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+        tokenId,
+      );
       expect(sessionRepository.revokeById).not.toHaveBeenCalled();
     });
 
@@ -99,10 +110,11 @@ describe('RevokeSessionHandler', () => {
 
       // Assert
       expect(sessionRepository.revokeById).toHaveBeenCalled();
-      const revokeDate = sessionRepository.revokeById.mock.calls[0][1] as Date;
+      const revokeDate = sessionRepository.revokeById.mock.calls[0][1];
       expect(revokeDate).toBeInstanceOf(Date);
-      expect(revokeDate.getTime()).toBeGreaterThanOrEqual(beforeRevoke.getTime());
+      expect(revokeDate.getTime()).toBeGreaterThanOrEqual(
+        beforeRevoke.getTime(),
+      );
     });
   });
 });
-

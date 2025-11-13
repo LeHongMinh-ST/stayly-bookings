@@ -1,10 +1,17 @@
-import { MigrationInterface, QueryRunner, TableColumn, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  TableColumn,
+  TableForeignKey,
+} from 'typeorm';
 
 /**
  * Fix auth_sessions foreign key constraint to support both users and customers
  * Adds user_type column and removes the restrictive foreign key
  */
-export class FixAuthSessionsForeignKey1700000000002 implements MigrationInterface {
+export class FixAuthSessionsForeignKey1700000000002
+  implements MigrationInterface
+{
   name = 'FixAuthSessionsForeignKey1700000000002';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -12,7 +19,9 @@ export class FixAuthSessionsForeignKey1700000000002 implements MigrationInterfac
     const authSessionsTable = await queryRunner.getTable('auth_sessions');
     if (authSessionsTable) {
       const foreignKey = authSessionsTable.foreignKeys.find(
-        (fk) => fk.columnNames.includes('user_id') && fk.referencedTableName === 'users',
+        (fk) =>
+          fk.columnNames.includes('user_id') &&
+          fk.referencedTableName === 'users',
       );
       if (foreignKey) {
         await queryRunner.dropForeignKey('auth_sessions', foreignKey);
@@ -71,4 +80,3 @@ export class FixAuthSessionsForeignKey1700000000002 implements MigrationInterfac
     );
   }
 }
-

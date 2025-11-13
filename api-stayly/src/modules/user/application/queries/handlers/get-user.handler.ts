@@ -11,7 +11,9 @@ import { UserResponseDto } from '../../dto/response/user-response.dto';
 
 @Injectable()
 @QueryHandler(GetUserQuery)
-export class GetUserHandler implements IQueryHandler<GetUserQuery, UserResponseDto> {
+export class GetUserHandler
+  implements IQueryHandler<GetUserQuery, UserResponseDto>
+{
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,

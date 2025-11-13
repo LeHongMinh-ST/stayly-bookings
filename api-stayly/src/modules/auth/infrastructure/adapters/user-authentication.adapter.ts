@@ -1,7 +1,7 @@
 /**
  * UserAuthenticationAdapter adapts IUserAuthenticationPort from user module
  * to IUserAuthenticationService interface for auth module
- * 
+ *
  * Following Port/Adapter Pattern:
  * - Port (interface) is defined in user module application layer
  * - Adapter is in infrastructure layer, so it CAN import from other modules
@@ -28,8 +28,9 @@ export class UserAuthenticationAdapter implements IUserAuthenticationService {
    * Adapts user module port to auth module interface
    * Infrastructure layer handles the mapping between modules
    */
-  async findForAuthentication(email: Email): Promise<UserAuthenticationData | null> {
+  async findForAuthentication(
+    email: Email,
+  ): Promise<UserAuthenticationData | null> {
     return this.userAuthenticationPort.findForAuthentication(email);
   }
 }
-

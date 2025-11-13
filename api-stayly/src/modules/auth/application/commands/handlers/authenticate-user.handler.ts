@@ -1,7 +1,12 @@
 /**
  * AuthenticateUserHandler validates credentials and issues JWT tokens
  */
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { AuthenticateUserCommand } from '../authenticate-user.command';
@@ -76,7 +81,8 @@ export class AuthenticateUserHandler
     command: AuthenticateUserCommand,
     userId: string,
   ): Promise<TokenResponseDto> {
-    const tokenPair: TokenPair = await this.tokenService.issueTokenPair(payload);
+    const tokenPair: TokenPair =
+      await this.tokenService.issueTokenPair(payload);
 
     const session = Session.create({
       id: randomUUID(),

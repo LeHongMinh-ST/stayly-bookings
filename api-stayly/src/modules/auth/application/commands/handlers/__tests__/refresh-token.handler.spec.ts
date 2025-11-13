@@ -25,7 +25,8 @@ describe('RefreshTokenHandler', () => {
 
   const tokenId = randomUUID();
   const userId = randomUUID();
-  const refreshTokenValue = 'refresh-token-value-long-enough-to-pass-validation';
+  const refreshTokenValue =
+    'refresh-token-value-long-enough-to-pass-validation';
   const userAgent = 'Mozilla/5.0';
   const ipAddress = '192.168.1.1';
 
@@ -39,7 +40,11 @@ describe('RefreshTokenHandler', () => {
   });
 
   const expiresAt = new Date(Date.now() + 604800 * 1000);
-  const mockRefreshToken = RefreshToken.create(refreshTokenValue, expiresAt, tokenId);
+  const mockRefreshToken = RefreshToken.create(
+    refreshTokenValue,
+    expiresAt,
+    tokenId,
+  );
   const mockSession = Session.create({
     id: randomUUID(),
     userId: userId,
@@ -87,12 +92,23 @@ describe('RefreshTokenHandler', () => {
   describe('execute', () => {
     it('should refresh token successfully and return new token pair', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
-      const newAccessToken = AccessToken.create('new-access-token-long-enough', 3600);
+      const newAccessToken = AccessToken.create(
+        'new-access-token-long-enough',
+        3600,
+      );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
-      const newRefreshToken = RefreshToken.create('new-refresh-token-long-enough-to-pass', newExpiresAt, newTokenId);
+      const newRefreshToken = RefreshToken.create(
+        'new-refresh-token-long-enough-to-pass',
+        newExpiresAt,
+        newTokenId,
+      );
       const newTokenPair = new TokenPair(newAccessToken, newRefreshToken);
 
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
@@ -108,20 +124,35 @@ describe('RefreshTokenHandler', () => {
       expect(result.accessToken).toBe('new-access-token-long-enough');
       expect(result.refreshToken).toBe('new-refresh-token-long-enough-to-pass');
       expect(result.tokenType).toBe('Bearer');
-      expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith(refreshTokenValue);
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(tokenId);
+      expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith(
+        refreshTokenValue,
+      );
+      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+        tokenId,
+      );
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
     });
 
     it('should preserve userType in new token payload', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
-      const newAccessToken = AccessToken.create('new-access-token-long-enough', 3600);
+      const newAccessToken = AccessToken.create(
+        'new-access-token-long-enough',
+        3600,
+      );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
-      const newRefreshToken = RefreshToken.create('new-refresh-token-long-enough-to-pass', newExpiresAt, newTokenId);
+      const newRefreshToken = RefreshToken.create(
+        'new-refresh-token-long-enough-to-pass',
+        newExpiresAt,
+        newTokenId,
+      );
       const newTokenPair = new TokenPair(newAccessToken, newRefreshToken);
 
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
@@ -134,7 +165,7 @@ describe('RefreshTokenHandler', () => {
 
       // Assert
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
-      const newPayload = tokenService.issueTokenPair.mock.calls[0][0] as JwtPayload;
+      const newPayload = tokenService.issueTokenPair.mock.calls[0][0];
       const newPayloadProps = newPayload.getProps();
       expect(newPayloadProps.userType).toBe('user');
       expect(newPayloadProps.sub).toBe(userId);
@@ -143,12 +174,23 @@ describe('RefreshTokenHandler', () => {
 
     it('should rotate refresh token in session', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
-      const newAccessToken = AccessToken.create('new-access-token-long-enough', 3600);
+      const newAccessToken = AccessToken.create(
+        'new-access-token-long-enough',
+        3600,
+      );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
-      const newRefreshToken = RefreshToken.create('new-refresh-token-long-enough-to-pass', newExpiresAt, newTokenId);
+      const newRefreshToken = RefreshToken.create(
+        'new-refresh-token-long-enough-to-pass',
+        newExpiresAt,
+        newTokenId,
+      );
       const newTokenPair = new TokenPair(newAccessToken, newRefreshToken);
 
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
@@ -163,7 +205,9 @@ describe('RefreshTokenHandler', () => {
 
       // Assert
       expect(mockSession.getRefreshToken()).not.toBe(oldRefreshToken);
-      expect(mockSession.getRefreshToken().getValue()).toBe('new-refresh-token-long-enough-to-pass');
+      expect(mockSession.getRefreshToken().getValue()).toBe(
+        'new-refresh-token-long-enough-to-pass',
+      );
       expect(sessionRepository.save).toHaveBeenCalledWith(mockSession);
     });
 
@@ -176,33 +220,53 @@ describe('RefreshTokenHandler', () => {
         permissions: [],
       });
 
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
       tokenService.verifyRefreshToken.mockResolvedValue(payloadWithoutTokenId);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(BadRequestException);
-      await expect(handler.execute(command)).rejects.toThrow('Refresh token missing token identifier');
+      await expect(handler.execute(command)).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Refresh token missing token identifier',
+      );
       expect(sessionRepository.findActiveByTokenId).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when session not found', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
       sessionRepository.findActiveByTokenId.mockResolvedValue(null);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(NotFoundException);
-      await expect(handler.execute(command)).rejects.toThrow('Refresh session not found');
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(tokenId);
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Refresh session not found',
+      );
+      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+        tokenId,
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
     it('should throw Error when session is not active', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
       const revokedSession = Session.rehydrate({
         id: randomUUID(),
@@ -218,18 +282,31 @@ describe('RefreshTokenHandler', () => {
       sessionRepository.findActiveByTokenId.mockResolvedValue(revokedSession);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow('Refresh token expired or revoked');
+      await expect(handler.execute(command)).rejects.toThrow(
+        'Refresh token expired or revoked',
+      );
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
     it('should generate new tokenId for new token pair', async () => {
       // Arrange
-      const command = new RefreshTokenCommand(refreshTokenValue, userAgent, ipAddress);
+      const command = new RefreshTokenCommand(
+        refreshTokenValue,
+        userAgent,
+        ipAddress,
+      );
 
-      const newAccessToken = AccessToken.create('new-access-token-long-enough', 3600);
+      const newAccessToken = AccessToken.create(
+        'new-access-token-long-enough',
+        3600,
+      );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
-      const newRefreshToken = RefreshToken.create('new-refresh-token-long-enough-to-pass', newExpiresAt, newTokenId);
+      const newRefreshToken = RefreshToken.create(
+        'new-refresh-token-long-enough-to-pass',
+        newExpiresAt,
+        newTokenId,
+      );
       const newTokenPair = new TokenPair(newAccessToken, newRefreshToken);
 
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
@@ -242,11 +319,10 @@ describe('RefreshTokenHandler', () => {
 
       // Assert
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
-      const newPayload = tokenService.issueTokenPair.mock.calls[0][0] as JwtPayload;
+      const newPayload = tokenService.issueTokenPair.mock.calls[0][0];
       const newPayloadProps = newPayload.getProps();
       expect(newPayloadProps.tokenId).toBeDefined();
       expect(newPayloadProps.tokenId).not.toBe(tokenId); // New tokenId should be different
     });
   });
 });
-

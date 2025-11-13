@@ -25,7 +25,10 @@ export class SessionOrmMapper {
     });
   }
 
-  static toOrm(session: Session, existing?: SessionOrmEntity): SessionOrmEntity {
+  static toOrm(
+    session: Session,
+    existing?: SessionOrmEntity,
+  ): SessionOrmEntity {
     const entity = existing ?? new SessionOrmEntity();
     entity.id = session.getId();
     entity.userId = session.getUserId();

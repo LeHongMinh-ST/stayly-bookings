@@ -42,9 +42,6 @@ export class SessionRepository implements ISessionRepository {
   }
 
   async revokeById(id: string, revokedAt: Date): Promise<void> {
-    await this.sessionRepo.update(
-      { id },
-      { revokedAt },
-    );
+    await this.sessionRepo.update({ id }, { revokedAt });
   }
 }

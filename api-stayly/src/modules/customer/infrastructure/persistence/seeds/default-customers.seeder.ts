@@ -26,10 +26,18 @@ export class DefaultCustomersSeeder implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    const email = this.configService.get<string>('seeds.sampleCustomerEmail') ?? 'customer@stayly.dev';
-    const password = this.configService.get<string>('seeds.sampleCustomerPassword') ?? 'Customer123!';
-    const fullName = this.configService.get<string>('seeds.sampleCustomerName') ?? 'Sample Customer';
-    const phone = this.configService.get<string>('seeds.sampleCustomerPhone') ?? '+84000000000';
+    const email =
+      this.configService.get<string>('seeds.sampleCustomerEmail') ??
+      'customer@stayly.dev';
+    const password =
+      this.configService.get<string>('seeds.sampleCustomerPassword') ??
+      'Customer123!';
+    const fullName =
+      this.configService.get<string>('seeds.sampleCustomerName') ??
+      'Sample Customer';
+    const phone =
+      this.configService.get<string>('seeds.sampleCustomerPhone') ??
+      '+84000000000';
 
     const emailVo = Email.create(email);
     const existing = await this.customerRepository.findByEmail(emailVo);
@@ -48,6 +56,8 @@ export class DefaultCustomersSeeder implements OnModuleInit {
     });
 
     await this.customerRepository.save(customer);
-    this.logger.log(`Seeded sample customer account (${email}). Password should be rotated in production.`);
+    this.logger.log(
+      `Seeded sample customer account (${email}). Password should be rotated in production.`,
+    );
   }
 }

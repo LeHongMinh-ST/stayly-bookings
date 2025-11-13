@@ -80,7 +80,9 @@ async function bootstrap() {
 
   const logger = app.get(Logger);
   logger.log(`${appName} is running on port ${port} in ${env} mode`);
-  logger.log(`Swagger documentation available at http://localhost:${port}/api/docs`);
+  logger.log(
+    `Swagger documentation available at http://localhost:${port}/api/docs`,
+  );
 }
 
 bootstrap();

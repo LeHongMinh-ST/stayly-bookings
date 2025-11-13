@@ -21,7 +21,9 @@ export class RevokeSessionHandler
    * Executes revocation marking session as revoked
    */
   async execute(command: RevokeSessionCommand): Promise<void> {
-    const session = await this.sessionRepository.findActiveByTokenId(command.tokenId);
+    const session = await this.sessionRepository.findActiveByTokenId(
+      command.tokenId,
+    );
     if (!session) {
       return;
     }

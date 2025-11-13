@@ -68,9 +68,13 @@ export default () => ({
     superAdminEmail: process.env.SEED_SUPER_ADMIN_EMAIL || 'admin@stayly.dev',
     superAdminPassword: process.env.SEED_SUPER_ADMIN_PASSWORD || 'ChangeMe123!',
     superAdminName: process.env.SEED_SUPER_ADMIN_NAME || 'System Super Admin',
-    sampleCustomerEmail: process.env.SEED_SAMPLE_CUSTOMER_EMAIL || 'customer@stayly.dev',
-    sampleCustomerPassword: process.env.SEED_SAMPLE_CUSTOMER_PASSWORD || 'Customer123!',
-    sampleCustomerName: process.env.SEED_SAMPLE_CUSTOMER_NAME || 'Sample Customer',
-    sampleCustomerPhone: process.env.SEED_SAMPLE_CUSTOMER_PHONE || '+84000000000',
+    sampleCustomerEmail:
+      process.env.SEED_SAMPLE_CUSTOMER_EMAIL || 'customer@stayly.dev',
+    sampleCustomerPassword:
+      process.env.SEED_SAMPLE_CUSTOMER_PASSWORD || 'Customer123!',
+    sampleCustomerName:
+      process.env.SEED_SAMPLE_CUSTOMER_NAME || 'Sample Customer',
+    sampleCustomerPhone:
+      process.env.SEED_SAMPLE_CUSTOMER_PHONE || '+84000000000',
   },
 });

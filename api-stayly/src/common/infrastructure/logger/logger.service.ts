@@ -45,4 +45,3 @@ export class LoggerService implements NestLoggerService {
     this.pinoLogger.trace({ context }, message);
   }
 }
-

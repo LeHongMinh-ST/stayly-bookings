@@ -24,7 +24,9 @@ export class JwtUserStrategy extends PassportStrategy(Strategy, 'jwt-user') {
 
     // Only allow user type (admin/staff), reject customer
     if (payload.userType === 'customer') {
-      throw new UnauthorizedException('Customer tokens are not allowed for admin endpoints');
+      throw new UnauthorizedException(
+        'Customer tokens are not allowed for admin endpoints',
+      );
     }
 
     return {
@@ -36,4 +38,3 @@ export class JwtUserStrategy extends PassportStrategy(Strategy, 'jwt-user') {
     };
   }
 }
-

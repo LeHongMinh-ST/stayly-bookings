@@ -32,4 +32,3 @@ export interface IUserAuthenticationPort {
 }
 
 export const USER_AUTHENTICATION_PORT = 'USER_AUTHENTICATION_PORT';
-

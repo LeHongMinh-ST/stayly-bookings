@@ -9,4 +9,3 @@ export class AuthenticateCustomerCommand {
     public readonly ipAddress?: string | null,
   ) {}
 }
-

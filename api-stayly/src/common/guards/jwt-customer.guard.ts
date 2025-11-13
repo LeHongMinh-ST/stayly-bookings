@@ -38,10 +38,11 @@ export class JwtCustomerGuard extends AuthGuard('jwt-customer') {
 
     // Additional check: ensure user is a customer
     if (user.userType !== 'customer' && !user.roles?.includes('customer')) {
-      throw new UnauthorizedException('Admin tokens are not allowed for customer endpoints');
+      throw new UnauthorizedException(
+        'Admin tokens are not allowed for customer endpoints',
+      );
     }
 
     return user;
   }
 }
-

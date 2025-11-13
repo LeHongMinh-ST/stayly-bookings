@@ -9,8 +9,8 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { UserOrmEntity } from '../entities/user.orm-entity';
-import { RoleOrmEntity } from '../entities/role.orm-entity';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { RoleOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/role.orm-entity';
+import { PermissionOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/permission.orm-entity';
 import { UserOrmMapper } from '../mappers/user.mapper';
 
 @Injectable()
@@ -26,35 +26,35 @@ export class UserRepository implements IUserRepository {
 
   /**
    * Persists aggregate state using upsert semantics
+   * Note: Role/permission validation is handled at application layer via RBAC validation port
    */
   async save(user: User): Promise<void> {
-    const roleCodes = user.getRoles().map((role) => role.getValue());
+    const roleCodes = user.getRoles().map((role) => role.getValueAsString());
     const permissionCodes = user
       .getPermissions()
       .map((permission) => permission.getValue());
 
+    // Load role and permission entities from database
+    // These should already be validated at application layer
     const roles = roleCodes.length
       ? await this.roleRepo.find({ where: { code: In(roleCodes) } })
       : [];
 
-    if (roles.length !== roleCodes.length) {
-      throw new Error('One or more roles are missing from catalog');
-    }
-
     const permissions = permissionCodes.length
       ? await this.permissionRepo.find({ where: { code: In(permissionCodes) } })
       : [];
-
-    if (permissions.length !== permissionCodes.length) {
-      throw new Error('One or more permissions are missing from catalog');
-    }
 
     const existing = await this.userRepo.findOne({
       where: { id: user.getId().getValue() },
       relations: ['roles', 'permissions'],
     });
 
-    const entity = UserOrmMapper.toOrm(user, roles, permissions, existing ?? undefined);
+    const entity = UserOrmMapper.toOrm(
+      user,
+      roles,
+      permissions,
+      existing ?? undefined,
+    );
     await this.userRepo.save(entity);
   }
 
@@ -69,7 +69,7 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: Email): Promise<User | null> {
     const entity = await this.userRepo.findOne({
       where: { email: email.getValue() },
-      relations: ['roles', 'permissions'],
+      relations: ['roles', 'roles.permissions', 'permissions'],
     });
     return entity ? UserOrmMapper.toDomain(entity) : null;
   }

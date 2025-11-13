@@ -2,8 +2,21 @@
  * CustomerAuthController manages authentication flows for customers (login, refresh, logout)
  * Only accessible by customers from customers table
  */
-import { Body, Controller, Inject, Post, Request, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CommandBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
 import { JwtCustomerGuard } from '../../../../common/guards/jwt-customer.guard';
@@ -59,16 +72,22 @@ export class CustomerAuthController {
    */
   @Post('refresh')
   @Public()
-  @ApiOperation({ summary: 'Refresh access token using refresh token (customer only)' })
+  @ApiOperation({
+    summary: 'Refresh access token using refresh token (customer only)',
+  })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
     status: 200,
-    description: 'Token refresh successful, returns new access and refresh tokens',
+    description:
+      'Token refresh successful, returns new access and refresh tokens',
     type: TokenResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  async refresh(@Body() dto: RefreshTokenDto, @Request() req: any): Promise<TokenResponseDto> {
+  async refresh(
+    @Body() dto: RefreshTokenDto,
+    @Request() req: any,
+  ): Promise<TokenResponseDto> {
     const command = new RefreshTokenCommand(
       dto.refreshToken,
       req.headers['user-agent'],
@@ -84,7 +103,9 @@ export class CustomerAuthController {
   @Post('logout')
   @UseGuards(JwtCustomerGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Logout and revoke refresh token session (customer only)' })
+  @ApiOperation({
+    summary: 'Logout and revoke refresh token session (customer only)',
+  })
   @ApiBody({ type: RefreshTokenDto })
   @ApiResponse({
     status: 200,
@@ -93,7 +114,9 @@ export class CustomerAuthController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(@Body() dto: RefreshTokenDto): Promise<void> {
-    const payload = await this.tokenService.verifyRefreshToken(dto.refreshToken);
+    const payload = await this.tokenService.verifyRefreshToken(
+      dto.refreshToken,
+    );
     const tokenId = payload.getProps().tokenId;
     if (!tokenId) {
       return;
@@ -101,4 +124,3 @@ export class CustomerAuthController {
     await this.commandBus.execute(new RevokeSessionCommand(tokenId));
   }
 }
-

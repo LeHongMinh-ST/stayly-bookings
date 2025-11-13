@@ -11,7 +11,10 @@ export class BcryptPasswordHasherService implements PasswordHasher {
   private readonly saltRounds: number;
 
   constructor(private readonly configService: ConfigService) {
-    this.saltRounds = this.configService.get<number>('security.bcryptSaltRounds', 12);
+    this.saltRounds = this.configService.get<number>(
+      'security.bcryptSaltRounds',
+      12,
+    );
   }
 
   /**

@@ -1,7 +1,12 @@
 /**
  * AuthenticateCustomerHandler validates customer credentials and issues JWT tokens
  */
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { AuthenticateCustomerCommand } from '../authenticate-customer.command';
@@ -38,10 +43,13 @@ export class AuthenticateCustomerHandler
   /**
    * Executes customer authentication returning signed token pair
    */
-  async execute(command: AuthenticateCustomerCommand): Promise<TokenResponseDto> {
+  async execute(
+    command: AuthenticateCustomerCommand,
+  ): Promise<TokenResponseDto> {
     const email = Email.create(command.email);
 
-    const customerData = await this.customerAuthService.findForAuthentication(email);
+    const customerData =
+      await this.customerAuthService.findForAuthentication(email);
     if (!customerData) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -75,7 +83,8 @@ export class AuthenticateCustomerHandler
     command: AuthenticateCustomerCommand,
     customerId: string,
   ): Promise<TokenResponseDto> {
-    const tokenPair: TokenPair = await this.tokenService.issueTokenPair(payload);
+    const tokenPair: TokenPair =
+      await this.tokenService.issueTokenPair(payload);
 
     const session = Session.create({
       id: randomUUID(),
@@ -95,4 +104,3 @@ export class AuthenticateCustomerHandler
     );
   }
 }
-
