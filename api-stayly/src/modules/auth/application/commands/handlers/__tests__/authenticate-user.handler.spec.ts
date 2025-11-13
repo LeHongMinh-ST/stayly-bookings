@@ -1,6 +1,9 @@
 /**
  * Unit tests for AuthenticateUserHandler
  * Tests user (admin/staff) authentication flow
+ * 
+ * Note: User authentication data no longer includes roles/permissions.
+ * They are queried separately from RBAC module via IUserRolePermissionQueryService
  */
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -8,6 +11,8 @@ import { AuthenticateUserHandler } from '../authenticate-user.handler';
 import { AuthenticateUserCommand } from '../../authenticate-user.command';
 import type { IUserAuthenticationService } from '../../../interfaces/user-authentication.service.interface';
 import { USER_AUTHENTICATION_SERVICE } from '../../../interfaces/user-authentication.service.interface';
+import type { IUserRolePermissionQueryService } from '../../../interfaces/user-role-permission-query.service.interface';
+import { USER_ROLE_PERMISSION_QUERY_SERVICE } from '../../../interfaces/user-role-permission-query.service.interface';
 import type { PasswordHasher } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../../common/application/interfaces/password-hasher.interface';
 import type { TokenService } from '../../../../../../common/application/interfaces/token-service.interface';
@@ -15,7 +20,6 @@ import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/t
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
 import { Email } from '../../../../../../common/domain/value-objects/email.vo';
-import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
 import { TokenPair } from '../../../../domain/value-objects/token-pair.vo';
@@ -24,6 +28,7 @@ import { randomUUID } from 'crypto';
 describe('AuthenticateUserHandler', () => {
   let handler: AuthenticateUserHandler;
   let userAuthService: jest.Mocked<IUserAuthenticationService>;
+  let userRolePermissionQueryService: jest.Mocked<IUserRolePermissionQueryService>;
   let passwordHasher: jest.Mocked<PasswordHasher>;
   let tokenService: jest.Mocked<TokenService>;
   let sessionRepository: jest.Mocked<ISessionRepository>;
@@ -40,14 +45,21 @@ describe('AuthenticateUserHandler', () => {
     email: 'admin@stayly.dev',
     passwordHash: hashedPassword,
     isActive: true,
+  };
+
+  const mockRolePermissionData = {
     roles: ['super_admin'],
-    permissions: ['user:manage'],
+    permissions: ['user:manage', 'user:read', 'user:create'],
   };
 
   beforeEach(async () => {
     // Arrange: Create mocks
-    const mockUserAuthRepository = {
+    const mockUserAuthService = {
       findForAuthentication: jest.fn(),
+    };
+
+    const mockUserRolePermissionQueryService = {
+      getUserRolesAndPermissions: jest.fn(),
     };
 
     const mockPasswordHasher = {
@@ -71,7 +83,11 @@ describe('AuthenticateUserHandler', () => {
         AuthenticateUserHandler,
         {
           provide: USER_AUTHENTICATION_SERVICE,
-          useValue: mockUserAuthRepository,
+          useValue: mockUserAuthService,
+        },
+        {
+          provide: USER_ROLE_PERMISSION_QUERY_SERVICE,
+          useValue: mockUserRolePermissionQueryService,
         },
         {
           provide: PASSWORD_HASHER,
@@ -90,6 +106,7 @@ describe('AuthenticateUserHandler', () => {
 
     handler = module.get<AuthenticateUserHandler>(AuthenticateUserHandler);
     userAuthService = module.get(USER_AUTHENTICATION_SERVICE);
+    userRolePermissionQueryService = module.get(USER_ROLE_PERMISSION_QUERY_SERVICE);
     passwordHasher = module.get(PASSWORD_HASHER);
     tokenService = module.get(TOKEN_SERVICE);
     sessionRepository = module.get(SESSION_REPOSITORY);
@@ -120,6 +137,9 @@ describe('AuthenticateUserHandler', () => {
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        mockRolePermissionData,
+      );
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
 
@@ -140,6 +160,9 @@ describe('AuthenticateUserHandler', () => {
         password,
         hashedPassword,
       );
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).toHaveBeenCalledWith(userId);
       expect(tokenService.issueTokenPair).toHaveBeenCalled();
       expect(sessionRepository.save).toHaveBeenCalled();
     });
@@ -166,6 +189,9 @@ describe('AuthenticateUserHandler', () => {
         userEmail,
       );
       expect(passwordHasher.compare).not.toHaveBeenCalled();
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -195,6 +221,9 @@ describe('AuthenticateUserHandler', () => {
         'WrongPassword',
         hashedPassword,
       );
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
@@ -229,10 +258,13 @@ describe('AuthenticateUserHandler', () => {
         password,
         hashedPassword,
       );
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).not.toHaveBeenCalled();
       expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
     });
 
-    it('should create JWT payload with userType as user', async () => {
+    it('should query roles and permissions from RBAC module after user validation', async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -252,6 +284,51 @@ describe('AuthenticateUserHandler', () => {
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        mockRolePermissionData,
+      );
+      tokenService.issueTokenPair.mockResolvedValue(tokenPair);
+      sessionRepository.save.mockResolvedValue();
+
+      // Act
+      await handler.execute(command);
+
+      // Assert: Verify that getUserRolesAndPermissions is called with correct userId
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).toHaveBeenCalledWith(userId);
+      // Verify that it's called after password validation (by checking all required calls happened)
+      expect(userAuthService.findForAuthentication).toHaveBeenCalled();
+      expect(passwordHasher.compare).toHaveBeenCalled();
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).toHaveBeenCalled();
+      expect(tokenService.issueTokenPair).toHaveBeenCalled();
+    });
+
+    it('should create JWT payload with roles and permissions from RBAC module', async () => {
+      // Arrange
+      const command = new AuthenticateUserCommand(
+        userEmail.getValue(),
+        password,
+        userAgent,
+        ipAddress,
+      );
+
+      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const expiresAt = new Date(Date.now() + 604800 * 1000);
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
+      const tokenPair = new TokenPair(accessToken, refreshToken);
+
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
+      passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        mockRolePermissionData,
+      );
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
 
@@ -266,7 +343,105 @@ describe('AuthenticateUserHandler', () => {
       expect(payloadProps.sub).toBe(userId);
       expect(payloadProps.email).toBe(userEmail.getValue());
       expect(payloadProps.roles).toEqual(['super_admin']);
-      expect(payloadProps.permissions).toEqual(['user:manage']);
+      expect(payloadProps.permissions).toEqual([
+        'user:manage',
+        'user:read',
+        'user:create',
+      ]);
+    });
+
+    it('should handle user with multiple roles and merged permissions', async () => {
+      // Arrange
+      const command = new AuthenticateUserCommand(
+        userEmail.getValue(),
+        password,
+        userAgent,
+        ipAddress,
+      );
+
+      const multiRolePermissionData = {
+        roles: ['super_admin', 'manager'],
+        permissions: [
+          'user:manage',
+          'user:read',
+          'user:create',
+          'booking:read',
+          'booking:create',
+        ],
+      };
+
+      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const expiresAt = new Date(Date.now() + 604800 * 1000);
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
+      const tokenPair = new TokenPair(accessToken, refreshToken);
+
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
+      passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        multiRolePermissionData,
+      );
+      tokenService.issueTokenPair.mockResolvedValue(tokenPair);
+      sessionRepository.save.mockResolvedValue();
+
+      // Act
+      await handler.execute(command);
+
+      // Assert
+      const payload = tokenService.issueTokenPair.mock.calls[0][0];
+      const payloadProps = payload.getProps();
+      expect(payloadProps.roles).toEqual(['super_admin', 'manager']);
+      expect(payloadProps.permissions).toEqual([
+        'user:manage',
+        'user:read',
+        'user:create',
+        'booking:read',
+        'booking:create',
+      ]);
+    });
+
+    it('should handle user with no roles and only direct permissions', async () => {
+      // Arrange
+      const command = new AuthenticateUserCommand(
+        userEmail.getValue(),
+        password,
+        userAgent,
+        ipAddress,
+      );
+
+      const noRolePermissionData = {
+        roles: [],
+        permissions: ['user:read'],
+      };
+
+      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const expiresAt = new Date(Date.now() + 604800 * 1000);
+      const refreshToken = RefreshToken.create(
+        'refresh-token-long-enough-to-pass-validation',
+        expiresAt,
+        randomUUID(),
+      );
+      const tokenPair = new TokenPair(accessToken, refreshToken);
+
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
+      passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        noRolePermissionData,
+      );
+      tokenService.issueTokenPair.mockResolvedValue(tokenPair);
+      sessionRepository.save.mockResolvedValue();
+
+      // Act
+      await handler.execute(command);
+
+      // Assert
+      const payload = tokenService.issueTokenPair.mock.calls[0][0];
+      const payloadProps = payload.getProps();
+      expect(payloadProps.roles).toEqual([]);
+      expect(payloadProps.permissions).toEqual(['user:read']);
     });
 
     it('should create session with correct metadata', async () => {
@@ -289,6 +464,9 @@ describe('AuthenticateUserHandler', () => {
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        mockRolePermissionData,
+      );
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
 
@@ -323,6 +501,9 @@ describe('AuthenticateUserHandler', () => {
 
       userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
       passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockResolvedValue(
+        mockRolePermissionData,
+      );
       tokenService.issueTokenPair.mockResolvedValue(tokenPair);
       sessionRepository.save.mockResolvedValue();
 
@@ -334,6 +515,32 @@ describe('AuthenticateUserHandler', () => {
       const savedSession = sessionRepository.save.mock.calls[0][0];
       expect(savedSession.getUserAgent()).toBeNull();
       expect(savedSession.getIpAddress()).toBeNull();
+    });
+
+    it('should propagate error when RBAC query fails', async () => {
+      // Arrange
+      const command = new AuthenticateUserCommand(
+        userEmail.getValue(),
+        password,
+        userAgent,
+        ipAddress,
+      );
+
+      userAuthService.findForAuthentication.mockResolvedValue(mockUserData);
+      passwordHasher.compare.mockResolvedValue(true);
+      userRolePermissionQueryService.getUserRolesAndPermissions.mockRejectedValue(
+        new Error('User not found in RBAC'),
+      );
+
+      // Act & Assert
+      await expect(handler.execute(command)).rejects.toThrow('User not found in RBAC');
+      expect(userAuthService.findForAuthentication).toHaveBeenCalled();
+      expect(passwordHasher.compare).toHaveBeenCalled();
+      expect(
+        userRolePermissionQueryService.getUserRolesAndPermissions,
+      ).toHaveBeenCalled();
+      expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
+      expect(sessionRepository.save).not.toHaveBeenCalled();
     });
   });
 });
