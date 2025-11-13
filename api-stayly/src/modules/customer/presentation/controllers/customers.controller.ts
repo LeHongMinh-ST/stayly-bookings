@@ -1,10 +1,11 @@
 /**
  * CustomersController exposes signup and profile endpoints for customers
  */
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Public } from '../../../../common/decorators/public.decorator';
+import { CurrentUser } from '../../../../common/decorators/current-user.decorator';
 import { JwtCustomerGuard } from '../../../../common/guards/jwt-customer.guard';
 import { RegisterCustomerDto } from '../../application/dto/request/register-customer.dto';
 import { RegisterCustomerCommand } from '../../application/commands/register-customer.command';
@@ -55,11 +56,7 @@ export class CustomersController {
     type: CustomerResponseDto,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async me(@Request() req: any): Promise<CustomerResponseDto> {
-    const customerId = req.user?.id ?? req.user?.sub;
-    if (!customerId) {
-      throw new Error('Missing customer identifier in token');
-    }
+  async me(@CurrentUser('id') customerId: string): Promise<CustomerResponseDto> {
     return this.queryBus.execute(new GetCustomerProfileQuery(customerId));
   }
 }
