@@ -6,12 +6,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AssignPermissionsToUserCommand } from '../assign-permissions-to-user.command';
 import type { IRolePermissionValidationPort } from '../../interfaces/role-permission-validation.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from '../../interfaces/role-permission-validation.port';
+import type { IUserAccessPort } from '../../../../user/application/interfaces/user-access.port';
+import { USER_ACCESS_PORT } from '../../../../user/application/interfaces/user-access.port';
 import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
-import type { IUserRepository } from '../../../../user/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../../user/domain/repositories/user.repository.interface';
-import { UserId } from '../../../../user/domain/value-objects/user-id.vo';
-import { UserPermission } from '../../../../user/domain/value-objects/user-permission.vo';
-import { User } from '../../../../user/domain/entities/user.entity';
+import type { IUserPermissionLinkPort } from '../../interfaces/user-permission-link.port';
+import { USER_PERMISSION_LINK_PORT } from '../../interfaces/user-permission-link.port';
 
 @Injectable()
 @CommandHandler(AssignPermissionsToUserCommand)
@@ -19,8 +18,10 @@ export class AssignPermissionsToUserHandler
   implements ICommandHandler<AssignPermissionsToUserCommand, UserResponseDto>
 {
   constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
+    @Inject(USER_ACCESS_PORT)
+    private readonly userAccessPort: IUserAccessPort,
+    @Inject(USER_PERMISSION_LINK_PORT)
+    private readonly userPermissionLinkPort: IUserPermissionLinkPort,
     @Inject(ROLE_PERMISSION_VALIDATION_PORT)
     private readonly rolePermissionValidation: IRolePermissionValidationPort,
   ) {}
@@ -32,11 +33,7 @@ export class AssignPermissionsToUserHandler
   async execute(
     command: AssignPermissionsToUserCommand,
   ): Promise<UserResponseDto> {
-    const userId = UserId.create(command.userId);
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    await this.userAccessPort.ensureUserExists(command.userId);
 
     // Validate permissions using RBAC validation port
     const validatedPermissionCodes =
@@ -44,19 +41,10 @@ export class AssignPermissionsToUserHandler
         command.permissions,
       );
 
-    const nextPermissions = validatedPermissionCodes.map((code) =>
-      UserPermission.create(code),
+    await this.userPermissionLinkPort.replaceUserPermissions(
+      command.userId,
+      validatedPermissionCodes,
     );
-    const updatedUser = User.rehydrate({
-      id: user.getId(),
-      email: user.getEmail(),
-      fullName: user.getFullName(),
-      passwordHash: user.getPasswordHash(),
-      status: user.getStatus(),
-      roles: user.getRoles(),
-      permissions: nextPermissions,
-    });
-    await this.userRepository.save(updatedUser);
-    return UserResponseDto.fromAggregate(updatedUser);
+    return await this.userAccessPort.getUserResponse(command.userId);
   }
 }

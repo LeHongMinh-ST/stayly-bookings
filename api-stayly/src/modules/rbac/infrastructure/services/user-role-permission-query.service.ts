@@ -3,26 +3,25 @@
  * This service implements IUserRolePermissionQueryPort and encapsulates role/permission query logic
  * Following Port/Adapter Pattern - service implements port defined in application layer
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import type {
   IUserRolePermissionQueryPort,
   UserRolePermissionData,
 } from '../../application/interfaces/user-role-permission-query.port';
-import type { IRoleRepository } from '../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../domain/repositories/role.repository.interface';
-import type { IUserRepository } from '../../../user/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../user/domain/repositories/user.repository.interface';
-import { UserId } from '../../../user/domain/value-objects/user-id.vo';
+import { RoleOrmEntity } from '../persistence/entities/role.orm-entity';
+import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
 
 @Injectable()
 export class UserRolePermissionQueryService
   implements IUserRolePermissionQueryPort
 {
   constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
-    @Inject(ROLE_REPOSITORY)
-    private readonly roleRepository: IRoleRepository,
+    @InjectRepository(UserOrmEntity)
+    private readonly userRepository: Repository<UserOrmEntity>,
+    @InjectRepository(RoleOrmEntity)
+    private readonly roleRepository: Repository<RoleOrmEntity>,
   ) {}
 
   /**
@@ -34,30 +33,34 @@ export class UserRolePermissionQueryService
   async getUserRolesAndPermissions(
     userId: string,
   ): Promise<UserRolePermissionData> {
-    const userIdVo = UserId.create(userId);
-    const user = await this.userRepository.findById(userIdVo);
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles', 'permissions'],
+    });
     if (!user) {
       throw new Error('User not found');
     }
 
-    // Get role codes from user
-    const roleCodes = user.getRoles().map((role) => role.getValueAsString());
+    // Get role codes directly from ORM entity
+    const roleCodes = (user.roles ?? []).map((role) => role.code);
 
     // Get permissions directly assigned to user
-    const directPermissions = user
-      .getPermissions()
-      .map((permission) => permission.getValue());
+    const directPermissions = (user.permissions ?? []).map(
+      (permission) => permission.code,
+    );
 
     // Load roles with permissions to get permissions from roles
     const allPermissions = new Set<string>(directPermissions);
     if (roleCodes.length > 0) {
-      const roles = await this.roleRepository.findAll();
-      const userRoles = roles.filter((role) =>
-        roleCodes.includes(role.getCode()),
-      );
+      const roles = await this.roleRepository.find({
+        where: roleCodes.map((code) => ({ code })),
+        relations: ['permissions'],
+      });
 
-      for (const role of userRoles) {
-        const rolePermissions = role.getPermissions().map((p) => p.getValue());
+      for (const role of roles) {
+        const rolePermissions = (role.permissions ?? []).map(
+          (permission) => permission.code,
+        );
         rolePermissions.forEach((perm) => allPermissions.add(perm));
       }
     }

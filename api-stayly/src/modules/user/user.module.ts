@@ -20,6 +20,8 @@ import { RoleOrmEntity } from '../rbac/infrastructure/persistence/entities/role.
 import { PermissionOrmEntity } from '../rbac/infrastructure/persistence/entities/permission.orm-entity';
 import { UserAuthenticationService } from './infrastructure/services/user-authentication.service';
 import { USER_AUTHENTICATION_PORT } from './application/interfaces/user-authentication.port';
+import { USER_ACCESS_PORT } from './application/interfaces/user-access.port';
+import { UserAccessService } from './infrastructure/services/user-access.service';
 
 const commandHandlers = [CreateUserHandler, UpdateUserStatusHandler];
 
@@ -46,12 +48,17 @@ const queryHandlers = [GetUserHandler, ListUsersHandler];
       provide: USER_AUTHENTICATION_PORT,
       useClass: UserAuthenticationService,
     },
+    {
+      provide: USER_ACCESS_PORT,
+      useClass: UserAccessService,
+    },
     // Seed services for CLI usage (they won't auto-run on bootstrap)
     DefaultUsersSeedService,
   ],
   exports: [
     USER_REPOSITORY,
     USER_AUTHENTICATION_PORT, // Export port for other modules (Port/Adapter Pattern)
+    USER_ACCESS_PORT,
   ],
 })
 export class UserModule {}

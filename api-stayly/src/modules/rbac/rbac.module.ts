@@ -27,12 +27,17 @@ import { RoleAssignmentService } from './infrastructure/services/role-assignment
 import { PermissionAssignmentService } from './infrastructure/services/permission-assignment.service';
 import { RolePermissionValidationService } from './infrastructure/services/role-permission-validation.service';
 import { UserRolePermissionQueryService } from './infrastructure/services/user-role-permission-query.service';
+import { UserRoleLinkService } from './infrastructure/services/user-role-link.service';
+import { UserPermissionLinkService } from './infrastructure/services/user-permission-link.service';
 import { ROLE_ASSIGNMENT_PORT } from './application/interfaces/role-assignment.port';
 import { PERMISSION_ASSIGNMENT_PORT } from './application/interfaces/permission-assignment.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from './application/interfaces/role-permission-validation.port';
 import { USER_ROLE_PERMISSION_QUERY_PORT } from './application/interfaces/user-role-permission-query.port';
+import { USER_ROLE_LINK_PORT } from './application/interfaces/user-role-link.port';
+import { USER_PERMISSION_LINK_PORT } from './application/interfaces/user-permission-link.port';
 import { RolesController } from './presentation/controllers/roles.controller';
 import { PermissionsController } from './presentation/controllers/permissions.controller';
+import { UserOrmEntity } from '../user/infrastructure/persistence/entities/user.orm-entity';
 
 const commandHandlers = [
   AssignRolesToUserHandler,
@@ -48,6 +53,7 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
     TypeOrmModule.forFeature([
       RoleOrmEntity,
       PermissionOrmEntity, // Needed for RoleRepository to load permissions
+      UserOrmEntity,
     ]),
   ],
   controllers: [RolesController, PermissionsController],
@@ -73,6 +79,14 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
       provide: USER_ROLE_PERMISSION_QUERY_PORT,
       useClass: UserRolePermissionQueryService,
     },
+    {
+      provide: USER_ROLE_LINK_PORT,
+      useClass: UserRoleLinkService,
+    },
+    {
+      provide: USER_PERMISSION_LINK_PORT,
+      useClass: UserPermissionLinkService,
+    },
     // Seed service for CLI usage
     RolePermissionSeedService,
   ],
@@ -83,6 +97,8 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
     PERMISSION_ASSIGNMENT_PORT,
     ROLE_PERMISSION_VALIDATION_PORT, // Export port for User module to validate roles/permissions
     USER_ROLE_PERMISSION_QUERY_PORT, // Export port for Auth module to query user roles/permissions
+    USER_ROLE_LINK_PORT,
+    USER_PERMISSION_LINK_PORT,
   ],
 })
 export class RbacModule {}
