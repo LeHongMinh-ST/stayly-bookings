@@ -14,12 +14,10 @@ export interface CreateSessionProps {
   refreshToken: RefreshToken;
   userAgent?: string | null;
   ipAddress?: string | null;
-  createdAt?: Date;
   revokedAt?: Date | null;
 }
 
 export class Session extends BaseEntity<SessionId> {
-  private createdAt: Date;
   private revokedAt: Date | null;
 
   private constructor(
@@ -29,16 +27,13 @@ export class Session extends BaseEntity<SessionId> {
     private refreshToken: RefreshToken,
     private readonly userAgent: string | null,
     private readonly ipAddress: string | null,
-    createdAt: Date,
     revokedAt: Date | null,
   ) {
     super(id);
-    this.createdAt = createdAt;
     this.revokedAt = revokedAt;
   }
 
   static create(props: CreateSessionProps): Session {
-    const createdAt = props.createdAt ?? new Date();
     const session = new Session(
       props.id,
       props.userId,
@@ -46,7 +41,6 @@ export class Session extends BaseEntity<SessionId> {
       props.refreshToken,
       props.userAgent ?? null,
       props.ipAddress ?? null,
-      createdAt,
       props.revokedAt ?? null,
     );
 
@@ -54,7 +48,7 @@ export class Session extends BaseEntity<SessionId> {
       new SessionIssuedEvent(
         session.getId().getValue(),
         session.userId,
-        createdAt,
+        new Date(),
       ),
     );
     return session;
@@ -67,7 +61,6 @@ export class Session extends BaseEntity<SessionId> {
     refreshToken: RefreshToken;
     userAgent: string | null;
     ipAddress: string | null;
-    createdAt: Date;
     revokedAt: Date | null;
   }): Session {
     return new Session(
@@ -77,7 +70,6 @@ export class Session extends BaseEntity<SessionId> {
       props.refreshToken,
       props.userAgent,
       props.ipAddress,
-      props.createdAt,
       props.revokedAt,
     );
   }
@@ -125,10 +117,6 @@ export class Session extends BaseEntity<SessionId> {
 
   getIpAddress(): string | null {
     return this.ipAddress;
-  }
-
-  getCreatedAt(): Date {
-    return this.createdAt;
   }
 
   getRevokedAt(): Date | null {

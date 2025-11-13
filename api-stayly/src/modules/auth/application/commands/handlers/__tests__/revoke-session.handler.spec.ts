@@ -29,6 +29,7 @@ describe('RevokeSessionHandler', () => {
   const mockSession = Session.create({
     id: SessionId.create(sessionId),
     userId: userId,
+    userType: 'user',
     refreshToken: refreshToken,
     userAgent: 'Mozilla/5.0',
     ipAddress: '192.168.1.1',

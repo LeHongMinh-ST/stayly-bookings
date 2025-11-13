@@ -15,6 +15,7 @@ describe('Session aggregate', () => {
     const session = Session.create({
       id: SessionId.create('11111111-1111-4111-8111-111111111111'),
       userId: 'user-id-123',
+      userType: 'user',
       refreshToken,
       userAgent: 'Jest Test',
       ipAddress: '127.0.0.1',
@@ -29,6 +30,7 @@ describe('Session aggregate', () => {
     const session = Session.create({
       id: SessionId.create('22222222-2222-4222-8222-222222222222'),
       userId: 'user-id-456',
+      userType: 'customer',
       refreshToken: buildRefreshToken(),
     });
 

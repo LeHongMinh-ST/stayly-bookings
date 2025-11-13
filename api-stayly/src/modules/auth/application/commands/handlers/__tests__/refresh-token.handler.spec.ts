@@ -10,7 +10,6 @@ import type { TokenService } from '../../../../../../common/application/interfac
 import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { TokenResponseDto } from '../../../dto/response/token-response.dto';
 import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
@@ -49,6 +48,7 @@ describe('RefreshTokenHandler', () => {
   const mockSession = Session.create({
     id: SessionId.create(randomUUID()),
     userId: userId,
+    userType: 'user',
     refreshToken: mockRefreshToken,
     userAgent: userAgent,
     ipAddress: ipAddress,
@@ -125,14 +125,18 @@ describe('RefreshTokenHandler', () => {
       expect(result.accessToken).toBe('new-access-token-long-enough');
       expect(result.refreshToken).toBe('new-refresh-token-long-enough-to-pass');
       expect(result.tokenType).toBe('Bearer');
-      expect(tokenService.verifyRefreshToken).toHaveBeenCalledWith(
+      expect(tokenService.verifyRefreshToken.mock.calls.length).toBeGreaterThan(
+        0,
+      );
+      expect(tokenService.verifyRefreshToken.mock.calls[0][0]).toBe(
         refreshTokenValue,
       );
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+      expect(sessionRepository.findActiveByTokenId.mock.calls.length).toBe(1);
+      expect(sessionRepository.findActiveByTokenId.mock.calls[0][0]).toBe(
         tokenId,
       );
-      expect(tokenService.issueTokenPair).toHaveBeenCalled();
-      expect(sessionRepository.save).toHaveBeenCalled();
+      expect(tokenService.issueTokenPair.mock.calls.length).toBeGreaterThan(0);
+      expect(sessionRepository.save.mock.calls.length).toBeGreaterThan(0);
     });
 
     it('should preserve userType in new token payload', async () => {
@@ -165,7 +169,7 @@ describe('RefreshTokenHandler', () => {
       await handler.execute(command);
 
       // Assert
-      expect(tokenService.issueTokenPair).toHaveBeenCalled();
+      expect(tokenService.issueTokenPair.mock.calls.length).toBeGreaterThan(0);
       const newPayload = tokenService.issueTokenPair.mock.calls[0][0];
       const newPayloadProps = newPayload.getProps();
       expect(newPayloadProps.userType).toBe('user');
@@ -209,7 +213,8 @@ describe('RefreshTokenHandler', () => {
       expect(mockSession.getRefreshToken().getValue()).toBe(
         'new-refresh-token-long-enough-to-pass',
       );
-      expect(sessionRepository.save).toHaveBeenCalledWith(mockSession);
+      expect(sessionRepository.save.mock.calls.length).toBeGreaterThan(0);
+      expect(sessionRepository.save.mock.calls[0][0]).toBe(mockSession);
     });
 
     it('should throw BadRequestException when refresh token missing tokenId', async () => {
@@ -236,7 +241,7 @@ describe('RefreshTokenHandler', () => {
       await expect(handler.execute(command)).rejects.toThrow(
         'Refresh token missing token identifier',
       );
-      expect(sessionRepository.findActiveByTokenId).not.toHaveBeenCalled();
+      expect(sessionRepository.findActiveByTokenId.mock.calls.length).toBe(0);
     });
 
     it('should throw NotFoundException when session not found', async () => {
@@ -250,15 +255,22 @@ describe('RefreshTokenHandler', () => {
       tokenService.verifyRefreshToken.mockResolvedValue(mockPayload);
       sessionRepository.findActiveByTokenId.mockResolvedValue(null);
 
-      // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(NotFoundException);
-      await expect(handler.execute(command)).rejects.toThrow(
-        'Refresh session not found',
-      );
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
+      // Act
+      let capturedError: unknown;
+      try {
+        await handler.execute(command);
+      } catch (error) {
+        capturedError = error;
+      }
+
+      // Assert
+      expect(capturedError).toBeInstanceOf(NotFoundException);
+      expect((capturedError as Error).message).toBe('Refresh session not found');
+      expect(sessionRepository.findActiveByTokenId.mock.calls.length).toBe(1);
+      expect(sessionRepository.findActiveByTokenId.mock.calls[0][0]).toBe(
         tokenId,
       );
-      expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
+      expect(tokenService.issueTokenPair.mock.calls.length).toBe(0);
     });
 
     it('should throw Error when session is not active', async () => {
@@ -270,12 +282,12 @@ describe('RefreshTokenHandler', () => {
       );
 
       const revokedSession = Session.rehydrate({
-        id: randomUUID(),
+        id: SessionId.create(randomUUID()),
         userId: userId,
+        userType: 'user',
         refreshToken: mockRefreshToken,
         userAgent: userAgent,
         ipAddress: ipAddress,
-        createdAt: new Date(),
         revokedAt: new Date(),
       });
 
@@ -286,7 +298,7 @@ describe('RefreshTokenHandler', () => {
       await expect(handler.execute(command)).rejects.toThrow(
         'Refresh token expired or revoked',
       );
-      expect(tokenService.issueTokenPair).not.toHaveBeenCalled();
+      expect(tokenService.issueTokenPair.mock.calls.length).toBe(0);
     });
 
     it('should generate new tokenId for new token pair', async () => {
@@ -319,7 +331,7 @@ describe('RefreshTokenHandler', () => {
       await handler.execute(command);
 
       // Assert
-      expect(tokenService.issueTokenPair).toHaveBeenCalled();
+      expect(tokenService.issueTokenPair.mock.calls.length).toBeGreaterThan(0);
       const newPayload = tokenService.issueTokenPair.mock.calls[0][0];
       const newPayloadProps = newPayload.getProps();
       expect(newPayloadProps.tokenId).toBeDefined();

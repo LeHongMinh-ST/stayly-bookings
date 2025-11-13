@@ -21,7 +21,6 @@ export class SessionOrmMapper {
       refreshToken,
       userAgent: entity.userAgent,
       ipAddress: entity.ipAddress,
-      createdAt: entity.createdAt,
       revokedAt: entity.revokedAt,
     });
   }
@@ -40,7 +39,6 @@ export class SessionOrmMapper {
     entity.userAgent = session.getUserAgent();
     entity.ipAddress = session.getIpAddress();
     entity.revokedAt = session.getRevokedAt();
-    entity.createdAt = session.getCreatedAt();
     return entity;
   }
 }
