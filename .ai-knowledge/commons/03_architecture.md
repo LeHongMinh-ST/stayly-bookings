@@ -1191,6 +1191,11 @@ async function bootstrap() {
     - Infrastructure layer xử lý giao tiếp giữa các module (Adapter)
     - Module sở hữu dữ liệu export Port, không export service trực tiếp
     - Module cần dữ liệu tạo Adapter trong infrastructure layer
+  - **Ví dụ RBAC-User Communication:**
+    - RBAC module export `ROLE_PERMISSION_VALIDATION_PORT` để User module validate roles/permissions
+    - User module export `USER_ROLE_PERMISSION_PORT` để RBAC module cập nhật user roles/permissions
+    - User module sử dụng local value objects (`UserRole`, `UserPermission`) để tránh phụ thuộc domain
+    - RBAC module sử dụng domain entities (`Role`) và value objects (`Permission`)
   - **Ví dụ:**
     ```typescript
     // User Module - application/interfaces/user-authentication.port.ts
@@ -1728,10 +1733,28 @@ POST   /api/v1/payments
 - OAuth2 (cho third-party integration)
 
 **Authorization:**
-- RBAC (Role-Based Access Control)
-- Guards trong NestJS (RoleGuard, PermissionGuard)
-- Decorators (@Roles(), @Permissions())
+- RBAC (Role-Based Access Control) với Role là Domain Entity
+- **Role Management:**
+  - Role là Domain Entity với CRUD operations
+  - Role có field `is_super_admin` để đánh dấu role mặc định
+  - Role có relationship many-to-many với Permission
+  - Super Admin role không thể xóa
+- **Permission Management:**
+  - Permission là Value Object (catalog được seed sẵn)
+  - Không có CRUD cho Permission
+- **Permission Checking (Real-time):**
+  - `PermissionsGuard` load roles và permissions từ database khi check (real-time)
+  - Merge permissions từ roles và permissions trực tiếp của user
+  - Không cần đăng nhập lại khi gán permissions mới cho role
+- Guards trong NestJS (`RolesGuard`, `PermissionsGuard`)
+- Decorators:
+  - `@Permissions()`: Định nghĩa permissions yêu cầu (chính, quyền động từ database)
+  - `@Roles()`: Định nghĩa roles yêu cầu (optional, backward compatibility)
 - Resource-level permissions
+- **User-Role-Permission Relationship:**
+  - User có thể có nhiều roles
+  - User có thể có permissions trực tiếp (ngoài permissions từ roles)
+  - Permissions từ roles được merge với permissions trực tiếp khi check quyền
 
 ### 7.2. Data Security
 

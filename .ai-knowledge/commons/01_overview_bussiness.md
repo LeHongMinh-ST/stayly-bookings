@@ -223,29 +223,73 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
    - Customer không thể truy cập Admin Panel, dù có email/mật khẩu
 
 4. **Phân quyền chi tiết:**
-   - Hệ thống sử dụng Role-Based Access Control (RBAC)
-   - Mỗi vai trò có danh sách quyền (permissions) cụ thể
-   - Quyền có thể được cấu hình linh hoạt:
-     - **Quản lý thông tin:** xem, chỉnh sửa, xóa thông tin homestay/hotel
-     - **Quản lý phòng:** xem, tạo, chỉnh sửa, xóa phòng
-     - **Quản lý giá cả:** xem, chỉnh sửa giá
-     - **Quản lý booking:** xem, tạo, chỉnh sửa, hủy booking
-     - **Check-in/Check-out:** thực hiện check-in/check-out
-     - **Quản lý nhân viên:** tạo, chỉnh sửa, xóa nhân viên
-     - **Xem báo cáo:** xem các loại báo cáo khác nhau
-     - **Quản lý thanh toán:** xem và quản lý thanh toán
+   - Hệ thống sử dụng Role-Based Access Control (RBAC) với kiến trúc module riêng biệt
+   - **RBAC Module:** Quản lý roles và permissions như Domain Entities, tách biệt khỏi User module
+   - **Chỉ áp dụng cho User (admin/staff):** Permissions không áp dụng cho Customer
+   - **Role là Domain Entity:**
+     - Role có CRUD operations (Create, Read, Update, Delete)
+     - Role có field `is_super_admin` để đánh dấu role mặc định (super_admin role)
+     - Role có relationship many-to-many với Permission (mỗi role có nhiều permissions)
+     - Super Admin role không thể xóa
+     - Các role khác có thể tạo mới và gán permissions
+   - **Permission là Value Object (Catalog):**
+     - Permissions được seed sẵn vào database
+     - Không có CRUD cho Permission (chỉ là catalog)
+     - Permission format: `module:action` (ví dụ: `user:manage`, `booking:read`)
+   - **User có roles và permissions độc lập:**
+     - User có thể có nhiều roles
+     - User có thể có permissions trực tiếp (ngoài permissions từ roles)
+     - Permissions từ roles được merge với permissions trực tiếp khi check quyền
+   - **Super Admin:**
+     - Role `super_admin` có `is_super_admin = true`
+     - Tự động có full permissions, không cần gán permissions cụ thể
+     - Không thể xóa role super_admin
+   - **Wildcard permissions:**
+     - `*:manage`: Full access to all modules
+     - `module:*`: Full access to all actions in a module (ví dụ: `user:*`)
+   - **Permissions được seed sẵn:**
+     - User management: `user:create`, `user:read`, `user:update`, `user:delete`, `user:manage`
+     - Customer management: `customer:create`, `customer:read`, `customer:update`, `customer:delete`, `customer:manage`
+     - Homestay/Hotel: `homestay:*`
+     - Room: `room:*`
+     - Booking: `booking:*` (bao gồm `checkin`, `checkout`)
+     - Payment: `payment:*`
+     - Report: `report:*`
+     - Role/Permission: `role:create`, `role:read`, `role:update`, `role:delete`, `role:assign`, `role:manage`, `permission:read`, `permission:assign`, `permission:manage`
+     - System: `system:*`
+   - **Gán quyền:**
+     - Chỉ Super Admin mới có thể gán roles và permissions cho User
+     - Chỉ Super Admin mới có thể tạo/sửa/xóa roles
+     - User phải có ít nhất 1 role
+     - Permissions có thể được gán trực tiếp cho User hoặc thông qua roles
+     - Khi gán permissions cho role, tất cả users có role đó sẽ tự động có permissions (real-time)
 
 5. **Bảo mật dữ liệu:**
    - Owner có thể truy cập tất cả dữ liệu của doanh nghiệp (tất cả homestay/hotel)
    - Manager chỉ có thể truy cập dữ liệu của homestay/hotel được gán
    - Staff chỉ có thể truy cập dữ liệu trong phạm vi quyền được gán
-   - Super Admin có thể truy cập tất cả dữ liệu
+   - Super Admin có thể truy cập tất cả dữ liệu (tự động có full permissions)
    - Customer chỉ có thể truy cập dữ liệu của mình (booking, đánh giá của mình)
    - Hoạt động của tất cả người dùng được ghi log để theo dõi
    - **Phân tách giao diện:**
      - Admin Panel: Chỉ Users (Super Admin, Owner, Manager, Staff) mới truy cập được
      - Frontend: Customer và Guest (chưa đăng nhập) có thể truy cập
      - Middleware/Guard ngăn Customer truy cập Admin Panel
+   - **Kiến trúc phân quyền:**
+     - **RBAC Module:** Module riêng biệt quản lý roles và permissions như Domain Entities
+     - **Guards:** `RolesGuard` và `PermissionsGuard` chỉ áp dụng cho User, không áp dụng cho Customer
+     - **Permission check logic (Real-time từ database):**
+       - `PermissionsGuard` load roles và permissions từ database khi check (real-time)
+       - Merge permissions từ roles và permissions trực tiếp của user
+       - Super Admin: Tự động bypass permission check (check `is_super_admin` flag)
+       - Wildcard `*:manage`: Full access
+       - Wildcard `module:*`: Full access to module
+       - Permission cụ thể: Check exact match
+       - Không cần đăng nhập lại khi gán permissions mới cho role (real-time check)
+   - **Cách sử dụng trong Controller:**
+     - Chỉ cần dùng `@Permissions('user:read')` decorator
+     - Không cần hardcode `@Roles('super_admin', 'owner')` (quyền động từ database)
+     - Guard tự động check permissions từ roles trong database
 
 **Bảng phân quyền tóm tắt:**
 
@@ -290,10 +334,20 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
   - Customer và User là 2 bảng riêng biệt, không thể chuyển đổi vai trò
 - **Bảo mật:**
   - Hoạt động của tất cả người dùng được ghi log để theo dõi
-  - Quyền có thể được cấu hình chi tiết hơn tùy theo nhu cầu
+  - Quyền có thể được cấu hình chi tiết hơn tùy theo nhu cầu thông qua RBAC module
   - Khi tạo tài khoản quản lý, hệ thống gửi email với thông tin đăng nhập (email và mật khẩu tạm thời)
   - Người dùng quản lý phải đổi mật khẩu lần đầu khi đăng nhập
   - Customer và User có thể có cùng email nhưng là 2 tài khoản riêng biệt
+  - **RBAC Module:**
+    - Quản lý roles như Domain Entities với CRUD operations
+    - Quản lý permissions như Value Objects (catalog được seed sẵn)
+    - Role có relationship many-to-many với Permission
+    - Role có field `is_super_admin` để đánh dấu role mặc định
+    - Cung cấp ports để User module gán roles/permissions
+    - Guards và decorators nằm trong `common/guards` và `common/decorators`
+    - Permissions được seed sẵn và không có CRUD
+    - Super Admin role (`is_super_admin = true`) tự động có full permissions, không thể xóa
+    - Permissions được check real-time từ database (không cần đăng nhập lại)
 
 ### 2.2. Quản lý thông tin Homestay
 
@@ -1257,9 +1311,13 @@ Giá cuối cùng = MAX(
   - Hệ thống tự động tạo mật khẩu tạm thời
   - Gửi email cho nhân viên với thông tin đăng nhập
   - Nhân viên phải đổi mật khẩu lần đầu khi đăng nhập
-  - Gán quyền chi tiết cho từng nhân viên:
-    - Chọn vai trò (role)
-    - Cấu hình quyền cụ thể (permissions)
+  - Gán quyền chi tiết cho từng nhân viên (thông qua RBAC module):
+    - Chọn vai trò (role) từ catalog hoặc tạo role mới (chỉ Super Admin)
+    - Mỗi role có thể gán nhiều permissions
+    - User có thể có nhiều roles
+    - User có thể có permissions trực tiếp (ngoài permissions từ roles)
+    - Permissions được quản lý bởi RBAC module, không nằm trong User module
+    - Permissions từ roles được merge với permissions trực tiếp khi check quyền (real-time)
     - Gán vào homestay/hotel cụ thể (nếu Owner quản lý nhiều homestay/hotel)
 - **Quản lý ca làm việc (shift management):**
   - Tạo ca làm việc
@@ -1276,15 +1334,36 @@ Giá cuối cùng = MAX(
   - Nhân viên không thể tự đăng ký, phải được tạo bởi Super Admin, Owner hoặc Manager
   - Khi tạo, hệ thống tự động tạo mật khẩu tạm thời và gửi email
   - Nhân viên phải đổi mật khẩu lần đầu khi đăng nhập
-- **Phân quyền:**
+  - User phải có ít nhất 1 role
+- **Phân quyền (thông qua RBAC module):**
   - Nhân viên chỉ có quyền truy cập dữ liệu trong phạm vi được gán
   - Không thể tạo nhân viên với quyền cao hơn người tạo
   - Manager chỉ có thể quản lý nhân viên nếu được Owner cấp quyền
+  - **Role là Domain Entity:**
+    - Role có CRUD operations (chỉ Super Admin mới có thể tạo/sửa/xóa roles)
+    - Role có field `is_super_admin` để đánh dấu role mặc định
+    - Role có relationship many-to-many với Permission
+    - Super Admin role (`is_super_admin = true`) không thể xóa
+  - **Super Admin:** Tự động có full permissions (check `is_super_admin` flag), không cần gán permissions cụ thể
+  - **Các role khác:** Phải được gán permissions cụ thể hoặc wildcard permissions
+  - **Permission format:** `module:action` (ví dụ: `user:manage`, `booking:read`)
+  - **Wildcard permissions:**
+    - `*:manage`: Full access to all modules
+    - `module:*`: Full access to all actions in a module
+  - **User có roles và permissions độc lập:**
+    - User có thể có nhiều roles
+    - User có thể có permissions trực tiếp (ngoài permissions từ roles)
+    - Permissions từ roles được merge với permissions trực tiếp khi check quyền (real-time từ database)
+  - Chỉ Super Admin mới có thể gán roles và permissions cho User
+  - Chỉ Super Admin mới có thể tạo/sửa/xóa roles
+  - Permissions chỉ áp dụng cho User (admin/staff), không áp dụng cho Customer
+  - Permissions được check real-time từ database (không cần đăng nhập lại khi gán permissions mới cho role)
 - **Bảo mật:**
   - Owner không thể bị xóa hoặc vô hiệu hóa bởi Manager hoặc Staff
   - Hoạt động của tất cả nhân viên được ghi log để theo dõi và audit
   - Khi vô hiệu hóa nhân viên, tài khoản vẫn tồn tại nhưng không thể đăng nhập
   - Nhân viên bị xóa sẽ không thể truy cập hệ thống nhưng dữ liệu lịch sử vẫn được giữ lại
+  - Guards (`RolesGuard`, `PermissionsGuard`) chỉ áp dụng cho User, không áp dụng cho Customer
 
 ### 13.2. Quản lý trạng thái phòng (Room Status Management)
 

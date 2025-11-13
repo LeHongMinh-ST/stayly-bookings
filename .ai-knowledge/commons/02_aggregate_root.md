@@ -20,25 +20,21 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - Quản lý tài khoản quản lý hệ thống (Super Admin, Owner, Manager, Staff)
 - Tách biệt hoàn toàn với Customer
 - Đăng nhập vào Admin Panel
+- **Lưu ý:** Roles và Permissions được quản lý bởi RBAC module (xem 2.14. RBAC Aggregate)
 
 **Entities:**
 - `User` (Aggregate Root)
   - `id`: Unique identifier
   - `email`: Email đăng nhập (unique)
   - `password`: Mật khẩu (hashed)
-  - `role`: Vai trò (super_admin, owner, manager, staff)
   - `full_name`: Họ tên
   - `phone`: Số điện thoại
   - `status`: Trạng thái (active, inactive, suspended)
   - `email_verified_at`: Thời gian xác thực email
   - `password_changed_at`: Thời gian đổi mật khẩu lần cuối
   - `created_by`: Người tạo (User ID)
-  - `created_at`, `updated_at`
-
-- `UserPermission` (Entity)
-  - `id`
-  - `user_id`: Foreign key to User
-  - `permission`: Quyền cụ thể (manage_homestay, manage_booking, etc.)
+  - `roles`: Danh sách roles (tham chiếu đến RBAC module qua ID)
+  - `permissions`: Danh sách permissions (tham chiếu đến RBAC module qua ID)
   - `created_at`, `updated_at`
 
 - `UserAssignment` (Entity) - Gán User vào homestay/hotel
@@ -51,8 +47,9 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 **Value Objects:**
 - `Email`: Email address với validation
 - `Password`: Mật khẩu với encryption
-- `Role`: Enum (super_admin, owner, manager, receptionist, housekeeping, service_staff, accountant)
 - `UserStatus`: Enum (active, inactive, suspended)
+- `Role`: Value object từ RBAC module (super_admin, owner, manager, staff)
+- `Permission`: Value object từ RBAC module (user:manage, booking:read, etc.)
 
 **Business Rules:**
 - Email phải unique trong hệ thống
@@ -61,13 +58,21 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - Owner không thể bị xóa bởi Manager hoặc Staff
 - Không thể tạo User với quyền cao hơn người tạo
 - User chỉ có thể truy cập Admin Panel
+- Roles và Permissions được quản lý bởi RBAC module, User aggregate chỉ tham chiếu qua ID
+- User phải có ít nhất 1 role
+- Super Admin tự động có full permissions (không cần gán permissions cụ thể)
 
 **Repository:** `UserRepository`
 
 **Domain Services:**
 - `UserCreationService`: Tạo User mới với validation và gửi email
 - `PasswordResetService`: Đặt lại mật khẩu
-- `PermissionAssignmentService`: Gán quyền cho User
+
+**Dependencies:**
+- Phụ thuộc vào RBAC module để:
+  - Validate roles và permissions khi tạo/cập nhật User
+  - Load roles và permissions khi hydrate User aggregate
+  - Gán roles và permissions cho User (thông qua RBAC module ports)
 
 ---
 
@@ -990,12 +995,177 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 
 ---
 
+### 2.14. RBAC Aggregate
+
+**Aggregate Root:** `Role` (Domain Entity)
+
+**Mô tả:**
+- Quản lý roles như Domain Entities với CRUD operations
+- Quản lý permissions như Value Objects (catalog được seed sẵn)
+- Cung cấp khả năng gán roles và permissions cho User
+- Tách biệt hoàn toàn khỏi User module để tái sử dụng và quản lý độc lập
+- Chỉ áp dụng cho User (admin/staff), không áp dụng cho Customer
+
+**Entities:**
+- `Role` (Domain Entity - Aggregate Root)
+  - `id`: RoleId (Value Object)
+  - `code`: Mã role (unique): super_admin, owner, manager, staff, hoặc role tùy chỉnh
+  - `displayName`: Tên hiển thị
+  - `isSuperAdmin`: Boolean flag để đánh dấu role mặc định (super_admin role)
+  - `permissions`: Danh sách Permission value objects (many-to-many relationship)
+  - `createdAt`, `updatedAt`
+  - Methods:
+    - `create()`: Tạo role mới
+    - `rehydrate()`: Load từ database
+    - `updateDisplayName()`: Cập nhật tên hiển thị
+    - `assignPermissions()`: Gán permissions cho role
+    - `removePermissions()`: Xóa permissions khỏi role
+    - `canDelete()`: Check xem có thể xóa không (super_admin không thể xóa)
+
+- `Permission` (Value Object - Catalog)
+  - `value`: String theo format `module:action` (ví dụ: user:manage, booking:read)
+  - Methods: `create()`, `getValue()`
+  - Validation: Phải theo format `module:action`
+  - Permissions được seed sẵn vào database, không có CRUD
+
+**Value Objects:**
+- `RoleId`: Value object cho Role ID (UUID validation)
+- `Permission`: Value object đại diện cho permission (catalog)
+
+**ORM Entities:**
+- `RoleOrmEntity` (ORM Entity)
+  - `id`: UUID
+  - `code`: Mã role (unique)
+  - `display_name`: Tên hiển thị
+  - `is_super_admin`: Boolean flag
+  - `permissions`: Many-to-many relationship với PermissionOrmEntity
+  - `created_at`, `updated_at`
+
+- `PermissionOrmEntity` (ORM Entity)
+  - `id`: UUID
+  - `code`: Mã permission (unique)
+  - `description`: Mô tả quyền
+  - `roles`: Many-to-many relationship với RoleOrmEntity (inverse side)
+  - `created_at`, `updated_at`
+
+**Business Rules:**
+- **Role Management:**
+  - Role là Domain Entity với CRUD operations
+  - Role có field `is_super_admin` để đánh dấu role mặc định
+  - Super Admin role (`is_super_admin = true`) không thể xóa
+  - Các role khác có thể tạo mới, sửa, xóa (chỉ Super Admin)
+  - Role có relationship many-to-many với Permission
+  - Khi tạo role mới, có thể gán permissions sau (không bắt buộc khi tạo)
+- **Permission Management:**
+  - Permission là Value Object (catalog)
+  - Permissions được seed sẵn vào database
+  - Không có CRUD cho Permission (chỉ là catalog)
+  - Permission format: `module:action` (ví dụ: `user:manage`, `booking:read`)
+- **User-Role-Permission Relationship:**
+  - User có thể có nhiều roles
+  - User có thể có permissions trực tiếp (ngoài permissions từ roles)
+  - Permissions từ roles được merge với permissions trực tiếp khi check quyền
+  - Permissions được check real-time từ database (không cần đăng nhập lại)
+- **Super Admin:**
+  - Role `super_admin` có `is_super_admin = true`
+  - Tự động có full permissions (bypass permission check)
+  - Không thể xóa
+- **Wildcard permissions:**
+  - `*:manage`: Full access to all modules
+  - `module:*`: Full access to all actions in a module
+- **Permissions được seed sẵn:**
+  - User management: `user:create`, `user:read`, `user:update`, `user:delete`, `user:manage`
+  - Customer management: `customer:create`, `customer:read`, `customer:update`, `customer:delete`, `customer:manage`
+  - Homestay/Hotel: `homestay:*`
+  - Room: `room:*`
+  - Booking: `booking:*` (bao gồm `checkin`, `checkout`)
+  - Payment: `payment:*`
+  - Report: `report:*`
+  - Role/Permission: `role:create`, `role:read`, `role:update`, `role:delete`, `role:assign`, `role:manage`, `permission:read`, `permission:assign`, `permission:manage`
+  - System: `system:*`
+  - Wildcard: `*:manage` (full access)
+- Chỉ Super Admin mới có thể gán roles và permissions cho User
+- Chỉ Super Admin mới có thể tạo/sửa/xóa roles
+- User phải có ít nhất 1 role
+- Permissions chỉ áp dụng cho User (admin/staff), không áp dụng cho Customer
+
+**Repositories:**
+- `RoleRepository`: Quản lý Role Domain Entities
+  - `findAll()`: Lấy tất cả roles với permissions
+  - `findById()`: Tìm role theo ID
+  - `findByCode()`: Tìm role theo code
+  - `save()`: Lưu role entity
+  - `delete()`: Xóa role (với check super_admin)
+- `PermissionRepository`: Quản lý Permission catalog (Value Objects)
+
+**Domain Services:**
+- `RoleAssignmentService`: Gán roles cho User
+- `PermissionAssignmentService`: Gán permissions cho User
+- `RolePermissionValidationService`: Validate roles và permissions
+
+**Ports (Application Interfaces):**
+- `IRoleAssignmentPort`: Port để User module gán roles
+- `IPermissionAssignmentPort`: Port để User module gán permissions
+- `IRolePermissionValidationPort`: Port để User module validate roles/permissions
+
+**Commands:**
+- `CreateRoleCommand`: Tạo role mới
+- `UpdateRoleCommand`: Cập nhật role
+- `DeleteRoleCommand`: Xóa role (với check super_admin)
+- `AssignPermissionsToRoleCommand`: Gán permissions cho role
+- `AssignRolesToUserCommand`: Gán roles cho User
+- `AssignPermissionsToUserCommand`: Gán permissions cho User
+
+**Queries:**
+- `GetRoleQuery`: Lấy role theo ID
+- `ListRolesQuery`: Lấy danh sách tất cả roles
+- `ListPermissionsQuery`: Lấy danh sách tất cả permissions
+
+**Guards và Decorators:**
+- `RolesGuard`: Kiểm tra roles (chỉ cho User, không cho Customer)
+- `PermissionsGuard`: Kiểm tra permissions với logic real-time:
+  - Load roles và permissions từ database khi check (real-time)
+  - Merge permissions từ roles và permissions trực tiếp của user
+  - Super Admin tự động có full permissions (check `is_super_admin` flag)
+  - Hỗ trợ wildcard `*:manage` và `module:*`
+  - Chỉ áp dụng cho User, không áp dụng cho Customer
+- `@Roles()` decorator: Định nghĩa roles yêu cầu (optional, backward compatibility)
+- `@Permissions()` decorator: Định nghĩa permissions yêu cầu (chính, quyền động từ database)
+
+**Dependencies:**
+- Phụ thuộc vào User module để:
+  - Inject `USER_ROLE_PERMISSION_PORT` để cập nhật roles/permissions cho User
+  - Truy cập User aggregate để cập nhật roles/permissions
+- User module phụ thuộc vào RBAC module để:
+  - Validate roles và permissions khi tạo/cập nhật User
+  - Load permissions từ roles khi check quyền
+
+**Lưu ý:**
+- **Role là Domain Entity** với CRUD operations, không phải Value Object
+- **Permission là Value Object** (catalog được seed sẵn), không có CRUD
+- Role có relationship many-to-many với Permission
+- User có roles và permissions độc lập (user có thể có permissions ngoài permissions của role)
+- Permissions được check real-time từ database (không cần đăng nhập lại khi gán permissions mới cho role)
+- Guards và decorators nằm trong `common/guards` và `common/decorators`, không nằm trong RBAC module
+- `PermissionsGuard` inject `ROLE_REPOSITORY` để load permissions từ roles real-time
+
+---
+
 ## 3. Quan hệ giữa các Aggregate
 
 ### 3.1. Sơ đồ quan hệ
 
 ```
+RBAC (Authorization Context)
+  ├──> Role (Domain Entity - Aggregate Root)
+  │     ├──> Permissions (many-to-many relationship)
+  │     └──> is_super_admin (flag)
+  └──> Permission (Value Object - Catalog)
+        └──> User (Aggregate Root) [via assignment]
+
 User (Aggregate Root)
+  ├──> Roles (many-to-many relationship với Role)
+  ├──> Permissions (many-to-many relationship với Permission, độc lập với roles)
   └──> Accommodation (Aggregate Root)
         ├──> Floor (Entity) [Hotel only, optional]
         ├──> Room/RoomType (Aggregate Root)
@@ -1065,8 +1235,16 @@ Promotion (Aggregate Root)
 | 11 | Invoice | Quản lý hóa đơn (Hotel) | Invoice Management |
 | 12 | Revenue | Quản lý doanh thu | Revenue Management |
 | 13 | Message | Quản lý tin nhắn | Communication |
+| 14 | RBAC | Quản lý roles (Domain Entity) và permissions (Value Object catalog) | Authorization/RBAC |
 
-**Lưu ý:** Floor không phải Aggregate Root riêng, mà là Entity trong Accommodation Aggregate (chỉ cho Hotel, optional).
+**Lưu ý:** 
+- Floor không phải Aggregate Root riêng, mà là Entity trong Accommodation Aggregate (chỉ cho Hotel, optional).
+- **Role là Domain Entity** với CRUD operations, có relationship many-to-many với Permission
+- **Permission là Value Object** (catalog được seed sẵn), không có CRUD
+- Role có field `is_super_admin` để đánh dấu role mặc định (super_admin role)
+- Super Admin role không thể xóa
+- User có roles và permissions độc lập (user có thể có permissions ngoài permissions của role)
+- Permissions được check real-time từ database (không cần đăng nhập lại khi gán permissions mới cho role)
 
 ---
 
