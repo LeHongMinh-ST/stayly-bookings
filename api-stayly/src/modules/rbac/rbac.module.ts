@@ -26,9 +26,11 @@ import { RolePermissionSeedService } from './infrastructure/persistence/seeds/ro
 import { RoleAssignmentService } from './infrastructure/services/role-assignment.service';
 import { PermissionAssignmentService } from './infrastructure/services/permission-assignment.service';
 import { RolePermissionValidationService } from './infrastructure/services/role-permission-validation.service';
+import { UserRolePermissionQueryService } from './infrastructure/services/user-role-permission-query.service';
 import { ROLE_ASSIGNMENT_PORT } from './application/interfaces/role-assignment.port';
 import { PERMISSION_ASSIGNMENT_PORT } from './application/interfaces/permission-assignment.port';
 import { ROLE_PERMISSION_VALIDATION_PORT } from './application/interfaces/role-permission-validation.port';
+import { USER_ROLE_PERMISSION_QUERY_PORT } from './application/interfaces/user-role-permission-query.port';
 import { RolesController } from './presentation/controllers/roles.controller';
 import { PermissionsController } from './presentation/controllers/permissions.controller';
 
@@ -67,6 +69,10 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
       provide: ROLE_PERMISSION_VALIDATION_PORT,
       useClass: RolePermissionValidationService,
     },
+    {
+      provide: USER_ROLE_PERMISSION_QUERY_PORT,
+      useClass: UserRolePermissionQueryService,
+    },
     // Seed service for CLI usage
     RolePermissionSeedService,
   ],
@@ -76,6 +82,7 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
     ROLE_ASSIGNMENT_PORT,
     PERMISSION_ASSIGNMENT_PORT,
     ROLE_PERMISSION_VALIDATION_PORT, // Export port for User module to validate roles/permissions
+    USER_ROLE_PERMISSION_QUERY_PORT, // Export port for Auth module to query user roles/permissions
   ],
 })
 export class RbacModule {}

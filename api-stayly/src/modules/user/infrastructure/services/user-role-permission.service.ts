@@ -5,9 +5,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
-import type {
-  IUserRolePermissionPort,
-} from '../../application/interfaces/user-role-permission.port';
+import type { IUserRolePermissionPort } from '../../application/interfaces/user-role-permission.port';
 import { UserId } from '../../domain/value-objects/user-id.vo';
 import { UserRole } from '../../domain/value-objects/user-role.vo';
 import { UserPermission } from '../../domain/value-objects/user-permission.vo';
@@ -60,4 +58,3 @@ export class UserRolePermissionService implements IUserRolePermissionPort {
     return UserResponseDto.fromAggregate(user);
   }
 }
-

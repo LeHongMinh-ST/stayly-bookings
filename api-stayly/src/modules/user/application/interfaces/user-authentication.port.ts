@@ -9,14 +9,13 @@ import { Email } from '../../../../common/domain/value-objects/email.vo';
 /**
  * User authentication data required for authentication flow
  * Only exposes necessary fields, not the full User entity
+ * Note: Roles and permissions are queried separately from RBAC module
  */
 export interface UserAuthenticationData {
   id: string;
   email: string;
   passwordHash: string;
   isActive: boolean;
-  roles: string[];
-  permissions: string[];
 }
 
 /**

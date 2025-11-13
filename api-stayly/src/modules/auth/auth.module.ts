@@ -12,6 +12,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SecurityModule } from '../../common/infrastructure/security/security.module';
 import { UserModule } from '../user/user.module';
 import { CustomerModule } from '../customer/customer.module';
+import { RbacModule } from '../rbac/rbac.module';
 import { AuthenticateUserHandler } from './application/commands/handlers/authenticate-user.handler';
 import { AuthenticateCustomerHandler } from './application/commands/handlers/authenticate-customer.handler';
 import { RefreshTokenHandler } from './application/commands/handlers/refresh-token.handler';
@@ -27,8 +28,10 @@ import { JwtUserStrategy } from '../../common/strategies/jwt-user.strategy';
 import { JwtCustomerStrategy } from '../../common/strategies/jwt-customer.strategy';
 import { CustomerAuthenticationAdapter } from './infrastructure/adapters/customer-authentication.adapter';
 import { UserAuthenticationAdapter } from './infrastructure/adapters/user-authentication.adapter';
+import { UserRolePermissionQueryAdapter } from './infrastructure/adapters/user-role-permission-query.adapter';
 import { CUSTOMER_AUTHENTICATION_SERVICE } from './application/interfaces/customer-authentication.service.interface';
 import { USER_AUTHENTICATION_SERVICE } from './application/interfaces/user-authentication.service.interface';
+import { USER_ROLE_PERMISSION_QUERY_SERVICE } from './application/interfaces/user-role-permission-query.service.interface';
 
 const commandHandlers = [
   AuthenticateUserHandler,
@@ -43,6 +46,7 @@ const commandHandlers = [
     SecurityModule,
     UserModule,
     CustomerModule,
+    RbacModule, // Import RbacModule to access USER_ROLE_PERMISSION_QUERY_PORT
     TypeOrmModule.forFeature([SessionOrmEntity]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -74,6 +78,10 @@ const commandHandlers = [
     {
       provide: USER_AUTHENTICATION_SERVICE,
       useClass: UserAuthenticationAdapter,
+    },
+    {
+      provide: USER_ROLE_PERMISSION_QUERY_SERVICE,
+      useClass: UserRolePermissionQueryAdapter,
     },
   ],
   exports: [TOKEN_SERVICE, SESSION_REPOSITORY, PassportModule],

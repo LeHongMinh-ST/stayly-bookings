@@ -12,6 +12,8 @@ import { randomUUID } from 'crypto';
 import { AuthenticateUserCommand } from '../authenticate-user.command';
 import type { IUserAuthenticationService } from '../../interfaces/user-authentication.service.interface';
 import { USER_AUTHENTICATION_SERVICE } from '../../interfaces/user-authentication.service.interface';
+import type { IUserRolePermissionQueryService } from '../../interfaces/user-role-permission-query.service.interface';
+import { USER_ROLE_PERMISSION_QUERY_SERVICE } from '../../interfaces/user-role-permission-query.service.interface';
 import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
 import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
@@ -32,6 +34,8 @@ export class AuthenticateUserHandler
   constructor(
     @Inject(USER_AUTHENTICATION_SERVICE)
     private readonly userAuthService: IUserAuthenticationService,
+    @Inject(USER_ROLE_PERMISSION_QUERY_SERVICE)
+    private readonly userRolePermissionQueryService: IUserRolePermissionQueryService,
     @Inject(PASSWORD_HASHER)
     private readonly passwordHasher: PasswordHasher,
     @Inject(TOKEN_SERVICE)
@@ -64,11 +68,17 @@ export class AuthenticateUserHandler
       throw new BadRequestException('User is not active');
     }
 
+    // Get roles and permissions from RBAC module
+    const rolePermissionData =
+      await this.userRolePermissionQueryService.getUserRolesAndPermissions(
+        userData.id,
+      );
+
     const payload = JwtPayload.create({
       sub: userData.id,
       email: userData.email,
-      roles: userData.roles,
-      permissions: userData.permissions,
+      roles: rolePermissionData.roles,
+      permissions: rolePermissionData.permissions,
       tokenId: randomUUID(),
       userType: 'user', // Mark as user for guard differentiation
     });
