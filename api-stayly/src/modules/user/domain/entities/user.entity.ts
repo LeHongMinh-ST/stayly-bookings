@@ -18,13 +18,9 @@ export interface CreateUserProps {
   status?: Status;
   roles?: UserRole[];
   permissions?: UserPermission[];
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 export class User extends BaseEntity<UserId> {
-  private updatedAt: Date;
-
   private constructor(
     id: UserId,
     private email: Email,
@@ -33,10 +29,8 @@ export class User extends BaseEntity<UserId> {
     private status: Status,
     private roles: UserRole[],
     private permissions: UserPermission[],
-    private readonly createdAt: Date,
   ) {
     super(id);
-    this.updatedAt = createdAt;
   }
 
   static create(props: CreateUserProps): User {
@@ -53,7 +47,6 @@ export class User extends BaseEntity<UserId> {
       props.status ?? Status.create(UserStatus.ACTIVE),
       props.roles ?? [UserRole.create(UserRoleEnum.STAFF)],
       props.permissions ?? [],
-      props.createdAt ?? now,
     );
 
     user.recordEvent(new UserCreatedEvent(user.getId().getValue(), now));
@@ -68,10 +61,8 @@ export class User extends BaseEntity<UserId> {
     status: Status;
     roles: UserRole[];
     permissions: UserPermission[];
-    createdAt: Date;
-    updatedAt: Date;
   }): User {
-    const user = new User(
+    return new User(
       props.id,
       props.email,
       props.fullName,
@@ -79,10 +70,7 @@ export class User extends BaseEntity<UserId> {
       props.status,
       props.roles,
       props.permissions,
-      props.createdAt,
     );
-    user.updatedAt = props.updatedAt;
-    return user;
   }
 
   rename(fullName: string): void {
@@ -90,7 +78,6 @@ export class User extends BaseEntity<UserId> {
       throw new Error('User full name is required');
     }
     this.fullName = fullName.trim();
-    this.touch();
   }
 
   assignRoles(nextRoles: UserRole[]): void {
@@ -98,22 +85,18 @@ export class User extends BaseEntity<UserId> {
       throw new Error('User must have at least one role');
     }
     this.roles = nextRoles;
-    this.touch();
   }
 
   assignPermissions(nextPermissions: UserPermission[]): void {
     this.permissions = nextPermissions;
-    this.touch();
   }
 
   updateStatus(nextStatus: Status): void {
     this.status = nextStatus;
-    this.touch();
   }
 
   changePassword(nextPasswordHash: PasswordHash): void {
     this.passwordHash = nextPasswordHash;
-    this.touch();
   }
 
   getEmail(): Email {
@@ -146,17 +129,5 @@ export class User extends BaseEntity<UserId> {
 
   getPermissions(): UserPermission[] {
     return [...this.permissions];
-  }
-
-  getCreatedAt(): Date {
-    return this.createdAt;
-  }
-
-  getUpdatedAt(): Date {
-    return this.updatedAt;
-  }
-
-  private touch(): void {
-    this.updatedAt = new Date();
   }
 }

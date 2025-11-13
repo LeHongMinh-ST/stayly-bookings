@@ -7,10 +7,7 @@ import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { UserRole } from '../../../domain/value-objects/user-role.vo';
 import { UserPermission } from '../../../domain/value-objects/user-permission.vo';
-import {
-  Status,
-  UserStatus,
-} from '../../../domain/value-objects/user-status.vo';
+import { Status } from '../../../domain/value-objects/user-status.vo';
 import { UserOrmEntity } from '../entities/user.orm-entity';
 import { RoleOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/role.orm-entity';
 import { PermissionOrmEntity } from '../../../../rbac/infrastructure/persistence/entities/permission.orm-entity';
@@ -30,8 +27,6 @@ export class UserOrmMapper {
       permissions: (entity.permissions || []).map((permission) =>
         UserPermission.create(permission.code),
       ),
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
     });
   }
 

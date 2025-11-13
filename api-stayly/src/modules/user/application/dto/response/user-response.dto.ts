@@ -41,18 +41,6 @@ export class UserResponseDto {
   })
   permissions!: string[];
 
-  @ApiProperty({
-    description: 'Account creation timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  createdAt!: string;
-
-  @ApiProperty({
-    description: 'Last update timestamp',
-    example: '2024-01-01T00:00:00.000Z',
-  })
-  updatedAt!: string;
-
   constructor(
     id: string,
     email: string,
@@ -60,8 +48,6 @@ export class UserResponseDto {
     status: string,
     roles: string[],
     permissions: string[],
-    createdAt: string,
-    updatedAt: string,
   ) {
     this.id = id;
     this.email = email;
@@ -69,8 +55,6 @@ export class UserResponseDto {
     this.status = status;
     this.roles = roles;
     this.permissions = permissions;
-    this.createdAt = createdAt;
-    this.updatedAt = updatedAt;
   }
 
   static fromAggregate(user: User): UserResponseDto {
@@ -81,8 +65,6 @@ export class UserResponseDto {
       user.getStatus().getValue(),
       user.getRoles().map((role) => role.getValueAsString()),
       user.getPermissions().map((permission) => permission.getValue()),
-      user.getCreatedAt().toISOString(),
-      user.getUpdatedAt().toISOString(),
     );
   }
 }

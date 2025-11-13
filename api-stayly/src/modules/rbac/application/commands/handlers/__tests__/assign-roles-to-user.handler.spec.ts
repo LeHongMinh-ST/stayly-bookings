@@ -62,10 +62,9 @@ describe('AssignRolesToUserHandler', () => {
         userId,
         'user@example.com',
         'User Name',
+        'active',
         ['editor', 'manager'],
         [],
-        new Date(),
-        new Date(),
       );
 
       rolePermissionValidation.validateRoles.mockResolvedValue(validatedRoles);
