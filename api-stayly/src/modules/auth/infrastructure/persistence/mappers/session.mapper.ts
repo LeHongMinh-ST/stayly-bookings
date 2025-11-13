@@ -16,6 +16,7 @@ export class SessionOrmMapper {
     return Session.rehydrate({
       id: entity.id,
       userId: entity.userId,
+      userType: entity.userType,
       refreshToken,
       userAgent: entity.userAgent,
       ipAddress: entity.ipAddress,
@@ -28,6 +29,7 @@ export class SessionOrmMapper {
     const entity = existing ?? new SessionOrmEntity();
     entity.id = session.getId();
     entity.userId = session.getUserId();
+    entity.userType = session.getUserType();
     entity.tokenId = session.getRefreshToken().getTokenId();
     entity.refreshToken = session.getRefreshToken().getValue();
     entity.refreshTokenExpiresAt = session.getRefreshToken().getExpiresAt();

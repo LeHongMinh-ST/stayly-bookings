@@ -80,6 +80,7 @@ export class AuthenticateCustomerHandler
     const session = Session.create({
       id: randomUUID(),
       userId: customerId,
+      userType: 'customer',
       refreshToken: tokenPair.refreshToken,
       userAgent: command.userAgent ?? null,
       ipAddress: command.ipAddress ?? null,

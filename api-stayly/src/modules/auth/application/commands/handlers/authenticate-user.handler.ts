@@ -81,6 +81,7 @@ export class AuthenticateUserHandler
     const session = Session.create({
       id: randomUUID(),
       userId: userId,
+      userType: 'user',
       refreshToken: tokenPair.refreshToken,
       userAgent: command.userAgent ?? null,
       ipAddress: command.ipAddress ?? null,

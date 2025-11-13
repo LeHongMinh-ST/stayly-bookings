@@ -19,6 +19,10 @@ export class SessionOrmEntity {
   @Column({ name: 'user_id' })
   userId!: string;
 
+  @Index('idx_auth_sessions_user_type')
+  @Column({ name: 'user_type', type: 'varchar', length: 20 })
+  userType!: 'user' | 'customer';
+
   @Index('idx_session_token_id', { unique: true })
   @Column({ name: 'token_id', unique: true })
   tokenId!: string;

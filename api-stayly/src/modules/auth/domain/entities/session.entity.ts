@@ -9,6 +9,7 @@ import { SessionRevokedEvent } from '../events/session-revoked.event';
 export interface CreateSessionProps {
   id: string;
   userId: string;
+  userType: 'user' | 'customer';
   refreshToken: RefreshToken;
   userAgent?: string | null;
   ipAddress?: string | null;
@@ -24,6 +25,7 @@ export class Session {
   private constructor(
     private readonly id: string,
     private readonly userId: string,
+    private readonly userType: 'user' | 'customer',
     private refreshToken: RefreshToken,
     private readonly userAgent: string | null,
     private readonly ipAddress: string | null,
@@ -39,6 +41,7 @@ export class Session {
     const session = new Session(
       props.id,
       props.userId,
+      props.userType,
       props.refreshToken,
       props.userAgent ?? null,
       props.ipAddress ?? null,
@@ -55,6 +58,7 @@ export class Session {
   static rehydrate(props: {
     id: string;
     userId: string;
+    userType: 'user' | 'customer';
     refreshToken: RefreshToken;
     userAgent: string | null;
     ipAddress: string | null;
@@ -64,6 +68,7 @@ export class Session {
     return new Session(
       props.id,
       props.userId,
+      props.userType,
       props.refreshToken,
       props.userAgent,
       props.ipAddress,
@@ -97,6 +102,10 @@ export class Session {
 
   getUserId(): string {
     return this.userId;
+  }
+
+  getUserType(): 'user' | 'customer' {
+    return this.userType;
   }
 
   getRefreshToken(): RefreshToken {
