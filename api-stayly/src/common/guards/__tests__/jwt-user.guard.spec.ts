@@ -7,6 +7,17 @@ import { Reflector } from "@nestjs/core";
 import { JwtUserGuard } from "../jwt-user.guard";
 import { IS_PUBLIC_KEY } from "../../decorators/public.decorator";
 
+type AuthGuardPrototype = {
+  canActivate: (ctx: ExecutionContext) => boolean;
+};
+
+const getParentAuthGuardPrototype = (
+  guardInstance: JwtUserGuard,
+): AuthGuardPrototype => {
+  const immediatePrototype = Object.getPrototypeOf(guardInstance) as unknown;
+  return Object.getPrototypeOf(immediatePrototype) as AuthGuardPrototype;
+};
+
 const createExecutionContextMock = (
   user: unknown,
 ): jest.Mocked<ExecutionContext> => {
@@ -90,10 +101,7 @@ describe("JwtUserGuard", () => {
     it("should call parent canActivate when route is not public", () => {
       // Arrange
       getAllAndOverrideSpy.mockReturnValue(false);
-      const guardPrototype = Object.getPrototypeOf(guard);
-      const parentPrototype = Object.getPrototypeOf(guardPrototype) as {
-        canActivate: (ctx: ExecutionContext) => boolean;
-      };
+      const parentPrototype = getParentAuthGuardPrototype(guard);
       const parentCanActivate = jest
         .spyOn(parentPrototype, "canActivate")
         .mockReturnValue(true);
