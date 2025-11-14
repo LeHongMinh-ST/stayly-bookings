@@ -3,9 +3,7 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { RolePermissionValidationService } from '../role-permission-validation.service';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import type { IPermissionRepository } from '../../../domain/repositories/permission.repository.interface';
 import { PERMISSION_REPOSITORY } from '../../../domain/repositories/permission.repository.interface';
 import { Role } from '../../../domain/entities/role.entity';
 import { RoleId } from '../../../domain/value-objects/role-id.vo';
@@ -14,13 +12,16 @@ import { randomUUID } from 'crypto';
 
 describe('RolePermissionValidationService', () => {
   let service: RolePermissionValidationService;
-  let roleRepository: jest.Mocked<IRoleRepository>;
-  let permissionRepository: jest.Mocked<IPermissionRepository>;
+  let findByIdMock: jest.Mock;
+  let findByCodesMock: jest.Mock;
 
   beforeEach(async () => {
+    findByIdMock = jest.fn();
+    findByCodesMock = jest.fn();
+
     const mockRoleRepository = {
       findAll: jest.fn(),
-      findById: jest.fn(),
+      findById: findByIdMock,
       findByCode: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
@@ -29,7 +30,7 @@ describe('RolePermissionValidationService', () => {
 
     const mockPermissionRepository = {
       findAll: jest.fn(),
-      findByCodes: jest.fn(),
+      findByCodes: findByCodesMock,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -49,8 +50,6 @@ describe('RolePermissionValidationService', () => {
     service = module.get<RolePermissionValidationService>(
       RolePermissionValidationService,
     );
-    roleRepository = module.get(ROLE_REPOSITORY);
-    permissionRepository = module.get(PERMISSION_REPOSITORY);
   });
 
   afterEach(() => {
@@ -76,16 +75,14 @@ describe('RolePermissionValidationService', () => {
         permissions: [Permission.create('user:write')],
       });
 
-      roleRepository.findById
-        .mockResolvedValueOnce(role1)
-        .mockResolvedValueOnce(role2);
+      findByIdMock.mockResolvedValueOnce(role1).mockResolvedValueOnce(role2);
 
       // Act
       const result = await service.validateRoles(roleIds);
 
       // Assert
       expect(result).toEqual(roleIds);
-      expect(roleRepository.findById).toHaveBeenCalledTimes(2);
+      expect(findByIdMock).toHaveBeenCalledTimes(2);
     });
 
     it('should throw error when at least one role is required', async () => {
@@ -93,7 +90,7 @@ describe('RolePermissionValidationService', () => {
       await expect(service.validateRoles([])).rejects.toThrow(
         'At least one role is required',
       );
-      expect(roleRepository.findById).not.toHaveBeenCalled();
+      expect(findByIdMock).not.toHaveBeenCalled();
     });
 
     it('should throw error when role does not exist', async () => {
@@ -108,9 +105,7 @@ describe('RolePermissionValidationService', () => {
         permissions: [Permission.create('user:read')],
       });
 
-      roleRepository.findById
-        .mockResolvedValueOnce(role1)
-        .mockResolvedValueOnce(null);
+      findByIdMock.mockResolvedValueOnce(role1).mockResolvedValueOnce(null);
 
       // Act & Assert
       await expect(service.validateRoles(roleIds)).rejects.toThrow(
@@ -136,9 +131,7 @@ describe('RolePermissionValidationService', () => {
         permissions: [], // No permissions
       });
 
-      roleRepository.findById
-        .mockResolvedValueOnce(role1)
-        .mockResolvedValueOnce(role2);
+      findByIdMock.mockResolvedValueOnce(role1).mockResolvedValueOnce(role2);
 
       // Act & Assert
       await expect(service.validateRoles(roleIds)).rejects.toThrow(
@@ -165,7 +158,7 @@ describe('RolePermissionValidationService', () => {
         permissions: [Permission.create('user:read')],
       });
 
-      roleRepository.findById
+      findByIdMock
         .mockResolvedValueOnce(superAdminRole)
         .mockResolvedValueOnce(role);
 
@@ -187,16 +180,14 @@ describe('RolePermissionValidationService', () => {
         Permission.create('user:create'),
         Permission.create('user:update'),
       ];
-      permissionRepository.findByCodes.mockResolvedValue(permissions);
+      findByCodesMock.mockResolvedValue(permissions);
 
       // Act
       const result = await service.validatePermissions(permissionCodes);
 
       // Assert
       expect(result).toEqual(permissionCodes);
-      expect(permissionRepository.findByCodes).toHaveBeenCalledWith(
-        permissionCodes,
-      );
+      expect(findByCodesMock).toHaveBeenCalledWith(permissionCodes);
     });
 
     it('should return empty array when permission codes is empty', async () => {
@@ -205,14 +196,14 @@ describe('RolePermissionValidationService', () => {
 
       // Assert
       expect(result).toEqual([]);
-      expect(permissionRepository.findByCodes).not.toHaveBeenCalled();
+      expect(findByCodesMock).not.toHaveBeenCalled();
     });
 
     it('should throw error when permission does not exist', async () => {
       // Arrange
       const permissionCodes = ['user:read', 'invalid:permission'];
       const permissions = [Permission.create('user:read')];
-      permissionRepository.findByCodes.mockResolvedValue(permissions);
+      findByCodesMock.mockResolvedValue(permissions);
 
       // Act & Assert
       await expect(
@@ -227,7 +218,7 @@ describe('RolePermissionValidationService', () => {
         Permission.create('user:read'),
         Permission.create('user:create'),
       ];
-      permissionRepository.findByCodes.mockResolvedValue(permissions);
+      findByCodesMock.mockResolvedValue(permissions);
 
       // Act
       const result = await service.validatePermissions(permissionCodes);

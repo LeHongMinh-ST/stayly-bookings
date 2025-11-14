@@ -37,17 +37,22 @@ export class RoleResponseDto {
   }
 
   // Backward compatibility method (deprecated)
-  static fromValueObject(role: any): RoleResponseDto {
+  static fromValueObject(role: {
+    getValue?: () => string;
+    displayName?: string;
+  }): RoleResponseDto {
     // This method is kept for backward compatibility
     // Should be removed after all code is migrated to use domain entities
+    const displayNameValue = role.getValue
+      ? role
+          .getValue()
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (l: string) => l.toUpperCase())
+      : (role.displayName ?? '');
+
     return {
       id: '',
-      displayName: role.getValue
-        ? role
-            .getValue()
-            .replace(/_/g, ' ')
-            .replace(/\b\w/g, (l) => l.toUpperCase())
-        : role.displayName,
+      displayName: displayNameValue,
       isSuperAdmin: false,
       permissions: [],
     };

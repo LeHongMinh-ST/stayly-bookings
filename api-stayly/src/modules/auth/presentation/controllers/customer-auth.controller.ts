@@ -2,14 +2,7 @@
  * CustomerAuthController manages authentication flows for customers (login, refresh, logout)
  * Only accessible by customers from customers table
  */
-import {
-  Body,
-  Controller,
-  Inject,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -26,6 +19,7 @@ import { TokenResponseDto } from '../../application/dto/response/token-response.
 import { RefreshTokenDto } from '../../application/dto/request/refresh-token.dto';
 import { RefreshTokenCommand } from '../../application/commands/refresh-token.command';
 import { RevokeSessionCommand } from '../../application/commands/revoke-session.command';
+import type { Request } from 'express';
 import type { TokenService } from '../../../../common/application/interfaces/token-service.interface';
 import { TOKEN_SERVICE } from '../../../../common/application/interfaces/token-service.interface';
 
@@ -55,13 +49,14 @@ export class CustomerAuthController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   async login(
     @Body() dto: LoginDto,
-    @Request() req: any,
+    @Req() req: Request,
   ): Promise<TokenResponseDto> {
+    const { userAgent, ipAddress } = this.extractRequestMetadata(req);
     const command = new AuthenticateCustomerCommand(
       dto.email,
       dto.password,
-      req.headers['user-agent'],
-      req.ip,
+      userAgent,
+      ipAddress,
     );
     return this.commandBus.execute(command);
   }
@@ -86,12 +81,13 @@ export class CustomerAuthController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   async refresh(
     @Body() dto: RefreshTokenDto,
-    @Request() req: any,
+    @Req() req: Request,
   ): Promise<TokenResponseDto> {
+    const { userAgent, ipAddress } = this.extractRequestMetadata(req);
     const command = new RefreshTokenCommand(
       dto.refreshToken,
-      req.headers['user-agent'],
-      req.ip,
+      userAgent,
+      ipAddress,
     );
     return this.commandBus.execute(command);
   }
@@ -122,5 +118,23 @@ export class CustomerAuthController {
       return;
     }
     await this.commandBus.execute(new RevokeSessionCommand(tokenId));
+  }
+
+  /**
+   * Normalizes request metadata for consistent downstream auditing
+   */
+  private extractRequestMetadata(req: Request): {
+    userAgent: string | null;
+    ipAddress: string | null;
+  } {
+    const userAgentHeader = req.headers['user-agent'];
+    const userAgent = Array.isArray(userAgentHeader)
+      ? (userAgentHeader[0] ?? null)
+      : (userAgentHeader ?? null);
+
+    return {
+      userAgent,
+      ipAddress: req.ip ?? null,
+    };
   }
 }

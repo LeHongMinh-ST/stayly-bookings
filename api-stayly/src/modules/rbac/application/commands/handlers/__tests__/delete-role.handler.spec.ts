@@ -4,7 +4,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeleteRoleHandler } from '../delete-role.handler';
 import { DeleteRoleCommand } from '../../delete-role.command';
-import type { IRoleRepository } from '../../../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
 import { Role } from '../../../../domain/entities/role.entity';
 import { RoleId } from '../../../../domain/value-objects/role-id.vo';
@@ -12,15 +11,19 @@ import { randomUUID } from 'crypto';
 
 describe('DeleteRoleHandler', () => {
   let handler: DeleteRoleHandler;
-  let roleRepository: jest.Mocked<IRoleRepository>;
+  let findByIdMock: jest.Mock;
+  let deleteMock: jest.Mock;
 
   const roleId = RoleId.create(randomUUID());
   const displayName = 'Editor';
 
   beforeEach(async () => {
+    findByIdMock = jest.fn();
+    deleteMock = jest.fn();
+
     const mockRoleRepository = {
-      findById: jest.fn(),
-      delete: jest.fn(),
+      findById: findByIdMock,
+      delete: deleteMock,
       findAll: jest.fn(),
       save: jest.fn(),
       exists: jest.fn(),
@@ -37,7 +40,6 @@ describe('DeleteRoleHandler', () => {
     }).compile();
 
     handler = module.get<DeleteRoleHandler>(DeleteRoleHandler);
-    roleRepository = module.get(ROLE_REPOSITORY);
   });
 
   afterEach(() => {
@@ -53,26 +55,26 @@ describe('DeleteRoleHandler', () => {
         isSuperAdmin: false,
       });
       const command = new DeleteRoleCommand(roleId.getValue());
-      roleRepository.findById.mockResolvedValue(role);
-      roleRepository.delete.mockResolvedValue();
+      findByIdMock.mockResolvedValue(role);
+      deleteMock.mockResolvedValue();
 
       // Act
       await handler.execute(command);
 
       // Assert
-      expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
-      expect(roleRepository.delete).toHaveBeenCalledWith(role);
+      expect(findByIdMock).toHaveBeenCalledWith(roleId);
+      expect(deleteMock).toHaveBeenCalledWith(role);
     });
 
     it('should throw error when role not found', async () => {
       // Arrange
       const command = new DeleteRoleCommand(roleId.getValue());
-      roleRepository.findById.mockResolvedValue(null);
+      findByIdMock.mockResolvedValue(null);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow('Role not found');
-      expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
-      expect(roleRepository.delete).not.toHaveBeenCalled();
+      expect(findByIdMock).toHaveBeenCalledWith(roleId);
+      expect(deleteMock).not.toHaveBeenCalled();
     });
 
     it('should throw error when trying to delete super admin role', async () => {
@@ -83,14 +85,14 @@ describe('DeleteRoleHandler', () => {
         isSuperAdmin: true,
       });
       const command = new DeleteRoleCommand(roleId.getValue());
-      roleRepository.findById.mockResolvedValue(superAdminRole);
+      findByIdMock.mockResolvedValue(superAdminRole);
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(
         'Cannot delete super admin role',
       );
-      expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
-      expect(roleRepository.delete).not.toHaveBeenCalled();
+      expect(findByIdMock).toHaveBeenCalledWith(roleId);
+      expect(deleteMock).not.toHaveBeenCalled();
     });
 
     it('should allow deletion of non-super-admin roles', async () => {
@@ -101,14 +103,14 @@ describe('DeleteRoleHandler', () => {
         isSuperAdmin: false,
       });
       const command = new DeleteRoleCommand(roleId.getValue());
-      roleRepository.findById.mockResolvedValue(regularRole);
-      roleRepository.delete.mockResolvedValue();
+      findByIdMock.mockResolvedValue(regularRole);
+      deleteMock.mockResolvedValue();
 
       // Act
       await handler.execute(command);
 
       // Assert
-      expect(roleRepository.delete).toHaveBeenCalledWith(regularRole);
+      expect(deleteMock).toHaveBeenCalledWith(regularRole);
     });
   });
 });

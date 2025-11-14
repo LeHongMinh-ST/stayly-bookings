@@ -22,6 +22,7 @@ export class ListPermissionsHandler
    * Executes query to retrieve all permissions
    */
   async execute(query: ListPermissionsQuery): Promise<Permission[]> {
-    return await this.permissionRepository.findAll();
+    const { limit, offset, search } = query;
+    return await this.permissionRepository.findAll(limit, offset, search);
   }
 }

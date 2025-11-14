@@ -3,7 +3,7 @@
  */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, Like, Repository } from 'typeorm';
 import { IPermissionRepository } from '../../../domain/repositories/permission.repository.interface';
 import { Permission } from '../../../domain/value-objects/permission.vo';
 import { PermissionOrmEntity } from '../entities/permission.orm-entity';
@@ -15,8 +15,19 @@ export class PermissionRepository implements IPermissionRepository {
     private readonly permissionRepo: Repository<PermissionOrmEntity>,
   ) {}
 
-  async findAll(): Promise<Permission[]> {
+  async findAll(
+    limit: number,
+    offset: number,
+    search?: string,
+  ): Promise<Permission[]> {
+    const where: FindOptionsWhere<PermissionOrmEntity> = {};
+    if (search) {
+      where.code = Like(`%${search}%`);
+    }
     const permissions = await this.permissionRepo.find({
+      take: limit,
+      skip: offset,
+      where,
       order: { code: 'ASC' },
     });
     return permissions.map((permission) => Permission.create(permission.code));

@@ -4,7 +4,11 @@
 import { Permission } from '../value-objects/permission.vo';
 
 export interface IPermissionRepository {
-  findAll(): Promise<Permission[]>;
+  findAll(
+    limit: number,
+    offset: number,
+    search?: string,
+  ): Promise<Permission[]>;
   findByCodes(codes: string[]): Promise<Permission[]>;
   findById(id: string): Promise<Permission | null>;
 }

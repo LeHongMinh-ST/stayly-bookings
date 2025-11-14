@@ -3,7 +3,6 @@
  */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { UserRolePermissionQueryService } from '../user-role-permission-query.service';
 import { UserOrmEntity } from '../../../../user/infrastructure/persistence/entities/user.orm-entity';
 import { RoleOrmEntity } from '../../persistence/entities/role.orm-entity';
@@ -12,20 +11,23 @@ import { randomUUID } from 'crypto';
 
 describe('UserRolePermissionQueryService', () => {
   let service: UserRolePermissionQueryService;
-  let userRepository: jest.Mocked<Repository<UserOrmEntity>>;
-  let roleRepository: jest.Mocked<Repository<RoleOrmEntity>>;
+  let findOneMock: jest.Mock;
+  let findMock: jest.Mock;
 
   const userId = randomUUID();
   const roleId1 = randomUUID();
   const roleId2 = randomUUID();
 
   beforeEach(async () => {
+    findOneMock = jest.fn();
+    findMock = jest.fn();
+
     const mockUserRepository = {
-      findOne: jest.fn(),
+      findOne: findOneMock,
     };
 
     const mockRoleRepository = {
-      find: jest.fn(),
+      find: findMock,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -45,8 +47,6 @@ describe('UserRolePermissionQueryService', () => {
     service = module.get<UserRolePermissionQueryService>(
       UserRolePermissionQueryService,
     );
-    userRepository = module.get(getRepositoryToken(UserOrmEntity));
-    roleRepository = module.get(getRepositoryToken(RoleOrmEntity));
   });
 
   afterEach(() => {
@@ -152,8 +152,8 @@ describe('UserRolePermissionQueryService', () => {
         permissions: [userPermission],
       };
 
-      userRepository.findOne.mockResolvedValue(user);
-      roleRepository.find.mockResolvedValue([ownerRole, managerRole]);
+      findOneMock.mockResolvedValue(user);
+      findMock.mockResolvedValue([ownerRole, managerRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -205,8 +205,8 @@ describe('UserRolePermissionQueryService', () => {
         permissions: [userPermission1, userPermission2],
       };
 
-      userRepository.findOne.mockResolvedValue(user);
-      roleRepository.find.mockResolvedValue([]);
+      findOneMock.mockResolvedValue(user);
+      findMock.mockResolvedValue([]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -214,7 +214,7 @@ describe('UserRolePermissionQueryService', () => {
       // Assert
       expect(result.roles).toEqual([]);
       expect(result.permissions).toEqual(['user:read', 'user:create']);
-      expect(roleRepository.find).not.toHaveBeenCalled();
+      expect(findMock).not.toHaveBeenCalled();
     });
 
     it('should merge permissions from multiple roles without duplicates', async () => {
@@ -291,8 +291,8 @@ describe('UserRolePermissionQueryService', () => {
         permissions: [],
       };
 
-      userRepository.findOne.mockResolvedValue(user);
-      roleRepository.find.mockResolvedValue([ownerRole, managerRole]);
+      findOneMock.mockResolvedValue(user);
+      findMock.mockResolvedValue([ownerRole, managerRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -309,17 +309,17 @@ describe('UserRolePermissionQueryService', () => {
 
     it('should throw error when user not found', async () => {
       // Arrange
-      userRepository.findOne.mockResolvedValue(null);
+      findOneMock.mockResolvedValue(null);
 
       // Act & Assert
       await expect(service.getUserRolesAndPermissions(userId)).rejects.toThrow(
         'User not found',
       );
-      expect(userRepository.findOne).toHaveBeenCalledWith({
+      expect(findOneMock).toHaveBeenCalledWith({
         where: { id: userId },
         relations: ['roles', 'permissions'],
       });
-      expect(roleRepository.find).not.toHaveBeenCalled();
+      expect(findMock).not.toHaveBeenCalled();
     });
 
     it('should handle user with super_admin role', async () => {
@@ -366,8 +366,8 @@ describe('UserRolePermissionQueryService', () => {
         permissions: [],
       };
 
-      userRepository.findOne.mockResolvedValue(user);
-      roleRepository.find.mockResolvedValue([superAdminRole]);
+      findOneMock.mockResolvedValue(user);
+      findMock.mockResolvedValue([superAdminRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
