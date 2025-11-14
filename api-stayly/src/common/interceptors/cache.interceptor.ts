@@ -14,16 +14,19 @@ import { tap } from 'rxjs/operators';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
+import type { Request } from 'express';
 
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
+  private readonly ttlMs = 300_000;
+
   constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Promise<Observable<any>> {
-    const request = context.switchToHttp().getRequest();
+  ): Promise<Observable<unknown>> {
+    const request = context.switchToHttp().getRequest<Request>();
     const { method, url } = request;
 
     // Only cache GET requests
@@ -32,16 +35,15 @@ export class CacheInterceptor implements NestInterceptor {
     }
 
     const cacheKey = `http:${method}:${url}`;
-    const cached = await this.cacheManager.get(cacheKey);
+    const cachedResponse = await this.cacheManager.get<unknown>(cacheKey);
 
-    if (cached) {
-      return of(cached);
+    if (typeof cachedResponse !== 'undefined') {
+      return of(cachedResponse);
     }
 
     return next.handle().pipe(
-      tap(async (data) => {
-        // Cache for 5 minutes by default
-        await this.cacheManager.set(cacheKey, data, 300000);
+      tap((data) => {
+        void this.cacheManager.set(cacheKey, data, this.ttlMs);
       }),
     );
   }
