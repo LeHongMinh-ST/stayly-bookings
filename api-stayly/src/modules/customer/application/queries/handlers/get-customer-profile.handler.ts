@@ -8,6 +8,7 @@ import { CUSTOMER_REPOSITORY } from '../../../domain/repositories/customer.repos
 import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
 import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
 import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
+import { ensureEntityExists } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @QueryHandler(GetCustomerProfileQuery)
@@ -24,10 +25,11 @@ export class GetCustomerProfileHandler
    */
   async execute(query: GetCustomerProfileQuery): Promise<CustomerResponseDto> {
     const customerId = CustomerId.create(query.customerId);
-    const customer = await this.customerRepository.findById(customerId);
-    if (!customer) {
-      throw new Error('Customer not found');
-    }
+    const customer = ensureEntityExists(
+      await this.customerRepository.findById(customerId),
+      'Customer',
+      customerId.getValue(),
+    );
     return CustomerResponseDto.fromAggregate(customer);
   }
 }

@@ -1,6 +1,8 @@
 /**
  * RefreshToken value object represents long lived token for renewing access tokens
  */
+import { InvalidInputError } from '../../../../common/domain/errors';
+
 export class RefreshToken {
   private constructor(
     private readonly value: string,
@@ -10,13 +12,24 @@ export class RefreshToken {
 
   static create(value: string, expiresAt: Date, tokenId: string): RefreshToken {
     if (!value || value.length < 20) {
-      throw new Error('Refresh token must be at least 20 characters');
+      throw new InvalidInputError(
+        'Refresh token must be at least 20 characters',
+        'refreshToken',
+        value,
+      );
     }
     if (!expiresAt || Number.isNaN(expiresAt.getTime())) {
-      throw new Error('Refresh token requires a valid expiration date');
+      throw new InvalidInputError(
+        'Refresh token requires a valid expiration date',
+        'expiresAt',
+        expiresAt,
+      );
     }
     if (!tokenId) {
-      throw new Error('Refresh token requires tokenId correlation');
+      throw new InvalidInputError(
+        'Refresh token requires tokenId correlation',
+        'tokenId',
+      );
     }
     return new RefreshToken(value, expiresAt, tokenId);
   }

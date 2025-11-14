@@ -7,6 +7,7 @@ import { USER_REPOSITORY } from '../../domain/repositories/user.repository.inter
 import { UserId } from '../../domain/value-objects/user-id.vo';
 import type { IUserAccessPort } from '../../application/interfaces/user-access.port';
 import { UserResponseDto } from '../../application/dto/response/user-response.dto';
+import { ensureEntityExists } from '../../../../common/application/exceptions';
 
 @Injectable()
 export class UserAccessService implements IUserAccessPort {
@@ -21,10 +22,11 @@ export class UserAccessService implements IUserAccessPort {
    */
   async ensureUserExists(userId: string): Promise<void> {
     const userIdVo = UserId.create(userId);
-    const user = await this.userRepository.findById(userIdVo);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    ensureEntityExists(
+      await this.userRepository.findById(userIdVo),
+      'User',
+      userId,
+    );
   }
 
   /**
@@ -32,10 +34,11 @@ export class UserAccessService implements IUserAccessPort {
    */
   async getUserResponse(userId: string): Promise<UserResponseDto> {
     const userIdVo = UserId.create(userId);
-    const user = await this.userRepository.findById(userIdVo);
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findById(userIdVo),
+      'User',
+      userId,
+    );
     return UserResponseDto.fromAggregate(user);
   }
 }

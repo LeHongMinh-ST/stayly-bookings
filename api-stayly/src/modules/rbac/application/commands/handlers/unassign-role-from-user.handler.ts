@@ -12,6 +12,7 @@ import type { IUserAccessPort } from '../../../../user/application/interfaces/us
 import { USER_ACCESS_PORT } from '../../../../user/application/interfaces/user-access.port';
 import { RoleId } from '../../../domain/value-objects/role-id.vo';
 import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
+import { ensureEntityExists } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @CommandHandler(UnassignRoleFromUserCommand)
@@ -36,10 +37,11 @@ export class UnassignRoleFromUserHandler
   ): Promise<UserResponseDto> {
     // Validate role exists
     const roleId = RoleId.create(command.roleId);
-    const role = await this.roleRepository.findById(roleId);
-    if (!role) {
-      throw new Error('Role not found');
-    }
+    ensureEntityExists(
+      await this.roleRepository.findById(roleId),
+      'Role',
+      roleId.getValue(),
+    );
 
     // Validate user exists
     await this.userAccess.ensureUserExists(command.userId);

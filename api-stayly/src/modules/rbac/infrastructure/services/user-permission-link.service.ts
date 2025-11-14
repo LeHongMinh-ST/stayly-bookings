@@ -7,6 +7,10 @@ import { In, Repository } from 'typeorm';
 import type { IUserPermissionLinkPort } from '../../application/interfaces/user-permission-link.port';
 import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
 import { PermissionOrmEntity } from '../persistence/entities/permission.orm-entity';
+import {
+  ensureEntityExists,
+  throwConflict,
+} from '../../../../common/application/exceptions';
 
 @Injectable()
 export class UserPermissionLinkService implements IUserPermissionLinkPort {
@@ -24,13 +28,14 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     userId: string,
     permissionCodes: string[],
   ): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['permissions'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['permissions'],
+      }),
+      'User',
+      userId,
+    );
 
     if (permissionCodes.length === 0) {
       user.permissions = [];
@@ -44,7 +49,7 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     });
 
     if (permissions.length !== normalizedCodes.length) {
-      throw new Error('One or more permissions are missing from catalog');
+      throwConflict('One or more permissions are missing from catalog');
     }
 
     user.permissions = permissions;
@@ -58,21 +63,23 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     userId: string,
     permissionCode: string,
   ): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['permissions'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['permissions'],
+      }),
+      'User',
+      userId,
+    );
 
     const normalizedCode = permissionCode.toLowerCase();
-    const permission = await this.permissionRepository.findOne({
-      where: { code: normalizedCode },
-    });
-    if (!permission) {
-      throw new Error('Permission not found');
-    }
+    const permission = ensureEntityExists(
+      await this.permissionRepository.findOne({
+        where: { code: normalizedCode },
+      }),
+      'Permission',
+      normalizedCode,
+    );
 
     // Check if permission already assigned
     const existingPermission = user.permissions.find(
@@ -93,13 +100,14 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     userId: string,
     permissionCode: string,
   ): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['permissions'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['permissions'],
+      }),
+      'User',
+      userId,
+    );
 
     const normalizedCode = permissionCode.toLowerCase();
     user.permissions = user.permissions.filter(

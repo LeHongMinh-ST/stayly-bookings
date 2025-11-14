@@ -9,6 +9,7 @@ import type { IPermissionRepository } from '../../domain/repositories/permission
 import { PERMISSION_REPOSITORY } from '../../domain/repositories/permission.repository.interface';
 import type { IRolePermissionValidationPort } from '../../application/interfaces/role-permission-validation.port';
 import { RoleId } from '../../domain/value-objects/role-id.vo';
+import { throwInvalidInput } from '../../../../common/application/exceptions';
 
 @Injectable()
 export class RolePermissionValidationService
@@ -27,7 +28,7 @@ export class RolePermissionValidationService
    */
   async validateRoles(roleIds: string[]): Promise<string[]> {
     if (!roleIds.length) {
-      throw new Error('At least one role is required');
+      throwInvalidInput('At least one role is required', 'roleIds');
     }
 
     const validatedRoleIds: string[] = [];
@@ -63,8 +64,9 @@ export class RolePermissionValidationService
     }
 
     if (invalidRoleIds.length > 0) {
-      throw new Error(
+      throwInvalidInput(
         `Invalid role(s) or role(s) without permissions: ${invalidRoleIds.join(', ')}`,
+        'roleIds',
       );
     }
 
@@ -87,8 +89,9 @@ export class RolePermissionValidationService
     );
 
     if (unknownPermissions.length) {
-      throw new Error(
+      throwInvalidInput(
         `Unknown permission(s): ${unknownPermissions.join(', ')}`,
+        'permissions',
       );
     }
 

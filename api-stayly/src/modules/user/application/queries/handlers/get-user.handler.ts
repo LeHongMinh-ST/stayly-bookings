@@ -8,6 +8,7 @@ import type { IUserRepository } from '../../../domain/repositories/user.reposito
 import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { UserResponseDto } from '../../dto/response/user-response.dto';
+import { ensureEntityExists } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @QueryHandler(GetUserQuery)
@@ -24,11 +25,11 @@ export class GetUserHandler
    */
   async execute(query: GetUserQuery): Promise<UserResponseDto> {
     const userId = UserId.create(query.userId);
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findById(userId),
+      'User',
+      userId.getValue(),
+    );
 
     return UserResponseDto.fromAggregate(user);
   }

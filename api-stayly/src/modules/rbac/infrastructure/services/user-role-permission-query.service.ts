@@ -12,6 +12,7 @@ import type {
 } from '../../application/interfaces/user-role-permission-query.port';
 import { RoleOrmEntity } from '../persistence/entities/role.orm-entity';
 import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
+import { ensureEntityExists } from '../../../../common/application/exceptions';
 
 @Injectable()
 export class UserRolePermissionQueryService
@@ -33,13 +34,14 @@ export class UserRolePermissionQueryService
   async getUserRolesAndPermissions(
     userId: string,
   ): Promise<UserRolePermissionData> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['roles', 'permissions'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles', 'permissions'],
+      }),
+      'User',
+      userId,
+    );
 
     // Get role IDs directly from ORM entity
     const roleIds = (user.roles ?? []).map((role) => role.id);

@@ -1,6 +1,8 @@
 /**
  * Role value object encapsulates RBAC role semantics for staff users
  */
+import { InvalidInputError } from '../../../../common/domain/errors';
+
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
   OWNER = 'owner',
@@ -14,7 +16,7 @@ export class Role {
   static from(value: string): Role {
     const normalized = value?.toLowerCase() as UserRole;
     if (!Object.values(UserRole).includes(normalized)) {
-      throw new Error(`Unsupported role: ${value}`);
+      throw new InvalidInputError(`Unsupported role: ${value}`, 'role', value);
     }
     return new Role(normalized);
   }

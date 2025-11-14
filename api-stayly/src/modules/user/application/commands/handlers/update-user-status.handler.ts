@@ -9,6 +9,7 @@ import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.in
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { Status } from '../../../domain/value-objects/user-status.vo';
 import { UserResponseDto } from '../../dto/response/user-response.dto';
+import { ensureEntityExists } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @CommandHandler(UpdateUserStatusCommand)
@@ -25,11 +26,11 @@ export class UpdateUserStatusHandler
    */
   async execute(command: UpdateUserStatusCommand): Promise<UserResponseDto> {
     const userId = UserId.create(command.userId);
-    const user = await this.userRepository.findById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findById(userId),
+      'User',
+      userId.getValue(),
+    );
 
     user.updateStatus(Status.create(command.status));
     await this.userRepository.save(user);

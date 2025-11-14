@@ -10,6 +10,10 @@ import { RoleId } from '../../../domain/value-objects/role-id.vo';
 import { RoleOrmEntity } from '../entities/role.orm-entity';
 import { PermissionOrmEntity } from '../entities/permission.orm-entity';
 import { RoleOrmMapper } from '../mappers/role.mapper';
+import {
+  throwConflict,
+  throwInvalidOperation,
+} from '../../../../../common/application/exceptions';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -46,7 +50,7 @@ export class RoleRepository implements IRoleRepository {
       : [];
 
     if (permissions.length !== permissionCodes.length) {
-      throw new Error('One or more permissions are missing from catalog');
+      throwConflict('One or more permissions are missing from catalog');
     }
 
     const existing = await this.roleRepo.findOne({
@@ -60,7 +64,11 @@ export class RoleRepository implements IRoleRepository {
 
   async delete(role: Role): Promise<void> {
     if (!role.canDelete()) {
-      throw new Error('Cannot delete super admin role');
+      throwInvalidOperation(
+        'Cannot delete super admin role',
+        'delete_role',
+        'Super admin role is protected',
+      );
     }
     await this.roleRepo.delete(role.getId().getValue());
   }

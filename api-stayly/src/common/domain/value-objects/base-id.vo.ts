@@ -1,3 +1,5 @@
+import { InvalidInputError } from "../errors";
+
 /**
  * BaseId value object encapsulates UUID validation for aggregate identifiers
  * Domain specific IDs should extend this class for consistent behaviour
@@ -35,7 +37,7 @@ export abstract class BaseId {
     const uuidRegex =
       /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
     if (!uuidRegex.test(value)) {
-      throw new Error('Identifier must be a valid UUID');
+      throw new InvalidInputError('Identifier must be a valid UUID', 'id');
     }
   }
 }

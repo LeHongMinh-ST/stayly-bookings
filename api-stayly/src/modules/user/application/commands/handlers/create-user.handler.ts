@@ -14,6 +14,7 @@ import { PasswordHash } from '../../../../../common/domain/value-objects/passwor
 import { UserId } from '../../../domain/value-objects/user-id.vo';
 import { User } from '../../../domain/entities/user.entity';
 import { UserResponseDto } from '../../dto/response/user-response.dto';
+import { throwConflict } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @CommandHandler(CreateUserCommand)
@@ -34,7 +35,7 @@ export class CreateUserHandler
     const email = Email.create(command.email);
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      throw new Error('User with email already exists');
+      throwConflict('User with email already exists', 'DUPLICATE_EMAIL');
     }
 
     const passwordHashValue = await this.passwordHasher.hash(command.password);

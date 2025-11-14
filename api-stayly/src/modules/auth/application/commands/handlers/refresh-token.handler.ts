@@ -1,12 +1,7 @@
 /**
  * RefreshTokenHandler validates refresh token and rotates credentials
  */
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { randomUUID } from 'crypto';
 import { RefreshTokenCommand } from '../refresh-token.command';
@@ -17,6 +12,11 @@ import { SESSION_REPOSITORY } from '../../../domain/repositories/session.reposit
 import { TokenResponseDto } from '../../dto/response/token-response.dto';
 import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
 import { Session } from '../../../domain/entities/session.entity';
+import {
+  ensureEntityExists,
+  throwInvalidInput,
+  throwInvalidOperation,
+} from '../../../../../common/application/exceptions';
 
 @Injectable()
 @CommandHandler(RefreshTokenCommand)
@@ -40,7 +40,11 @@ export class RefreshTokenHandler
     const session = await this.loadSession(payload);
 
     if (!session.isActive()) {
-      throw new Error('Refresh token expired or revoked');
+      throwInvalidOperation(
+        'Refresh token expired or revoked',
+        'refresh_token',
+        'Session is not active',
+      );
     }
 
     const props = payload.getProps();
@@ -66,14 +70,13 @@ export class RefreshTokenHandler
   private async loadSession(payload: JwtPayload): Promise<Session> {
     const props = payload.getProps();
     if (!props.tokenId) {
-      throw new BadRequestException('Refresh token missing token identifier');
+      throwInvalidInput('Refresh token missing token identifier', 'tokenId');
     }
-    const session = await this.sessionRepository.findActiveByTokenId(
+    const session = ensureEntityExists(
+      await this.sessionRepository.findActiveByTokenId(props.tokenId),
+      'Session',
       props.tokenId,
     );
-    if (!session) {
-      throw new NotFoundException('Refresh session not found');
-    }
     return session;
   }
 }

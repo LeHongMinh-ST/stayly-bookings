@@ -8,6 +8,7 @@ import { RoleResponseDto } from '../../dto/response/role-response.dto';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
 import { RoleId } from '../../../domain/value-objects/role-id.vo';
+import { ensureEntityExists } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @QueryHandler(GetRoleQuery)
@@ -21,10 +22,11 @@ export class GetRoleHandler
 
   async execute(query: GetRoleQuery): Promise<RoleResponseDto> {
     const roleId = RoleId.create(query.roleId);
-    const role = await this.roleRepository.findById(roleId);
-    if (!role) {
-      throw new Error('Role not found');
-    }
+    const role = ensureEntityExists(
+      await this.roleRepository.findById(roleId),
+      'Role',
+      roleId.getValue(),
+    );
     return RoleResponseDto.fromDomain(role);
   }
 }

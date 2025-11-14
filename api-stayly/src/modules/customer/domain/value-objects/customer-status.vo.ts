@@ -1,6 +1,8 @@
 /**
  * CustomerStatus value object expresses lifecycle state for guests
  */
+import { InvalidInputError } from '../../../../common/domain/errors';
+
 export enum CustomerStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
@@ -13,7 +15,11 @@ export class Status {
   static from(value: string): Status {
     const normalized = value?.toLowerCase() as CustomerStatus;
     if (!Object.values(CustomerStatus).includes(normalized)) {
-      throw new Error(`Unsupported customer status: ${value}`);
+      throw new InvalidInputError(
+        `Unsupported customer status: ${value}`,
+        'status',
+        value,
+      );
     }
     return new Status(normalized);
   }

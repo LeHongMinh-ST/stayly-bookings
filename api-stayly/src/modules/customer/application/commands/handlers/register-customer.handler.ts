@@ -14,6 +14,7 @@ import { PasswordHash } from '../../../../../common/domain/value-objects/passwor
 import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
 import { Customer } from '../../../domain/entities/customer.entity';
 import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
+import { throwConflict } from '../../../../../common/application/exceptions';
 
 @Injectable()
 @CommandHandler(RegisterCustomerCommand)
@@ -36,7 +37,7 @@ export class RegisterCustomerHandler
     const email = Email.create(command.email);
     const existingCustomer = await this.customerRepository.findByEmail(email);
     if (existingCustomer) {
-      throw new Error('Email already registered');
+      throwConflict('Email already registered', 'DUPLICATE_EMAIL');
     }
 
     const hashed = await this.passwordHasher.hash(command.password);

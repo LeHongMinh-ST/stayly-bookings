@@ -10,6 +10,7 @@ import { JwtPayload } from '../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../domain/value-objects/refresh-token.vo';
 import { TokenPair } from '../../domain/value-objects/token-pair.vo';
+import { throwInternalError, throwInvalidInput } from '../../../../common/application/exceptions';
 
 @Injectable()
 export class JwtTokenService implements TokenService {
@@ -24,11 +25,11 @@ export class JwtTokenService implements TokenService {
   ) {
     const accessSecret = this.configService.get<string>('jwt.secret');
     if (!accessSecret) {
-      throw new Error('jwt.secret is not configured');
+      throwInternalError('jwt.secret is not configured');
     }
     const refreshSecret = this.configService.get<string>('jwt.refreshSecret');
     if (!refreshSecret) {
-      throw new Error('jwt.refreshSecret is not configured');
+      throwInternalError('jwt.refreshSecret is not configured');
     }
     this.refreshSecret = refreshSecret;
     const refreshExpiresInConfig = this.configService.get<string | number>(
@@ -65,7 +66,7 @@ export class JwtTokenService implements TokenService {
       Date.now() + this.refreshExpiresInSeconds * 1000,
     );
     if (!payloadProps.tokenId) {
-      throw new Error('Refresh token requires tokenId claim');
+      throwInvalidInput('Refresh token requires tokenId claim', 'tokenId');
     }
     return RefreshToken.create(token, expiresAt, payloadProps.tokenId);
   }

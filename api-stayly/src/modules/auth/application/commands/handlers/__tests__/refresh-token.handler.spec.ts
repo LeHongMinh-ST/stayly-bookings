@@ -265,7 +265,9 @@ describe('RefreshTokenHandler', () => {
 
       // Assert
       expect(capturedError).toBeInstanceOf(NotFoundException);
-      expect((capturedError as Error).message).toBe('Refresh session not found');
+      expect((capturedError as Error).message).toBe(
+        `Session not found with identifier: ${tokenId}`,
+      );
       expect(sessionRepository.findActiveByTokenId.mock.calls.length).toBe(1);
       expect(sessionRepository.findActiveByTokenId.mock.calls[0][0]).toBe(
         tokenId,

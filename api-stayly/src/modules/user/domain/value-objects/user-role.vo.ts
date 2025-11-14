@@ -2,6 +2,8 @@
  * UserRole value object - local to User module
  * Maps to RBAC Role value object in infrastructure layer
  */
+import { InvalidInputError } from '../../../../common/domain/errors';
+
 export enum UserRoleEnum {
   SUPER_ADMIN = 'super_admin',
   OWNER = 'owner',
@@ -15,7 +17,7 @@ export class UserRole {
   static from(value: string): UserRole {
     const normalized = value?.toLowerCase() as UserRoleEnum;
     if (!Object.values(UserRoleEnum).includes(normalized)) {
-      throw new Error(`Unsupported role: ${value}`);
+      throw new InvalidInputError(`Unsupported role: ${value}`, 'role', value);
     }
     return new UserRole(normalized);
   }

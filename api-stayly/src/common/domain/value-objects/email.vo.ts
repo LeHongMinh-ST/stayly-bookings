@@ -1,3 +1,5 @@
+import { InvalidInputError } from "../errors";
+
 /**
  * Email value object encapsulates email validation logic
  */
@@ -7,12 +9,12 @@ export class Email {
   static create(value: string): Email {
     const trimmed = value?.trim().toLowerCase();
     if (!trimmed) {
-      throw new Error('Email is required');
+      throw new InvalidInputError('Email is required', 'email');
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmed)) {
-      throw new Error(`Invalid email format: ${trimmed}`);
+      throw new InvalidInputError(`Invalid email format: ${trimmed}`);
     }
 
     return new Email(trimmed);
