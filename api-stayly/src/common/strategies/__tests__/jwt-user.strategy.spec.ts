@@ -6,16 +6,22 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtUserStrategy } from '../jwt-user.strategy';
 
+const createConfigServiceMock = (
+  secret: string | undefined,
+): jest.Mocked<ConfigService> =>
+  ({
+    get: jest.fn((key: string) => (key === 'jwt.secret' ? secret : undefined)),
+  }) as unknown as jest.Mocked<ConfigService>;
+
+type JwtUserPayload = Parameters<JwtUserStrategy['validate']>[0];
+
 describe('JwtUserStrategy', () => {
   let strategy: JwtUserStrategy;
   let configService: jest.Mocked<ConfigService>;
 
   beforeEach(() => {
     // Arrange: Create mocks
-    configService = {
-      get: jest.fn().mockReturnValue('test-secret-key'),
-    } as any;
-
+    configService = createConfigServiceMock('test-secret-key');
     strategy = new JwtUserStrategy(configService);
   });
 
@@ -24,9 +30,8 @@ describe('JwtUserStrategy', () => {
   });
 
   describe('validate', () => {
-    it('should return user object when payload is valid and userType is user', async () => {
-      // Arrange
-      const payload = {
+    it('should return user object when payload is valid and userType is user', () => {
+      const payload: JwtUserPayload = {
         sub: 'user-id',
         email: 'admin@stayly.dev',
         roles: ['super_admin'],
@@ -34,10 +39,8 @@ describe('JwtUserStrategy', () => {
         userType: 'user',
       };
 
-      // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
-      // Assert
       expect(result).toEqual({
         id: 'user-id',
         email: 'admin@stayly.dev',
@@ -47,19 +50,16 @@ describe('JwtUserStrategy', () => {
       });
     });
 
-    it('should return user object when payload is valid without userType', async () => {
-      // Arrange
-      const payload = {
+    it('should return user object when payload is valid without userType', () => {
+      const payload: JwtUserPayload = {
         sub: 'user-id',
         email: 'admin@stayly.dev',
         roles: ['super_admin'],
         permissions: ['user:manage'],
       };
 
-      // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
-      // Assert
       expect(result).toEqual({
         id: 'user-id',
         email: 'admin@stayly.dev',
@@ -69,41 +69,36 @@ describe('JwtUserStrategy', () => {
       });
     });
 
-    it('should throw UnauthorizedException when payload missing sub', async () => {
-      // Arrange
+    it('should throw UnauthorizedException when payload missing sub', () => {
       const payload = {
         email: 'admin@stayly.dev',
         roles: ['super_admin'],
       };
 
-      // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload as JwtUserPayload)).toThrow(
         UnauthorizedException,
       );
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload as JwtUserPayload)).toThrow(
         'Invalid token payload',
       );
     });
 
-    it('should throw UnauthorizedException when payload missing email', async () => {
-      // Arrange
+    it('should throw UnauthorizedException when payload missing email', () => {
       const payload = {
         sub: 'user-id',
         roles: ['super_admin'],
       };
 
-      // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload as JwtUserPayload)).toThrow(
         UnauthorizedException,
       );
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload as JwtUserPayload)).toThrow(
         'Invalid token payload',
       );
     });
 
-    it('should throw UnauthorizedException when userType is customer', async () => {
-      // Arrange
-      const payload = {
+    it('should throw UnauthorizedException when userType is customer', () => {
+      const payload: JwtUserPayload = {
         sub: 'customer-id',
         email: 'customer@stayly.dev',
         roles: ['customer'],
@@ -111,27 +106,21 @@ describe('JwtUserStrategy', () => {
         userType: 'customer',
       };
 
-      // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
+      expect(() => strategy.validate(payload)).toThrow(
         'Customer tokens are not allowed for admin endpoints',
       );
     });
 
-    it('should handle empty roles and permissions', async () => {
-      // Arrange
-      const payload = {
+    it('should handle empty roles and permissions', () => {
+      const payload: JwtUserPayload = {
         sub: 'user-id',
         email: 'admin@stayly.dev',
         userType: 'user',
       };
 
-      // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
-      // Assert
       expect(result).toEqual({
         id: 'user-id',
         email: 'admin@stayly.dev',

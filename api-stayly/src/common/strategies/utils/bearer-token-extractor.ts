@@ -1,8 +1,13 @@
-import type { JwtFromRequestFunction } from 'passport-jwt';
+import type { Request } from 'express';
 
-export const bearerTokenExtractor: JwtFromRequestFunction = (req) => {
-  const authorizationHeader = req?.headers?.authorization;
-  if (!authorizationHeader || typeof authorizationHeader !== 'string') {
+export type RequestTokenExtractor = (req: Request) => string | null;
+
+export const bearerTokenExtractor: RequestTokenExtractor = (req: Request) => {
+  if (!req || typeof req !== 'object') {
+    return null;
+  }
+  const authorizationHeader = req.headers?.authorization;
+  if (typeof authorizationHeader !== 'string') {
     return null;
   }
 

@@ -6,16 +6,20 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtCustomerStrategy } from '../jwt-customer.strategy';
 
+const createConfigServiceMock = (
+  secret: string | undefined,
+): jest.Mocked<ConfigService> =>
+  ({
+    get: jest.fn((key: string) => (key === 'jwt.secret' ? secret : undefined)),
+  }) as unknown as jest.Mocked<ConfigService>;
+
 describe('JwtCustomerStrategy', () => {
   let strategy: JwtCustomerStrategy;
   let configService: jest.Mocked<ConfigService>;
 
   beforeEach(() => {
     // Arrange: Create mocks
-    configService = {
-      get: jest.fn().mockReturnValue('test-secret-key'),
-    } as any;
-
+    configService = createConfigServiceMock('test-secret-key');
     strategy = new JwtCustomerStrategy(configService);
   });
 
@@ -24,7 +28,7 @@ describe('JwtCustomerStrategy', () => {
   });
 
   describe('validate', () => {
-    it('should return customer object when payload is valid and userType is customer', async () => {
+    it('should return customer object when payload is valid and userType is customer', () => {
       // Arrange
       const payload = {
         sub: 'customer-id',
@@ -35,7 +39,7 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
       // Assert
       expect(result).toEqual({
@@ -47,7 +51,7 @@ describe('JwtCustomerStrategy', () => {
       });
     });
 
-    it('should return customer object when payload is valid without userType but has customer role', async () => {
+    it('should return customer object when payload is valid without userType but has customer role', () => {
       // Arrange
       const payload = {
         sub: 'customer-id',
@@ -57,7 +61,7 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
       // Assert
       expect(result).toEqual({
@@ -69,7 +73,7 @@ describe('JwtCustomerStrategy', () => {
       });
     });
 
-    it('should throw UnauthorizedException when payload missing sub', async () => {
+    it('should throw UnauthorizedException when payload missing sub', () => {
       // Arrange
       const payload = {
         email: 'customer@stayly.dev',
@@ -77,15 +81,11 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        'Invalid token payload',
-      );
+      expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
+      expect(() => strategy.validate(payload)).toThrow('Invalid token payload');
     });
 
-    it('should throw UnauthorizedException when payload missing email', async () => {
+    it('should throw UnauthorizedException when payload missing email', () => {
       // Arrange
       const payload = {
         sub: 'customer-id',
@@ -93,15 +93,11 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        'Invalid token payload',
-      );
+      expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
+      expect(() => strategy.validate(payload)).toThrow('Invalid token payload');
     });
 
-    it('should throw UnauthorizedException when userType is user', async () => {
+    it('should throw UnauthorizedException when userType is user', () => {
       // Arrange
       const payload = {
         sub: 'user-id',
@@ -112,15 +108,13 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
+      expect(() => strategy.validate(payload)).toThrow(
         'Admin tokens are not allowed for customer endpoints',
       );
     });
 
-    it('should throw UnauthorizedException when user has non-customer roles', async () => {
+    it('should throw UnauthorizedException when user has non-customer roles', () => {
       // Arrange
       const payload = {
         sub: 'user-id',
@@ -130,15 +124,13 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act & Assert
-      await expect(strategy.validate(payload)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(strategy.validate(payload)).rejects.toThrow(
+      expect(() => strategy.validate(payload)).toThrow(UnauthorizedException);
+      expect(() => strategy.validate(payload)).toThrow(
         'Admin tokens are not allowed for customer endpoints',
       );
     });
 
-    it('should handle empty roles and permissions', async () => {
+    it('should handle empty roles and permissions', () => {
       // Arrange
       const payload = {
         sub: 'customer-id',
@@ -147,7 +139,7 @@ describe('JwtCustomerStrategy', () => {
       };
 
       // Act
-      const result = await strategy.validate(payload);
+      const result = strategy.validate(payload);
 
       // Assert
       expect(result).toEqual({

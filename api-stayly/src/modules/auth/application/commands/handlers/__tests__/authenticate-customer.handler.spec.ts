@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 /**
  * Unit tests for AuthenticateCustomerHandler
  * Tests customer authentication flow
@@ -15,7 +16,6 @@ import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/t
 import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
 import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
 import { Email } from '../../../../../../common/domain/value-objects/email.vo';
-import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
 import { TokenPair } from '../../../../domain/value-objects/token-pair.vo';

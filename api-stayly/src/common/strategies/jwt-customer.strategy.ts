@@ -7,6 +7,13 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { bearerTokenExtractor } from './utils/bearer-token-extractor';
+import type { RequestTokenExtractor } from './utils/bearer-token-extractor';
+
+type JwtStrategyOptions = {
+  jwtFromRequest: RequestTokenExtractor;
+  ignoreExpiration: boolean;
+  secretOrKey: string;
+};
 
 type JwtCustomerClaims = {
   sub: string;
@@ -26,11 +33,15 @@ export class JwtCustomerStrategy extends PassportStrategy(
     if (!secret) {
       throw new Error('jwt.secret is not configured');
     }
-    super({
+    const secretKey: string = secret;
+    const options: JwtStrategyOptions = {
       jwtFromRequest: bearerTokenExtractor,
       ignoreExpiration: false,
-      secretOrKey: secret,
-    });
+      secretOrKey: secretKey,
+    };
+    // PassportStrategy factory currently has loose typings; force call
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    super(options);
   }
 
   validate(payload: JwtCustomerClaims) {
