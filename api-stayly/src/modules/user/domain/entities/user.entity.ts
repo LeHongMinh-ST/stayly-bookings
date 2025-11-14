@@ -1,13 +1,13 @@
 /**
  * User aggregate encapsulates administration staff and owner accounts
  */
-import { BaseEntity } from '../../../../common/domain/entities/base.entity';
-import { InvalidInputError } from '../../../../common/domain/errors';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
-import { UserId } from '../value-objects/user-id.vo';
-import { Status, UserStatus } from '../value-objects/user-status.vo';
-import { UserCreatedEvent } from '../events/user-created.event';
+import { BaseEntity } from "../../../../common/domain/entities/base.entity";
+import { InvalidInputError } from "../../../../common/domain/errors";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
+import { UserId } from "../value-objects/user-id.vo";
+import { Status, UserStatus } from "../value-objects/user-status.vo";
+import { UserCreatedEvent } from "../events/user-created.event";
 
 export interface CreateUserProps {
   id: UserId;
@@ -30,7 +30,7 @@ export class User extends BaseEntity<UserId> {
 
   static create(props: CreateUserProps): User {
     if (!props.fullName?.trim()) {
-      throw new InvalidInputError('User full name is required', 'fullName');
+      throw new InvalidInputError("User full name is required", "fullName");
     }
 
     const now = new Date();
@@ -64,7 +64,7 @@ export class User extends BaseEntity<UserId> {
 
   rename(fullName: string): void {
     if (!fullName?.trim()) {
-      throw new InvalidInputError('User full name is required', 'fullName');
+      throw new InvalidInputError("User full name is required", "fullName");
     }
     this.fullName = fullName.trim();
   }

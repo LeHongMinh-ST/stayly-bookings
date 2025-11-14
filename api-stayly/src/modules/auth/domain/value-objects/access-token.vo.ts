@@ -1,7 +1,7 @@
 /**
  * AccessToken value object wraps JWT string to enforce minimal validation
  */
-import { InvalidInputError } from '../../../../common/domain/errors';
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export class AccessToken {
   private constructor(
@@ -12,15 +12,15 @@ export class AccessToken {
   static create(value: string, expiresInSeconds: number): AccessToken {
     if (!value || value.length < 20) {
       throw new InvalidInputError(
-        'Access token must be at least 20 characters',
-        'accessToken',
+        "Access token must be at least 20 characters",
+        "accessToken",
         value,
       );
     }
     if (expiresInSeconds <= 0) {
       throw new InvalidInputError(
-        'Access token expiry must be positive',
-        'expiresInSeconds',
+        "Access token expiry must be positive",
+        "expiresInSeconds",
         expiresInSeconds,
       );
     }

@@ -3,47 +3,47 @@ import {
   QueryRunner,
   Table,
   TableForeignKey,
-} from 'typeorm';
+} from "typeorm";
 
 export class CreateUsersCustomersTables1700000000001
   implements MigrationInterface
 {
-  name = 'CreateUsersCustomersTables1700000000001';
+  name = "CreateUsersCustomersTables1700000000001";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"');
 
     await queryRunner.createTable(
       new Table({
-        name: 'roles',
+        name: "roles",
         columns: [
           {
-            name: 'id',
-            type: 'uuid',
+            name: "id",
+            type: "uuid",
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
           {
-            name: 'code',
-            type: 'varchar',
+            name: "code",
+            type: "varchar",
             isNullable: false,
             isUnique: true,
           },
           {
-            name: 'display_name',
-            type: 'varchar',
+            name: "display_name",
+            type: "varchar",
             isNullable: false,
           },
           {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "created_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
           {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "updated_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
         ],
       }),
@@ -52,35 +52,35 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'permissions',
+        name: "permissions",
         columns: [
           {
-            name: 'id',
-            type: 'uuid',
+            name: "id",
+            type: "uuid",
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
           {
-            name: 'code',
-            type: 'varchar',
+            name: "code",
+            type: "varchar",
             isNullable: false,
             isUnique: true,
           },
           {
-            name: 'description',
-            type: 'text',
+            name: "description",
+            type: "text",
             isNullable: true,
           },
           {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "created_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
           {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "updated_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
         ],
       }),
@@ -89,46 +89,46 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'users',
+        name: "users",
         columns: [
           {
-            name: 'id',
-            type: 'uuid',
+            name: "id",
+            type: "uuid",
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
           {
-            name: 'email',
-            type: 'varchar',
+            name: "email",
+            type: "varchar",
             isNullable: false,
             isUnique: true,
           },
           {
-            name: 'full_name',
-            type: 'varchar',
+            name: "full_name",
+            type: "varchar",
             isNullable: false,
           },
           {
-            name: 'password_hash',
-            type: 'varchar',
+            name: "password_hash",
+            type: "varchar",
             isNullable: false,
           },
           {
-            name: 'status',
-            type: 'varchar',
+            name: "status",
+            type: "varchar",
             isNullable: false,
             default: "'active'",
           },
           {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "created_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
           {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "updated_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
         ],
       }),
@@ -137,16 +137,16 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'user_roles',
+        name: "user_roles",
         columns: [
           {
-            name: 'user_id',
-            type: 'uuid',
+            name: "user_id",
+            type: "uuid",
             isPrimary: true,
           },
           {
-            name: 'role_id',
-            type: 'uuid',
+            name: "role_id",
+            type: "uuid",
             isPrimary: true,
           },
         ],
@@ -155,16 +155,16 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'user_permissions',
+        name: "user_permissions",
         columns: [
           {
-            name: 'user_id',
-            type: 'uuid',
+            name: "user_id",
+            type: "uuid",
             isPrimary: true,
           },
           {
-            name: 'permission_id',
-            type: 'uuid',
+            name: "permission_id",
+            type: "uuid",
             isPrimary: true,
           },
         ],
@@ -173,61 +173,61 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'customers',
+        name: "customers",
         columns: [
           {
-            name: 'id',
-            type: 'uuid',
+            name: "id",
+            type: "uuid",
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
           {
-            name: 'email',
-            type: 'varchar',
+            name: "email",
+            type: "varchar",
             isNullable: false,
             isUnique: true,
           },
           {
-            name: 'full_name',
-            type: 'varchar',
+            name: "full_name",
+            type: "varchar",
             isNullable: false,
           },
           {
-            name: 'password_hash',
-            type: 'varchar',
+            name: "password_hash",
+            type: "varchar",
             isNullable: false,
           },
           {
-            name: 'phone',
-            type: 'varchar',
+            name: "phone",
+            type: "varchar",
             isNullable: true,
           },
           {
-            name: 'date_of_birth',
-            type: 'date',
+            name: "date_of_birth",
+            type: "date",
             isNullable: true,
           },
           {
-            name: 'status',
-            type: 'varchar',
+            name: "status",
+            type: "varchar",
             isNullable: false,
             default: "'active'",
           },
           {
-            name: 'email_verified_at',
-            type: 'timestamp with time zone',
+            name: "email_verified_at",
+            type: "timestamp with time zone",
             isNullable: true,
           },
           {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "created_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
           {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "updated_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
         ],
       }),
@@ -236,60 +236,60 @@ export class CreateUsersCustomersTables1700000000001
 
     await queryRunner.createTable(
       new Table({
-        name: 'auth_sessions',
+        name: "auth_sessions",
         columns: [
           {
-            name: 'id',
-            type: 'uuid',
+            name: "id",
+            type: "uuid",
             isPrimary: true,
-            generationStrategy: 'uuid',
-            default: 'uuid_generate_v4()',
+            generationStrategy: "uuid",
+            default: "uuid_generate_v4()",
           },
           {
-            name: 'user_id',
-            type: 'uuid',
+            name: "user_id",
+            type: "uuid",
             isNullable: false,
           },
           {
-            name: 'token_id',
-            type: 'uuid',
+            name: "token_id",
+            type: "uuid",
             isNullable: false,
             isUnique: true,
           },
           {
-            name: 'refresh_token',
-            type: 'text',
+            name: "refresh_token",
+            type: "text",
             isNullable: false,
           },
           {
-            name: 'refresh_token_expires_at',
-            type: 'timestamp with time zone',
+            name: "refresh_token_expires_at",
+            type: "timestamp with time zone",
             isNullable: false,
           },
           {
-            name: 'user_agent',
-            type: 'text',
+            name: "user_agent",
+            type: "text",
             isNullable: true,
           },
           {
-            name: 'ip_address',
-            type: 'varchar',
+            name: "ip_address",
+            type: "varchar",
             isNullable: true,
           },
           {
-            name: 'revoked_at',
-            type: 'timestamp with time zone',
+            name: "revoked_at",
+            type: "timestamp with time zone",
             isNullable: true,
           },
           {
-            name: 'created_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "created_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
           {
-            name: 'updated_at',
-            type: 'timestamp with time zone',
-            default: 'now()',
+            name: "updated_at",
+            type: "timestamp with time zone",
+            default: "now()",
           },
         ],
       }),
@@ -297,84 +297,84 @@ export class CreateUsersCustomersTables1700000000001
     );
 
     await queryRunner.createForeignKey(
-      'user_roles',
+      "user_roles",
       new TableForeignKey({
-        columnNames: ['user_id'],
-        referencedTableName: 'users',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
+        columnNames: ["user_id"],
+        referencedTableName: "users",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
       }),
     );
 
     await queryRunner.createForeignKey(
-      'user_roles',
+      "user_roles",
       new TableForeignKey({
-        columnNames: ['role_id'],
-        referencedTableName: 'roles',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
+        columnNames: ["role_id"],
+        referencedTableName: "roles",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
       }),
     );
 
     await queryRunner.createForeignKey(
-      'user_permissions',
+      "user_permissions",
       new TableForeignKey({
-        columnNames: ['user_id'],
-        referencedTableName: 'users',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
+        columnNames: ["user_id"],
+        referencedTableName: "users",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
       }),
     );
 
     await queryRunner.createForeignKey(
-      'user_permissions',
+      "user_permissions",
       new TableForeignKey({
-        columnNames: ['permission_id'],
-        referencedTableName: 'permissions',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
+        columnNames: ["permission_id"],
+        referencedTableName: "permissions",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
       }),
     );
 
     await queryRunner.createForeignKey(
-      'auth_sessions',
+      "auth_sessions",
       new TableForeignKey({
-        columnNames: ['user_id'],
-        referencedTableName: 'users',
-        referencedColumnNames: ['id'],
-        onDelete: 'CASCADE',
+        columnNames: ["user_id"],
+        referencedTableName: "users",
+        referencedColumnNames: ["id"],
+        onDelete: "CASCADE",
       }),
     );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    const authSessionsTable = await queryRunner.getTable('auth_sessions');
+    const authSessionsTable = await queryRunner.getTable("auth_sessions");
     if (authSessionsTable) {
       for (const fk of authSessionsTable.foreignKeys) {
-        await queryRunner.dropForeignKey('auth_sessions', fk);
+        await queryRunner.dropForeignKey("auth_sessions", fk);
       }
     }
 
-    const userPermissionsTable = await queryRunner.getTable('user_permissions');
+    const userPermissionsTable = await queryRunner.getTable("user_permissions");
     if (userPermissionsTable) {
       for (const fk of userPermissionsTable.foreignKeys) {
-        await queryRunner.dropForeignKey('user_permissions', fk);
+        await queryRunner.dropForeignKey("user_permissions", fk);
       }
     }
 
-    const userRolesTable = await queryRunner.getTable('user_roles');
+    const userRolesTable = await queryRunner.getTable("user_roles");
     if (userRolesTable) {
       for (const fk of userRolesTable.foreignKeys) {
-        await queryRunner.dropForeignKey('user_roles', fk);
+        await queryRunner.dropForeignKey("user_roles", fk);
       }
     }
 
-    await queryRunner.dropTable('auth_sessions');
-    await queryRunner.dropTable('user_permissions');
-    await queryRunner.dropTable('user_roles');
-    await queryRunner.dropTable('customers');
-    await queryRunner.dropTable('users');
-    await queryRunner.dropTable('permissions');
-    await queryRunner.dropTable('roles');
+    await queryRunner.dropTable("auth_sessions");
+    await queryRunner.dropTable("user_permissions");
+    await queryRunner.dropTable("user_roles");
+    await queryRunner.dropTable("customers");
+    await queryRunner.dropTable("users");
+    await queryRunner.dropTable("permissions");
+    await queryRunner.dropTable("roles");
   }
 }

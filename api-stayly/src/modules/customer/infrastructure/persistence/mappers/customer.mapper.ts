@@ -1,12 +1,12 @@
 /**
  * CustomerOrmMapper converts between ORM entity and customer aggregate
  */
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { Customer } from '../../../domain/entities/customer.entity';
-import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
-import { Status } from '../../../domain/value-objects/customer-status.vo';
-import { CustomerOrmEntity } from '../entities/customer.orm-entity';
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../../common/domain/value-objects/password-hash.vo";
+import { Customer } from "../../../domain/entities/customer.entity";
+import { CustomerId } from "../../../domain/value-objects/customer-id.vo";
+import { Status } from "../../../domain/value-objects/customer-status.vo";
+import { CustomerOrmEntity } from "../entities/customer.orm-entity";
 
 export class CustomerOrmMapper {
   static toDomain(entity: CustomerOrmEntity): Customer {

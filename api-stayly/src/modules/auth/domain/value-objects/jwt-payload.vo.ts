@@ -1,7 +1,7 @@
 /**
  * JwtPayload value object standardizes fields encoded in access tokens
  */
-import { InvalidInputError } from '../../../../common/domain/errors';
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export interface JwtPayloadProps {
   sub: string;
@@ -9,7 +9,7 @@ export interface JwtPayloadProps {
   roles: string[];
   permissions: string[];
   tokenId?: string;
-  userType?: 'user' | 'customer'; // Distinguish between user and customer
+  userType?: "user" | "customer"; // Distinguish between user and customer
 }
 
 export class JwtPayload {
@@ -18,12 +18,12 @@ export class JwtPayload {
   static create(props: JwtPayloadProps): JwtPayload {
     if (!props.sub) {
       throw new InvalidInputError(
-        'JwtPayload requires subject identifier',
-        'sub',
+        "JwtPayload requires subject identifier",
+        "sub",
       );
     }
     if (!props.email) {
-      throw new InvalidInputError('JwtPayload requires email claim', 'email');
+      throw new InvalidInputError("JwtPayload requires email claim", "email");
     }
     return new JwtPayload({
       ...props,

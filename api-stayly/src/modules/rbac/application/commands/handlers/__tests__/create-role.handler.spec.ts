@@ -1,17 +1,17 @@
 /**
  * Unit tests for CreateRoleHandler
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { CreateRoleHandler } from '../create-role.handler';
-import { CreateRoleCommand } from '../../create-role.command';
-import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
-import { ROLE_PERMISSION_VALIDATION_PORT } from '../../../interfaces/role-permission-validation.port';
+import { Test, TestingModule } from "@nestjs/testing";
+import { CreateRoleHandler } from "../create-role.handler";
+import { CreateRoleCommand } from "../../create-role.command";
+import { ROLE_REPOSITORY } from "../../../../domain/repositories/role.repository.interface";
+import { ROLE_PERMISSION_VALIDATION_PORT } from "../../../interfaces/role-permission-validation.port";
 
-describe('CreateRoleHandler', () => {
+describe("CreateRoleHandler", () => {
   let handler: CreateRoleHandler;
   let saveMock: jest.Mock;
   let validatePermissionsMock: jest.Mock;
-  const displayName = 'Editor';
+  const displayName = "Editor";
 
   beforeEach(async () => {
     saveMock = jest.fn();
@@ -51,8 +51,8 @@ describe('CreateRoleHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should create role successfully without permissions', async () => {
+  describe("execute", () => {
+    it("should create role successfully without permissions", async () => {
       // Arrange
       const command = new CreateRoleCommand(displayName);
       saveMock.mockResolvedValue();
@@ -69,9 +69,9 @@ describe('CreateRoleHandler', () => {
       expect(validatePermissionsMock).not.toHaveBeenCalled();
     });
 
-    it('should create role with permissions', async () => {
+    it("should create role with permissions", async () => {
       // Arrange
-      const permissions = ['user:read', 'user:create'];
+      const permissions = ["user:read", "user:create"];
       const command = new CreateRoleCommand(displayName, permissions);
       validatePermissionsMock.mockResolvedValue(permissions);
       saveMock.mockResolvedValue();
@@ -87,17 +87,17 @@ describe('CreateRoleHandler', () => {
       expect(saveMock).toHaveBeenCalled();
     });
 
-    it('should validate permissions before creating role', async () => {
+    it("should validate permissions before creating role", async () => {
       // Arrange
-      const permissions = ['user:read', 'invalid:permission'];
+      const permissions = ["user:read", "invalid:permission"];
       const command = new CreateRoleCommand(displayName, permissions);
       validatePermissionsMock.mockRejectedValue(
-        new Error('Unknown permission(s): invalid:permission'),
+        new Error("Unknown permission(s): invalid:permission"),
       );
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(
-        'Unknown permission(s): invalid:permission',
+        "Unknown permission(s): invalid:permission",
       );
       expect(validatePermissionsMock).toHaveBeenCalledWith(permissions);
       expect(saveMock).not.toHaveBeenCalled();

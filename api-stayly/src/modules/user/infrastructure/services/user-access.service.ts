@@ -1,13 +1,13 @@
 /**
  * UserAccessService implements IUserAccessPort and provides user lookup utilities.
  */
-import { Inject, Injectable } from '@nestjs/common';
-import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
-import { UserId } from '../../domain/value-objects/user-id.vo';
-import type { IUserAccessPort } from '../../application/interfaces/user-access.port';
-import { UserResponseDto } from '../../application/dto/response/user-response.dto';
-import { ensureEntityExists } from '../../../../common/application/exceptions';
+import { Inject, Injectable } from "@nestjs/common";
+import type { IUserRepository } from "../../domain/repositories/user.repository.interface";
+import { USER_REPOSITORY } from "../../domain/repositories/user.repository.interface";
+import { UserId } from "../../domain/value-objects/user-id.vo";
+import type { IUserAccessPort } from "../../application/interfaces/user-access.port";
+import { UserResponseDto } from "../../application/dto/response/user-response.dto";
+import { ensureEntityExists } from "../../../../common/application/exceptions";
 
 @Injectable()
 export class UserAccessService implements IUserAccessPort {
@@ -24,7 +24,7 @@ export class UserAccessService implements IUserAccessPort {
     const userIdVo = UserId.create(userId);
     ensureEntityExists(
       await this.userRepository.findById(userIdVo),
-      'User',
+      "User",
       userId,
     );
   }
@@ -36,7 +36,7 @@ export class UserAccessService implements IUserAccessPort {
     const userIdVo = UserId.create(userId);
     const user = ensureEntityExists(
       await this.userRepository.findById(userIdVo),
-      'User',
+      "User",
       userId,
     );
     return UserResponseDto.fromAggregate(user);

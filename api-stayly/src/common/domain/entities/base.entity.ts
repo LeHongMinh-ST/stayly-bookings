@@ -3,8 +3,8 @@
  * - Stores identifier value object
  * - Captures domain events for later dispatch
  */
-import { DomainEvent } from '../interfaces/domain-event.interface';
-import { BaseId } from '../value-objects/base-id.vo';
+import { DomainEvent } from "../interfaces/domain-event.interface";
+import { BaseId } from "../value-objects/base-id.vo";
 
 export abstract class BaseEntity<TId extends BaseId> {
   private readonly id: TId;

@@ -1,7 +1,7 @@
 /**
  * IPermissionRepository exposes permission catalog lookup
  */
-import { Permission } from '../value-objects/permission.vo';
+import { Permission } from "../value-objects/permission.vo";
 
 export interface IPermissionRepository {
   findAll(
@@ -13,4 +13,4 @@ export interface IPermissionRepository {
   findById(id: string): Promise<Permission | null>;
 }
 
-export const PERMISSION_REPOSITORY = 'PERMISSION_REPOSITORY';
+export const PERMISSION_REPOSITORY = "PERMISSION_REPOSITORY";

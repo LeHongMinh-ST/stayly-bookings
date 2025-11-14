@@ -13,15 +13,15 @@ import {
   ExecutionContext,
   Inject,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
-import type { IRoleRepository } from '../../modules/rbac/domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../modules/rbac/domain/repositories/role.repository.interface';
-import type { Request } from 'express';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { PERMISSIONS_KEY } from "../decorators/permissions.decorator";
+import type { IRoleRepository } from "../../modules/rbac/domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../modules/rbac/domain/repositories/role.repository.interface";
+import type { Request } from "express";
 
 type JwtUserContext = {
-  userType?: 'user' | 'customer';
+  userType?: "user" | "customer";
   roles?: string[];
   permissions?: string[];
 };
@@ -49,18 +49,18 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
     if (!user) {
-      throw new UnauthorizedException('Missing authenticated user context');
+      throw new UnauthorizedException("Missing authenticated user context");
     }
 
     // Only apply permission check to user (admin/staff), not customer
     // Customer endpoints should use JwtCustomerGuard without permission checks
-    if (user.userType === 'customer') {
+    if (user.userType === "customer") {
       return false; // Permissions guard only for user type
     }
 
     // Super admin automatically has full permissions
     const userRoles = Array.isArray(user.roles) ? user.roles : [];
-    if (userRoles.includes('super_admin')) {
+    if (userRoles.includes("super_admin")) {
       return true;
     }
 
@@ -73,7 +73,7 @@ export class PermissionsGuard implements CanActivate {
     const permissionSet = new Set(allPermissions);
 
     // Check if user has wildcard permission '*:manage' for full access
-    if (permissionSet.has('*:manage')) {
+    if (permissionSet.has("*:manage")) {
       return true;
     }
 
@@ -88,7 +88,7 @@ export class PermissionsGuard implements CanActivate {
       }
 
       // Check wildcard match: if required is 'module:action', check for 'module:*'
-      const [module, action] = requiredPermission.split(':');
+      const [module, action] = requiredPermission.split(":");
       if (module && action) {
         const wildcardPermission = `${module}:*`;
         if (permissionSet.has(wildcardPermission)) {

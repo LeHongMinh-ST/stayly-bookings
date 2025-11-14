@@ -1,28 +1,28 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../../domain/entities/role.entity';
+import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "../../../domain/entities/role.entity";
 
 export class RoleResponseDto {
   @ApiProperty({
-    description: 'Role unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Role unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   id!: string;
 
   @ApiProperty({
-    description: 'Display name for the role',
-    example: 'Super Admin',
+    description: "Display name for the role",
+    example: "Super Admin",
   })
   displayName!: string;
 
   @ApiProperty({
-    description: 'Whether this is the super admin role',
+    description: "Whether this is the super admin role",
     example: false,
   })
   isSuperAdmin!: boolean;
 
   @ApiProperty({
-    description: 'Array of permission codes assigned to this role',
-    example: ['user:manage', 'booking:read'],
+    description: "Array of permission codes assigned to this role",
+    example: ["user:manage", "booking:read"],
     type: [String],
   })
   permissions!: string[];
@@ -46,12 +46,12 @@ export class RoleResponseDto {
     const displayNameValue = role.getValue
       ? role
           .getValue()
-          .replace(/_/g, ' ')
+          .replace(/_/g, " ")
           .replace(/\b\w/g, (l: string) => l.toUpperCase())
-      : (role.displayName ?? '');
+      : (role.displayName ?? "");
 
     return {
-      id: '',
+      id: "",
       displayName: displayNameValue,
       isSuperAdmin: false,
       permissions: [],

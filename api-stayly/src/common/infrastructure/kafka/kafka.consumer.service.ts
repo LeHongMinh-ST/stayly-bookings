@@ -3,8 +3,8 @@
  * Base service for consuming events from Kafka topics
  */
 
-import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
+import { Injectable, Logger } from "@nestjs/common";
+import { OnEvent } from "@nestjs/event-emitter";
 
 @Injectable()
 export class KafkaConsumerService {
@@ -14,7 +14,7 @@ export class KafkaConsumerService {
    * Handle incoming Kafka message
    * This is a base implementation, should be extended by specific consumers
    */
-  @OnEvent('kafka.message')
+  @OnEvent("kafka.message")
   handleMessage(payload: any) {
     this.logger.debug(`Received Kafka message: ${JSON.stringify(payload)}`);
     // Base implementation - should be overridden by specific handlers

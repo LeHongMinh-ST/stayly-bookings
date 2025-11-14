@@ -1,19 +1,19 @@
 /**
  * RoleRepository provides persistence capabilities for role aggregate
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { Role } from '../../../domain/entities/role.entity';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { RoleOrmEntity } from '../entities/role.orm-entity';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
-import { RoleOrmMapper } from '../mappers/role.mapper';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import { IRoleRepository } from "../../../domain/repositories/role.repository.interface";
+import { Role } from "../../../domain/entities/role.entity";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
+import { RoleOrmEntity } from "../entities/role.orm-entity";
+import { PermissionOrmEntity } from "../entities/permission.orm-entity";
+import { RoleOrmMapper } from "../mappers/role.mapper";
 import {
   throwConflict,
   throwInvalidOperation,
-} from '../../../../../common/application/exceptions';
+} from "../../../../../common/application/exceptions";
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -26,8 +26,8 @@ export class RoleRepository implements IRoleRepository {
 
   async findAll(): Promise<Role[]> {
     const roles = await this.roleRepo.find({
-      relations: ['permissions'],
-      order: { displayName: 'ASC' },
+      relations: ["permissions"],
+      order: { displayName: "ASC" },
     });
     return roles.map((role) => RoleOrmMapper.toDomain(role));
   }
@@ -35,7 +35,7 @@ export class RoleRepository implements IRoleRepository {
   async findById(id: RoleId): Promise<Role | null> {
     const entity = await this.roleRepo.findOne({
       where: { id: id.getValue() },
-      relations: ['permissions'],
+      relations: ["permissions"],
     });
     if (!entity) {
       return null;
@@ -50,12 +50,12 @@ export class RoleRepository implements IRoleRepository {
       : [];
 
     if (permissions.length !== permissionCodes.length) {
-      throwConflict('One or more permissions are missing from catalog');
+      throwConflict("One or more permissions are missing from catalog");
     }
 
     const existing = await this.roleRepo.findOne({
       where: { id: role.getId().getValue() },
-      relations: ['permissions'],
+      relations: ["permissions"],
     });
 
     const entity = RoleOrmMapper.toOrm(
@@ -69,9 +69,9 @@ export class RoleRepository implements IRoleRepository {
   async delete(role: Role): Promise<void> {
     if (!role.canDelete()) {
       throwInvalidOperation(
-        'Cannot delete super admin role',
-        'delete_role',
-        'Super admin role is protected',
+        "Cannot delete super admin role",
+        "delete_role",
+        "Super admin role is protected",
       );
     }
     await this.roleRepo.delete(role.getId().getValue());

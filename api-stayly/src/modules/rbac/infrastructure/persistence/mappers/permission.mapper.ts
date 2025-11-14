@@ -1,8 +1,8 @@
 /**
  * PermissionOrmMapper converts between Permission value object and ORM entity
  */
-import { Permission } from '../../../domain/value-objects/permission.vo';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { Permission } from "../../../domain/value-objects/permission.vo";
+import { PermissionOrmEntity } from "../entities/permission.orm-entity";
 
 export class PermissionOrmMapper {
   /**

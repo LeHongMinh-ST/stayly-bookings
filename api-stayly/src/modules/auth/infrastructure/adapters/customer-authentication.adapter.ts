@@ -8,14 +8,14 @@
  * - Application layer only depends on interface, not this adapter
  * - Infrastructure layer handles cross-module communication
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { ICustomerAuthenticationPort } from '../../../customer/application/interfaces/customer-authentication.port';
-import { CUSTOMER_AUTHENTICATION_PORT } from '../../../customer/application/interfaces/customer-authentication.port';
+import { Inject, Injectable } from "@nestjs/common";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
+import type { ICustomerAuthenticationPort } from "../../../customer/application/interfaces/customer-authentication.port";
+import { CUSTOMER_AUTHENTICATION_PORT } from "../../../customer/application/interfaces/customer-authentication.port";
 import type {
   ICustomerAuthenticationService,
   CustomerAuthenticationData,
-} from '../../application/interfaces/customer-authentication.service.interface';
+} from "../../application/interfaces/customer-authentication.service.interface";
 
 @Injectable()
 export class CustomerAuthenticationAdapter

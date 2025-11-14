@@ -1,22 +1,22 @@
 /**
  * DefaultUsersSeedService provides seeding logic for default admin user
  */
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ModuleRef } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
-import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
-import type { IRoleRepository } from '../../../../rbac/domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../../rbac/domain/repositories/role.repository.interface';
-import type { IUserRoleLinkPort } from '../../../../rbac/application/interfaces/user-role-link.port';
-import { USER_ROLE_LINK_PORT } from '../../../../rbac/application/interfaces/user-role-link.port';
-import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { User } from '../../../domain/entities/user.entity';
-import { UserId } from '../../../domain/value-objects/user-id.vo';
+import { Inject, Injectable, Logger } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
+import { randomUUID } from "crypto";
+import type { IUserRepository } from "../../../domain/repositories/user.repository.interface";
+import { USER_REPOSITORY } from "../../../domain/repositories/user.repository.interface";
+import type { IRoleRepository } from "../../../../rbac/domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../../rbac/domain/repositories/role.repository.interface";
+import type { IUserRoleLinkPort } from "../../../../rbac/application/interfaces/user-role-link.port";
+import { USER_ROLE_LINK_PORT } from "../../../../rbac/application/interfaces/user-role-link.port";
+import type { PasswordHasher } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../../common/domain/value-objects/password-hash.vo";
+import { User } from "../../../domain/entities/user.entity";
+import { UserId } from "../../../domain/value-objects/user-id.vo";
 
 @Injectable()
 export class DefaultUsersSeedService {
@@ -36,14 +36,14 @@ export class DefaultUsersSeedService {
    */
   async seed(): Promise<void> {
     const email =
-      this.configService.get<string>('seeds.superAdminEmail') ??
-      'admin@stayly.dev';
+      this.configService.get<string>("seeds.superAdminEmail") ??
+      "admin@stayly.dev";
     const password =
-      this.configService.get<string>('seeds.superAdminPassword') ??
-      'ChangeMe123!';
+      this.configService.get<string>("seeds.superAdminPassword") ??
+      "ChangeMe123!";
     const fullName =
-      this.configService.get<string>('seeds.superAdminName') ??
-      'System Super Admin';
+      this.configService.get<string>("seeds.superAdminName") ??
+      "System Super Admin";
 
     const emailVo = Email.create(email);
     const existing = await this.userRepository.findByEmail(emailVo);
@@ -65,7 +65,7 @@ export class DefaultUsersSeedService {
 
     if (!superAdminRoleFromCatalog) {
       this.logger.warn(
-        'Super admin role not found. Skipping default super admin seeding.',
+        "Super admin role not found. Skipping default super admin seeding.",
       );
       return;
     }

@@ -6,12 +6,12 @@ import {
   Inject,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { DeleteRoleCommand } from '../delete-role.command';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
+} from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { DeleteRoleCommand } from "../delete-role.command";
+import type { IRoleRepository } from "../../../domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../domain/repositories/role.repository.interface";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
 
 @Injectable()
 @CommandHandler(DeleteRoleCommand)
@@ -27,11 +27,11 @@ export class DeleteRoleHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new NotFoundException('Role not found');
+      throw new NotFoundException("Role not found");
     }
 
     if (!role.canDelete()) {
-      throw new BadRequestException('Cannot delete super admin role');
+      throw new BadRequestException("Cannot delete super admin role");
     }
 
     await this.roleRepository.delete(role);

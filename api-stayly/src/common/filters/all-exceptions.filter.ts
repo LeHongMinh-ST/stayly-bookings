@@ -10,23 +10,23 @@ import {
   HttpException,
   HttpStatus,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
-import { DomainError } from '../domain/errors';
-import { mapDomainErrorToHttpException } from '../domain/errors/domain-error-mapper';
+} from "@nestjs/common";
+import { Request, Response } from "express";
+import { DomainError } from "../domain/errors";
+import { mapDomainErrorToHttpException } from "../domain/errors/domain-error-mapper";
 
 const resolveResponseMessage = (
   response: unknown,
   fallback: string,
 ): string => {
-  if (typeof response === 'string') {
+  if (typeof response === "string") {
     return response;
   }
   if (
     response &&
-    typeof response === 'object' &&
-    'message' in response &&
-    typeof (response as { message?: unknown }).message === 'string'
+    typeof response === "object" &&
+    "message" in response &&
+    typeof (response as { message?: unknown }).message === "string"
   ) {
     return (response as { message: string }).message;
   }
@@ -73,7 +73,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // Handle unknown errors
     else {
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      message = 'Internal server error';
+      message = "Internal server error";
 
       // Log unexpected errors with full stack trace
       this.logger.error(

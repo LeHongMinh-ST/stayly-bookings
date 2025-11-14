@@ -6,24 +6,24 @@ import {
   Inject,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
-import { AuthenticateCustomerCommand } from '../authenticate-customer.command';
-import type { ICustomerAuthenticationService } from '../../interfaces/customer-authentication.service.interface';
-import { CUSTOMER_AUTHENTICATION_SERVICE } from '../../interfaces/customer-authentication.service.interface';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
-import type { TokenService } from '../../../../../common/application/interfaces/token-service.interface';
-import { TOKEN_SERVICE } from '../../../../../common/application/interfaces/token-service.interface';
-import type { ISessionRepository } from '../../../domain/repositories/session.repository.interface';
-import { SESSION_REPOSITORY } from '../../../domain/repositories/session.repository.interface';
-import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
-import { Session } from '../../../domain/entities/session.entity';
-import { SessionId } from '../../../domain/value-objects/session-id.vo';
-import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
-import { TokenResponseDto } from '../../dto/response/token-response.dto';
+} from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { randomUUID } from "crypto";
+import { AuthenticateCustomerCommand } from "../authenticate-customer.command";
+import type { ICustomerAuthenticationService } from "../../interfaces/customer-authentication.service.interface";
+import { CUSTOMER_AUTHENTICATION_SERVICE } from "../../interfaces/customer-authentication.service.interface";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import type { PasswordHasher } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../common/application/interfaces/password-hasher.interface";
+import type { TokenService } from "../../../../../common/application/interfaces/token-service.interface";
+import { TOKEN_SERVICE } from "../../../../../common/application/interfaces/token-service.interface";
+import type { ISessionRepository } from "../../../domain/repositories/session.repository.interface";
+import { SESSION_REPOSITORY } from "../../../domain/repositories/session.repository.interface";
+import { JwtPayload } from "../../../domain/value-objects/jwt-payload.vo";
+import { Session } from "../../../domain/entities/session.entity";
+import { SessionId } from "../../../domain/value-objects/session-id.vo";
+import { TokenPair } from "../../../domain/value-objects/token-pair.vo";
+import { TokenResponseDto } from "../../dto/response/token-response.dto";
 
 @Injectable()
 @CommandHandler(AuthenticateCustomerCommand)
@@ -52,7 +52,7 @@ export class AuthenticateCustomerHandler
     const customerData =
       await this.customerAuthService.findForAuthentication(email);
     if (!customerData) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const matches = await this.passwordHasher.compare(
@@ -60,20 +60,20 @@ export class AuthenticateCustomerHandler
       customerData.passwordHash,
     );
     if (!matches) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     if (!customerData.isActive) {
-      throw new BadRequestException('Customer account is not active');
+      throw new BadRequestException("Customer account is not active");
     }
 
     const payload = JwtPayload.create({
       sub: customerData.id,
       email: customerData.email,
-      roles: ['customer'],
+      roles: ["customer"],
       permissions: [],
       tokenId: randomUUID(),
-      userType: 'customer', // Mark as customer for guard differentiation
+      userType: "customer", // Mark as customer for guard differentiation
     });
 
     return this.issueTokens(payload, command, customerData.id);
@@ -90,7 +90,7 @@ export class AuthenticateCustomerHandler
     const session = Session.create({
       id: SessionId.create(randomUUID()),
       userId: customerId,
-      userType: 'customer',
+      userType: "customer",
       refreshToken: tokenPair.refreshToken,
       userAgent: command.userAgent ?? null,
       ipAddress: command.ipAddress ?? null,
@@ -100,7 +100,7 @@ export class AuthenticateCustomerHandler
     return new TokenResponseDto(
       tokenPair.accessToken.getValue(),
       tokenPair.refreshToken.getValue(),
-      'Bearer',
+      "Bearer",
       tokenPair.accessToken.getExpiresInSeconds(),
     );
   }

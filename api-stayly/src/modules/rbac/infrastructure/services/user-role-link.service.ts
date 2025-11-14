@@ -1,16 +1,16 @@
 /**
  * UserRoleLinkService applies role assignments using TypeORM repositories.
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import type { IUserRoleLinkPort } from '../../application/interfaces/user-role-link.port';
-import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
-import { RoleOrmEntity } from '../persistence/entities/role.orm-entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import type { IUserRoleLinkPort } from "../../application/interfaces/user-role-link.port";
+import { UserOrmEntity } from "../../../user/infrastructure/persistence/entities/user.orm-entity";
+import { RoleOrmEntity } from "../persistence/entities/role.orm-entity";
 import {
   ensureEntityExists,
   throwConflict,
-} from '../../../../common/application/exceptions';
+} from "../../../../common/application/exceptions";
 
 @Injectable()
 export class UserRoleLinkService implements IUserRoleLinkPort {
@@ -28,9 +28,9 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['roles'],
+        relations: ["roles"],
       }),
-      'User',
+      "User",
       userId,
     );
 
@@ -45,7 +45,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
     });
 
     if (roles.length !== roleIds.length) {
-      throwConflict('One or more roles are missing from catalog');
+      throwConflict("One or more roles are missing from catalog");
     }
 
     user.roles = roles;
@@ -59,9 +59,9 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['roles'],
+        relations: ["roles"],
       }),
-      'User',
+      "User",
       userId,
     );
 
@@ -69,7 +69,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
       await this.roleRepository.findOne({
         where: { id: roleId },
       }),
-      'Role',
+      "Role",
       roleId,
     );
 
@@ -90,9 +90,9 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['roles'],
+        relations: ["roles"],
       }),
-      'User',
+      "User",
       userId,
     );
 

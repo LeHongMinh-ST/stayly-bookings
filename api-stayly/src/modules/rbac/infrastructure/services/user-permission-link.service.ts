@@ -1,16 +1,16 @@
 /**
  * UserPermissionLinkService manages direct user-permission relations.
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import type { IUserPermissionLinkPort } from '../../application/interfaces/user-permission-link.port';
-import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
-import { PermissionOrmEntity } from '../persistence/entities/permission.orm-entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import type { IUserPermissionLinkPort } from "../../application/interfaces/user-permission-link.port";
+import { UserOrmEntity } from "../../../user/infrastructure/persistence/entities/user.orm-entity";
+import { PermissionOrmEntity } from "../persistence/entities/permission.orm-entity";
 import {
   ensureEntityExists,
   throwConflict,
-} from '../../../../common/application/exceptions';
+} from "../../../../common/application/exceptions";
 
 @Injectable()
 export class UserPermissionLinkService implements IUserPermissionLinkPort {
@@ -31,9 +31,9 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['permissions'],
+        relations: ["permissions"],
       }),
-      'User',
+      "User",
       userId,
     );
 
@@ -49,7 +49,7 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     });
 
     if (permissions.length !== normalizedCodes.length) {
-      throwConflict('One or more permissions are missing from catalog');
+      throwConflict("One or more permissions are missing from catalog");
     }
 
     user.permissions = permissions;
@@ -66,9 +66,9 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['permissions'],
+        relations: ["permissions"],
       }),
-      'User',
+      "User",
       userId,
     );
 
@@ -77,7 +77,7 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
       await this.permissionRepository.findOne({
         where: { code: normalizedCode },
       }),
-      'Permission',
+      "Permission",
       normalizedCode,
     );
 
@@ -103,9 +103,9 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['permissions'],
+        relations: ["permissions"],
       }),
-      'User',
+      "User",
       userId,
     );
 

@@ -1,17 +1,17 @@
 /**
  * AssignRoleToUserHandler assigns a single role to a user
  */
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AssignRoleToUserCommand } from '../assign-role-to-user.command';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import type { IUserRoleLinkPort } from '../../interfaces/user-role-link.port';
-import { USER_ROLE_LINK_PORT } from '../../interfaces/user-role-link.port';
-import type { IUserAccessPort } from '../../../../user/application/interfaces/user-access.port';
-import { USER_ACCESS_PORT } from '../../../../user/application/interfaces/user-access.port';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { AssignRoleToUserCommand } from "../assign-role-to-user.command";
+import type { IRoleRepository } from "../../../domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../domain/repositories/role.repository.interface";
+import type { IUserRoleLinkPort } from "../../interfaces/user-role-link.port";
+import { USER_ROLE_LINK_PORT } from "../../interfaces/user-role-link.port";
+import type { IUserAccessPort } from "../../../../user/application/interfaces/user-access.port";
+import { USER_ACCESS_PORT } from "../../../../user/application/interfaces/user-access.port";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
+import { UserResponseDto } from "../../../../user/application/dto/response/user-response.dto";
 
 @Injectable()
 @CommandHandler(AssignRoleToUserCommand)
@@ -36,7 +36,7 @@ export class AssignRoleToUserHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new BadRequestException('Role not found');
+      throw new BadRequestException("Role not found");
     }
 
     // Validate user exists

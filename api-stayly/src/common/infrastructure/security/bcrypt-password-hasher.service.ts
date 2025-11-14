@@ -1,10 +1,10 @@
 /**
  * BcryptPasswordHasher hashes and verifies passwords using bcrypt
  */
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import bcryptModule from 'bcrypt';
-import { PasswordHasher } from '../../application/interfaces/password-hasher.interface';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import bcryptModule from "bcrypt";
+import { PasswordHasher } from "../../application/interfaces/password-hasher.interface";
 
 type HashFunction = (
   data: string,
@@ -29,7 +29,7 @@ export class BcryptPasswordHasherService implements PasswordHasher {
 
   constructor(private readonly configService: ConfigService) {
     this.saltRounds = this.configService.get<number>(
-      'security.bcryptSaltRounds',
+      "security.bcryptSaltRounds",
       12,
     );
   }

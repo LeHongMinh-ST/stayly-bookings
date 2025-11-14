@@ -2,7 +2,7 @@
  * InvalidInputError represents when input validation fails
  * Should be mapped to HTTP 400 Bad Request
  */
-import { DomainError } from './domain-error';
+import { DomainError } from "./domain-error";
 
 export class InvalidInputError extends DomainError {
   constructor(
@@ -11,7 +11,7 @@ export class InvalidInputError extends DomainError {
     value?: unknown,
     metadata?: Record<string, unknown>,
   ) {
-    super(message, 'INVALID_INPUT', {
+    super(message, "INVALID_INPUT", {
       field,
       value,
       ...metadata,

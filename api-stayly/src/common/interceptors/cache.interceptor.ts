@@ -8,13 +8,13 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-} from '@nestjs/common';
-import { Observable, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Inject } from '@nestjs/common';
-import type { Cache } from 'cache-manager';
-import type { Request } from 'express';
+} from "@nestjs/common";
+import { Observable, of } from "rxjs";
+import { tap } from "rxjs/operators";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Inject } from "@nestjs/common";
+import type { Cache } from "cache-manager";
+import type { Request } from "express";
 
 @Injectable()
 export class CacheInterceptor implements NestInterceptor {
@@ -30,14 +30,14 @@ export class CacheInterceptor implements NestInterceptor {
     const { method, url } = request;
 
     // Only cache GET requests
-    if (method !== 'GET') {
+    if (method !== "GET") {
       return next.handle();
     }
 
     const cacheKey = `http:${method}:${url}`;
     const cachedResponse = await this.cacheManager.get<unknown>(cacheKey);
 
-    if (typeof cachedResponse !== 'undefined') {
+    if (typeof cachedResponse !== "undefined") {
       return of(cachedResponse);
     }
 

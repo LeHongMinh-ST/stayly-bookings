@@ -1,16 +1,16 @@
 /**
  * AssignPermissionToUserHandler assigns a single permission to a user
  */
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { AssignPermissionToUserCommand } from '../assign-permission-to-user.command';
-import type { IPermissionRepository } from '../../../domain/repositories/permission.repository.interface';
-import { PERMISSION_REPOSITORY } from '../../../domain/repositories/permission.repository.interface';
-import type { IUserPermissionLinkPort } from '../../interfaces/user-permission-link.port';
-import { USER_PERMISSION_LINK_PORT } from '../../interfaces/user-permission-link.port';
-import type { IUserAccessPort } from '../../../../user/application/interfaces/user-access.port';
-import { USER_ACCESS_PORT } from '../../../../user/application/interfaces/user-access.port';
-import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { AssignPermissionToUserCommand } from "../assign-permission-to-user.command";
+import type { IPermissionRepository } from "../../../domain/repositories/permission.repository.interface";
+import { PERMISSION_REPOSITORY } from "../../../domain/repositories/permission.repository.interface";
+import type { IUserPermissionLinkPort } from "../../interfaces/user-permission-link.port";
+import { USER_PERMISSION_LINK_PORT } from "../../interfaces/user-permission-link.port";
+import type { IUserAccessPort } from "../../../../user/application/interfaces/user-access.port";
+import { USER_ACCESS_PORT } from "../../../../user/application/interfaces/user-access.port";
+import { UserResponseDto } from "../../../../user/application/dto/response/user-response.dto";
 
 @Injectable()
 @CommandHandler(AssignPermissionToUserCommand)
@@ -38,7 +38,7 @@ export class AssignPermissionToUserHandler
       command.permissionId,
     );
     if (!permission) {
-      throw new NotFoundException('Permission not found');
+      throw new NotFoundException("Permission not found");
     }
 
     // Validate user exists

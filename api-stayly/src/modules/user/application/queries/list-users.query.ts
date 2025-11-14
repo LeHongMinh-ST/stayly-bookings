@@ -1,7 +1,7 @@
 import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_OFFSET,
-} from '../../../../common/constants';
+} from "../../../../common/constants";
 
 /**
  * ListUsersQuery supports pagination and filtering for administrative users

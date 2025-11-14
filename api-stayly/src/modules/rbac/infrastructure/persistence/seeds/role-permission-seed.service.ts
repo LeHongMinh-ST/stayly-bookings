@@ -1,87 +1,87 @@
 /**
  * RolePermissionSeedService provides seeding logic for roles and permissions
  */
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
-import { RoleOrmEntity } from '../entities/role.orm-entity';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { In, Repository } from "typeorm";
+import { RoleOrmEntity } from "../entities/role.orm-entity";
+import { PermissionOrmEntity } from "../entities/permission.orm-entity";
 
 const DEFAULT_ROLES = [
-  { displayName: 'Super Admin', isSuperAdmin: true },
-  { displayName: 'Owner', isSuperAdmin: false },
-  { displayName: 'Manager', isSuperAdmin: false },
-  { displayName: 'Staff', isSuperAdmin: false },
+  { displayName: "Super Admin", isSuperAdmin: true },
+  { displayName: "Owner", isSuperAdmin: false },
+  { displayName: "Manager", isSuperAdmin: false },
+  { displayName: "Staff", isSuperAdmin: false },
 ];
 
 const DEFAULT_PERMISSIONS = [
   // User management permissions
-  { code: 'user:create', description: 'Create administrative users' },
-  { code: 'user:read', description: 'View administrative users' },
-  { code: 'user:update', description: 'Update administrative users' },
-  { code: 'user:delete', description: 'Delete administrative users' },
+  { code: "user:create", description: "Create administrative users" },
+  { code: "user:read", description: "View administrative users" },
+  { code: "user:update", description: "Update administrative users" },
+  { code: "user:delete", description: "Delete administrative users" },
   {
-    code: 'user:manage',
-    description: 'Full user management (create, read, update, delete)',
+    code: "user:manage",
+    description: "Full user management (create, read, update, delete)",
   },
   // Customer management permissions
-  { code: 'customer:create', description: 'Create customers' },
-  { code: 'customer:read', description: 'View customers' },
-  { code: 'customer:update', description: 'Update customers' },
-  { code: 'customer:delete', description: 'Delete customers' },
+  { code: "customer:create", description: "Create customers" },
+  { code: "customer:read", description: "View customers" },
+  { code: "customer:update", description: "Update customers" },
+  { code: "customer:delete", description: "Delete customers" },
   {
-    code: 'customer:manage',
-    description: 'Full customer management (create, read, update, delete)',
+    code: "customer:manage",
+    description: "Full customer management (create, read, update, delete)",
   },
   // Homestay/Hotel management permissions
-  { code: 'homestay:create', description: 'Create homestays/hotels' },
-  { code: 'homestay:read', description: 'View homestays/hotels' },
-  { code: 'homestay:update', description: 'Update homestays/hotels' },
-  { code: 'homestay:delete', description: 'Delete homestays/hotels' },
-  { code: 'homestay:manage', description: 'Full homestay/hotel management' },
+  { code: "homestay:create", description: "Create homestays/hotels" },
+  { code: "homestay:read", description: "View homestays/hotels" },
+  { code: "homestay:update", description: "Update homestays/hotels" },
+  { code: "homestay:delete", description: "Delete homestays/hotels" },
+  { code: "homestay:manage", description: "Full homestay/hotel management" },
   // Room management permissions
-  { code: 'room:create', description: 'Create rooms' },
-  { code: 'room:read', description: 'View rooms' },
-  { code: 'room:update', description: 'Update rooms' },
-  { code: 'room:delete', description: 'Delete rooms' },
-  { code: 'room:manage', description: 'Full room management' },
+  { code: "room:create", description: "Create rooms" },
+  { code: "room:read", description: "View rooms" },
+  { code: "room:update", description: "Update rooms" },
+  { code: "room:delete", description: "Delete rooms" },
+  { code: "room:manage", description: "Full room management" },
   // Booking management permissions
-  { code: 'booking:create', description: 'Create bookings' },
-  { code: 'booking:read', description: 'View bookings' },
-  { code: 'booking:update', description: 'Update bookings' },
-  { code: 'booking:cancel', description: 'Cancel bookings' },
-  { code: 'booking:checkin', description: 'Perform check-in' },
-  { code: 'booking:checkout', description: 'Perform check-out' },
-  { code: 'booking:manage', description: 'Full booking management' },
+  { code: "booking:create", description: "Create bookings" },
+  { code: "booking:read", description: "View bookings" },
+  { code: "booking:update", description: "Update bookings" },
+  { code: "booking:cancel", description: "Cancel bookings" },
+  { code: "booking:checkin", description: "Perform check-in" },
+  { code: "booking:checkout", description: "Perform check-out" },
+  { code: "booking:manage", description: "Full booking management" },
   // Payment management permissions
-  { code: 'payment:read', description: 'View payments' },
-  { code: 'payment:process', description: 'Process payments' },
-  { code: 'payment:refund', description: 'Process refunds' },
-  { code: 'payment:manage', description: 'Full payment management' },
+  { code: "payment:read", description: "View payments" },
+  { code: "payment:process", description: "Process payments" },
+  { code: "payment:refund", description: "Process refunds" },
+  { code: "payment:manage", description: "Full payment management" },
   // Report permissions
-  { code: 'report:read', description: 'View reports' },
-  { code: 'report:export', description: 'Export reports' },
-  { code: 'report:manage', description: 'Full report management' },
+  { code: "report:read", description: "View reports" },
+  { code: "report:export", description: "Export reports" },
+  { code: "report:manage", description: "Full report management" },
   // Role and Permission management permissions
-  { code: 'role:create', description: 'Create roles' },
-  { code: 'role:read', description: 'View roles' },
-  { code: 'role:update', description: 'Update roles' },
-  { code: 'role:delete', description: 'Delete roles' },
-  { code: 'role:assign', description: 'Assign roles to users' },
-  { code: 'role:manage', description: 'Full role management' },
-  { code: 'permission:read', description: 'View permissions' },
+  { code: "role:create", description: "Create roles" },
+  { code: "role:read", description: "View roles" },
+  { code: "role:update", description: "Update roles" },
+  { code: "role:delete", description: "Delete roles" },
+  { code: "role:assign", description: "Assign roles to users" },
+  { code: "role:manage", description: "Full role management" },
+  { code: "permission:read", description: "View permissions" },
   {
-    code: 'permission:assign',
-    description: 'Assign permissions to users/roles',
+    code: "permission:assign",
+    description: "Assign permissions to users/roles",
   },
-  { code: 'permission:manage', description: 'Full permission management' },
+  { code: "permission:manage", description: "Full permission management" },
   // System configuration permissions
-  { code: 'system:configure', description: 'Configure system settings' },
-  { code: 'system:manage', description: 'Full system management' },
+  { code: "system:configure", description: "Configure system settings" },
+  { code: "system:manage", description: "Full system management" },
   // Wildcard permission for full access (only for super admin)
   {
-    code: '*:manage',
-    description: 'Full access to all modules (super admin only)',
+    code: "*:manage",
+    description: "Full access to all modules (super admin only)",
   },
 ];
 
@@ -106,7 +106,7 @@ export class RolePermissionSeedService {
 
   private async ensureRoles(): Promise<void> {
     const existingRoles = await this.roleRepo.find({
-      select: ['displayName'],
+      select: ["displayName"],
     });
     const existing = new Set(existingRoles.map((role) => role.displayName));
     const missing = DEFAULT_ROLES.filter(
@@ -114,7 +114,7 @@ export class RolePermissionSeedService {
     );
 
     if (!missing.length) {
-      this.logger.log('All roles already exist');
+      this.logger.log("All roles already exist");
       // Update is_super_admin flag for Super Admin role if it exists
       await this.updateSuperAdminFlag();
       return;
@@ -123,7 +123,7 @@ export class RolePermissionSeedService {
     // Insert missing roles
     await this.roleRepo.insert(missing);
     this.logger.log(
-      `Seeded roles: ${missing.map((role) => role.displayName).join(', ')}`,
+      `Seeded roles: ${missing.map((role) => role.displayName).join(", ")}`,
     );
 
     // Update is_super_admin flag for Super Admin role
@@ -132,12 +132,12 @@ export class RolePermissionSeedService {
 
   private async updateSuperAdminFlag(): Promise<void> {
     const superAdminRole = await this.roleRepo.findOne({
-      where: { displayName: 'Super Admin' },
+      where: { displayName: "Super Admin" },
     });
     if (superAdminRole && !superAdminRole.isSuperAdmin) {
       superAdminRole.isSuperAdmin = true;
       await this.roleRepo.save(superAdminRole);
-      this.logger.log('Updated is_super_admin flag for Super Admin role');
+      this.logger.log("Updated is_super_admin flag for Super Admin role");
     }
   }
 
@@ -146,7 +146,7 @@ export class RolePermissionSeedService {
       where: {
         code: In(DEFAULT_PERMISSIONS.map((permission) => permission.code)),
       },
-      select: ['code'],
+      select: ["code"],
     });
     const existing = new Set(
       existingCodes.map((permission) => permission.code),
@@ -156,7 +156,7 @@ export class RolePermissionSeedService {
     );
 
     if (!missing.length) {
-      this.logger.log('All permissions already exist');
+      this.logger.log("All permissions already exist");
       return;
     }
 
@@ -164,7 +164,7 @@ export class RolePermissionSeedService {
       missing.map((permission) => ({ ...permission })),
     );
     this.logger.log(
-      `Seeded permissions: ${missing.map((permission) => permission.code).join(', ')}`,
+      `Seeded permissions: ${missing.map((permission) => permission.code).join(", ")}`,
     );
   }
 }

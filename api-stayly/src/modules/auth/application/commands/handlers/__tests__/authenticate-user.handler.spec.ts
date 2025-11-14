@@ -5,29 +5,29 @@
  * Note: User authentication data no longer includes roles/permissions.
  * They are queried separately from RBAC module via IUserRolePermissionQueryService
  */
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthenticateUserHandler } from '../authenticate-user.handler';
-import { AuthenticateUserCommand } from '../../authenticate-user.command';
-import type { IUserAuthenticationService } from '../../../interfaces/user-authentication.service.interface';
-import { USER_AUTHENTICATION_SERVICE } from '../../../interfaces/user-authentication.service.interface';
-import type { IUserRolePermissionQueryService } from '../../../interfaces/user-role-permission-query.service.interface';
-import { USER_ROLE_PERMISSION_QUERY_SERVICE } from '../../../interfaces/user-role-permission-query.service.interface';
-import type { PasswordHasher } from '../../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../../common/application/interfaces/password-hasher.interface';
-import type { TokenService } from '../../../../../../common/application/interfaces/token-service.interface';
-import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
-import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
-import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { Email } from '../../../../../../common/domain/value-objects/email.vo';
-import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
-import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
-import { TokenPair } from '../../../../domain/value-objects/token-pair.vo';
-import { Session } from '../../../../domain/entities/session.entity';
-import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
-import { randomUUID } from 'crypto';
+import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
+import { AuthenticateUserHandler } from "../authenticate-user.handler";
+import { AuthenticateUserCommand } from "../../authenticate-user.command";
+import type { IUserAuthenticationService } from "../../../interfaces/user-authentication.service.interface";
+import { USER_AUTHENTICATION_SERVICE } from "../../../interfaces/user-authentication.service.interface";
+import type { IUserRolePermissionQueryService } from "../../../interfaces/user-role-permission-query.service.interface";
+import { USER_ROLE_PERMISSION_QUERY_SERVICE } from "../../../interfaces/user-role-permission-query.service.interface";
+import type { PasswordHasher } from "../../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../../common/application/interfaces/password-hasher.interface";
+import type { TokenService } from "../../../../../../common/application/interfaces/token-service.interface";
+import { TOKEN_SERVICE } from "../../../../../../common/application/interfaces/token-service.interface";
+import type { ISessionRepository } from "../../../../domain/repositories/session.repository.interface";
+import { SESSION_REPOSITORY } from "../../../../domain/repositories/session.repository.interface";
+import { Email } from "../../../../../../common/domain/value-objects/email.vo";
+import { AccessToken } from "../../../../domain/value-objects/access-token.vo";
+import { RefreshToken } from "../../../../domain/value-objects/refresh-token.vo";
+import { TokenPair } from "../../../../domain/value-objects/token-pair.vo";
+import { Session } from "../../../../domain/entities/session.entity";
+import { JwtPayload } from "../../../../domain/value-objects/jwt-payload.vo";
+import { randomUUID } from "crypto";
 
-describe('AuthenticateUserHandler', () => {
+describe("AuthenticateUserHandler", () => {
   let handler: AuthenticateUserHandler;
   let findForAuthenticationMock: jest.Mock;
   let getUserRolesAndPermissionsMock: jest.Mock;
@@ -40,22 +40,22 @@ describe('AuthenticateUserHandler', () => {
   let revokeSessionMock: jest.Mock;
 
   const userId = randomUUID();
-  const userEmail = Email.create('admin@stayly.dev');
-  const password = 'SecurePassword123!';
-  const hashedPassword = '$2b$10$hashedpassword';
-  const userAgent = 'Mozilla/5.0';
-  const ipAddress = '192.168.1.1';
+  const userEmail = Email.create("admin@stayly.dev");
+  const password = "SecurePassword123!";
+  const hashedPassword = "$2b$10$hashedpassword";
+  const userAgent = "Mozilla/5.0";
+  const ipAddress = "192.168.1.1";
 
   const mockUserData = {
     id: userId,
-    email: 'admin@stayly.dev',
+    email: "admin@stayly.dev",
     passwordHash: hashedPassword,
     isActive: true,
   };
 
   const mockRolePermissionData = {
-    roles: ['super_admin'],
-    permissions: ['user:manage', 'user:read', 'user:create'],
+    roles: ["super_admin"],
+    permissions: ["user:manage", "user:read", "user:create"],
   };
 
   beforeEach(async () => {
@@ -128,8 +128,8 @@ describe('AuthenticateUserHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should authenticate user successfully and return token pair', async () => {
+  describe("execute", () => {
+    it("should authenticate user successfully and return token pair", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -138,10 +138,10 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -158,11 +158,11 @@ describe('AuthenticateUserHandler', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.accessToken).toBe('access-token-long-enough');
+      expect(result.accessToken).toBe("access-token-long-enough");
       expect(result.refreshToken).toBe(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
       );
-      expect(result.tokenType).toBe('Bearer');
+      expect(result.tokenType).toBe("Bearer");
       expect(findForAuthenticationMock).toHaveBeenCalledWith(userEmail);
       expect(comparePasswordMock).toHaveBeenCalledWith(
         password,
@@ -173,7 +173,7 @@ describe('AuthenticateUserHandler', () => {
       expect(saveSessionMock).toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException when user not found', async () => {
+    it("should throw UnauthorizedException when user not found", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -189,7 +189,7 @@ describe('AuthenticateUserHandler', () => {
         UnauthorizedException,
       );
       await expect(handler.execute(command)).rejects.toThrow(
-        'Invalid credentials',
+        "Invalid credentials",
       );
       expect(findForAuthenticationMock).toHaveBeenCalledWith(userEmail);
       expect(comparePasswordMock).not.toHaveBeenCalled();
@@ -197,11 +197,11 @@ describe('AuthenticateUserHandler', () => {
       expect(issueTokenPairMock).not.toHaveBeenCalled();
     });
 
-    it('should throw UnauthorizedException when password does not match', async () => {
+    it("should throw UnauthorizedException when password does not match", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
-        'WrongPassword',
+        "WrongPassword",
         userAgent,
         ipAddress,
       );
@@ -214,18 +214,18 @@ describe('AuthenticateUserHandler', () => {
         UnauthorizedException,
       );
       await expect(handler.execute(command)).rejects.toThrow(
-        'Invalid credentials',
+        "Invalid credentials",
       );
       expect(findForAuthenticationMock).toHaveBeenCalledWith(userEmail);
       expect(comparePasswordMock).toHaveBeenCalledWith(
-        'WrongPassword',
+        "WrongPassword",
         hashedPassword,
       );
       expect(getUserRolesAndPermissionsMock).not.toHaveBeenCalled();
       expect(issueTokenPairMock).not.toHaveBeenCalled();
     });
 
-    it('should throw BadRequestException when user is not active', async () => {
+    it("should throw BadRequestException when user is not active", async () => {
       // Arrange
       const inactiveUserData = {
         ...mockUserData,
@@ -247,7 +247,7 @@ describe('AuthenticateUserHandler', () => {
         BadRequestException,
       );
       await expect(handler.execute(command)).rejects.toThrow(
-        'User is not active',
+        "User is not active",
       );
       expect(findForAuthenticationMock).toHaveBeenCalledWith(userEmail);
       expect(comparePasswordMock).toHaveBeenCalledWith(
@@ -258,7 +258,7 @@ describe('AuthenticateUserHandler', () => {
       expect(issueTokenPairMock).not.toHaveBeenCalled();
     });
 
-    it('should query roles and permissions from RBAC module after user validation', async () => {
+    it("should query roles and permissions from RBAC module after user validation", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -267,10 +267,10 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -294,7 +294,7 @@ describe('AuthenticateUserHandler', () => {
       expect(issueTokenPairMock).toHaveBeenCalled();
     });
 
-    it('should create JWT payload with roles and permissions from RBAC module', async () => {
+    it("should create JWT payload with roles and permissions from RBAC module", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -303,10 +303,10 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -326,18 +326,18 @@ describe('AuthenticateUserHandler', () => {
       const [issuedPayload] = issueTokenPairMock.mock.calls[0] as [JwtPayload];
       const payload = issuedPayload;
       const payloadProps = payload.getProps();
-      expect(payloadProps.userType).toBe('user');
+      expect(payloadProps.userType).toBe("user");
       expect(payloadProps.sub).toBe(userId);
       expect(payloadProps.email).toBe(userEmail.getValue());
-      expect(payloadProps.roles).toEqual(['super_admin']);
+      expect(payloadProps.roles).toEqual(["super_admin"]);
       expect(payloadProps.permissions).toEqual([
-        'user:manage',
-        'user:read',
-        'user:create',
+        "user:manage",
+        "user:read",
+        "user:create",
       ]);
     });
 
-    it('should handle user with multiple roles and merged permissions', async () => {
+    it("should handle user with multiple roles and merged permissions", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -347,20 +347,20 @@ describe('AuthenticateUserHandler', () => {
       );
 
       const multiRolePermissionData = {
-        roles: ['super_admin', 'manager'],
+        roles: ["super_admin", "manager"],
         permissions: [
-          'user:manage',
-          'user:read',
-          'user:create',
-          'booking:read',
-          'booking:create',
+          "user:manage",
+          "user:read",
+          "user:create",
+          "booking:read",
+          "booking:create",
         ],
       };
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -379,17 +379,17 @@ describe('AuthenticateUserHandler', () => {
       const [issuedPayload] = issueTokenPairMock.mock.calls[0] as [JwtPayload];
       const payload = issuedPayload;
       const payloadProps = payload.getProps();
-      expect(payloadProps.roles).toEqual(['super_admin', 'manager']);
+      expect(payloadProps.roles).toEqual(["super_admin", "manager"]);
       expect(payloadProps.permissions).toEqual([
-        'user:manage',
-        'user:read',
-        'user:create',
-        'booking:read',
-        'booking:create',
+        "user:manage",
+        "user:read",
+        "user:create",
+        "booking:read",
+        "booking:create",
       ]);
     });
 
-    it('should handle user with no roles and only direct permissions', async () => {
+    it("should handle user with no roles and only direct permissions", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -400,13 +400,13 @@ describe('AuthenticateUserHandler', () => {
 
       const noRolePermissionData = {
         roles: [],
-        permissions: ['user:read'],
+        permissions: ["user:read"],
       };
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -426,10 +426,10 @@ describe('AuthenticateUserHandler', () => {
       const payload = issuedPayload;
       const payloadProps = payload.getProps();
       expect(payloadProps.roles).toEqual([]);
-      expect(payloadProps.permissions).toEqual(['user:read']);
+      expect(payloadProps.permissions).toEqual(["user:read"]);
     });
 
-    it('should create session with correct metadata', async () => {
+    it("should create session with correct metadata", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -438,10 +438,10 @@ describe('AuthenticateUserHandler', () => {
         ipAddress,
       );
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -464,7 +464,7 @@ describe('AuthenticateUserHandler', () => {
       expect(savedSession.getIpAddress()).toBe(ipAddress);
     });
 
-    it('should handle null userAgent and ipAddress', async () => {
+    it("should handle null userAgent and ipAddress", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -473,10 +473,10 @@ describe('AuthenticateUserHandler', () => {
         null,
       );
 
-      const accessToken = AccessToken.create('access-token-long-enough', 3600);
+      const accessToken = AccessToken.create("access-token-long-enough", 3600);
       const expiresAt = new Date(Date.now() + 604800 * 1000);
       const refreshToken = RefreshToken.create(
-        'refresh-token-long-enough-to-pass-validation',
+        "refresh-token-long-enough-to-pass-validation",
         expiresAt,
         randomUUID(),
       );
@@ -498,7 +498,7 @@ describe('AuthenticateUserHandler', () => {
       expect(savedSession.getIpAddress()).toBeNull();
     });
 
-    it('should propagate error when RBAC query fails', async () => {
+    it("should propagate error when RBAC query fails", async () => {
       // Arrange
       const command = new AuthenticateUserCommand(
         userEmail.getValue(),
@@ -510,12 +510,12 @@ describe('AuthenticateUserHandler', () => {
       findForAuthenticationMock.mockResolvedValue(mockUserData);
       comparePasswordMock.mockResolvedValue(true);
       getUserRolesAndPermissionsMock.mockRejectedValue(
-        new Error('User not found in RBAC'),
+        new Error("User not found in RBAC"),
       );
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(
-        'User not found in RBAC',
+        "User not found in RBAC",
       );
       expect(findForAuthenticationMock).toHaveBeenCalled();
       expect(comparePasswordMock).toHaveBeenCalled();

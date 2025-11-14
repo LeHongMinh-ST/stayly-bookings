@@ -6,26 +6,26 @@ import {
   Inject,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
-import { AuthenticateUserCommand } from '../authenticate-user.command';
-import type { IUserAuthenticationService } from '../../interfaces/user-authentication.service.interface';
-import { USER_AUTHENTICATION_SERVICE } from '../../interfaces/user-authentication.service.interface';
-import type { IUserRolePermissionQueryService } from '../../interfaces/user-role-permission-query.service.interface';
-import { USER_ROLE_PERMISSION_QUERY_SERVICE } from '../../interfaces/user-role-permission-query.service.interface';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
-import type { TokenService } from '../../../../../common/application/interfaces/token-service.interface';
-import { TOKEN_SERVICE } from '../../../../../common/application/interfaces/token-service.interface';
-import type { ISessionRepository } from '../../../domain/repositories/session.repository.interface';
-import { SESSION_REPOSITORY } from '../../../domain/repositories/session.repository.interface';
-import { JwtPayload } from '../../../domain/value-objects/jwt-payload.vo';
-import { Session } from '../../../domain/entities/session.entity';
-import { SessionId } from '../../../domain/value-objects/session-id.vo';
-import { TokenPair } from '../../../domain/value-objects/token-pair.vo';
-import { TokenResponseDto } from '../../dto/response/token-response.dto';
+} from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { randomUUID } from "crypto";
+import { AuthenticateUserCommand } from "../authenticate-user.command";
+import type { IUserAuthenticationService } from "../../interfaces/user-authentication.service.interface";
+import { USER_AUTHENTICATION_SERVICE } from "../../interfaces/user-authentication.service.interface";
+import type { IUserRolePermissionQueryService } from "../../interfaces/user-role-permission-query.service.interface";
+import { USER_ROLE_PERMISSION_QUERY_SERVICE } from "../../interfaces/user-role-permission-query.service.interface";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import type { PasswordHasher } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../common/application/interfaces/password-hasher.interface";
+import type { TokenService } from "../../../../../common/application/interfaces/token-service.interface";
+import { TOKEN_SERVICE } from "../../../../../common/application/interfaces/token-service.interface";
+import type { ISessionRepository } from "../../../domain/repositories/session.repository.interface";
+import { SESSION_REPOSITORY } from "../../../domain/repositories/session.repository.interface";
+import { JwtPayload } from "../../../domain/value-objects/jwt-payload.vo";
+import { Session } from "../../../domain/entities/session.entity";
+import { SessionId } from "../../../domain/value-objects/session-id.vo";
+import { TokenPair } from "../../../domain/value-objects/token-pair.vo";
+import { TokenResponseDto } from "../../dto/response/token-response.dto";
 
 @Injectable()
 @CommandHandler(AuthenticateUserCommand)
@@ -54,7 +54,7 @@ export class AuthenticateUserHandler
 
     const userData = await this.userAuthService.findForAuthentication(email);
     if (!userData) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     const matches = await this.passwordHasher.compare(
@@ -62,11 +62,11 @@ export class AuthenticateUserHandler
       userData.passwordHash,
     );
     if (!matches) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException("Invalid credentials");
     }
 
     if (!userData.isActive) {
-      throw new BadRequestException('User is not active');
+      throw new BadRequestException("User is not active");
     }
 
     // Get roles and permissions from RBAC module
@@ -81,7 +81,7 @@ export class AuthenticateUserHandler
       roles: rolePermissionData.roles,
       permissions: rolePermissionData.permissions,
       tokenId: randomUUID(),
-      userType: 'user', // Mark as user for guard differentiation
+      userType: "user", // Mark as user for guard differentiation
     });
 
     return this.issueTokens(payload, command, userData.id);
@@ -98,7 +98,7 @@ export class AuthenticateUserHandler
     const session = Session.create({
       id: SessionId.create(randomUUID()),
       userId: userId,
-      userType: 'user',
+      userType: "user",
       refreshToken: tokenPair.refreshToken,
       userAgent: command.userAgent ?? null,
       ipAddress: command.ipAddress ?? null,
@@ -108,7 +108,7 @@ export class AuthenticateUserHandler
     return new TokenResponseDto(
       tokenPair.accessToken.getValue(),
       tokenPair.refreshToken.getValue(),
-      'Bearer',
+      "Bearer",
       tokenPair.accessToken.getExpiresInSeconds(),
     );
   }

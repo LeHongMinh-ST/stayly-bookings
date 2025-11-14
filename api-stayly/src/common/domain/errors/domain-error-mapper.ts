@@ -11,7 +11,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ConflictError,
   DomainError,
@@ -21,7 +21,7 @@ import {
   InvalidStateError,
   NotFoundError,
   UnauthorizedError,
-} from './index';
+} from "./index";
 
 /**
  * Maps a domain error to the appropriate HTTP exception

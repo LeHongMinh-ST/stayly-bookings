@@ -1,10 +1,10 @@
 /**
  * SessionOrmMapper bridges Session aggregate with ORM entity
  */
-import { RefreshToken } from '../../../domain/value-objects/refresh-token.vo';
-import { Session } from '../../../domain/entities/session.entity';
-import { SessionOrmEntity } from '../entities/session.orm-entity';
-import { SessionId } from '../../../domain/value-objects/session-id.vo';
+import { RefreshToken } from "../../../domain/value-objects/refresh-token.vo";
+import { Session } from "../../../domain/entities/session.entity";
+import { SessionOrmEntity } from "../entities/session.orm-entity";
+import { SessionId } from "../../../domain/value-objects/session-id.vo";
 
 export class SessionOrmMapper {
   static toDomain(entity: SessionOrmEntity): Session {

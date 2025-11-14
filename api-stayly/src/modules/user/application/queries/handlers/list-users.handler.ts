@@ -1,13 +1,13 @@
 /**
  * ListUsersHandler retrieves paginated administrative users
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ListUsersQuery } from '../list-users.query';
-import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
-import { UserResponseDto } from '../../dto/response/user-response.dto';
-import { UserCollectionDto } from '../../dto/response/user-collection.dto';
+import { Inject, Injectable } from "@nestjs/common";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { ListUsersQuery } from "../list-users.query";
+import type { IUserRepository } from "../../../domain/repositories/user.repository.interface";
+import { USER_REPOSITORY } from "../../../domain/repositories/user.repository.interface";
+import { UserResponseDto } from "../../dto/response/user-response.dto";
+import { UserCollectionDto } from "../../dto/response/user-collection.dto";
 
 @Injectable()
 @QueryHandler(ListUsersQuery)

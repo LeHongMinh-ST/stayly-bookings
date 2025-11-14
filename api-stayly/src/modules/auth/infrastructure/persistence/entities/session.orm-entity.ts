@@ -8,43 +8,43 @@ import {
   Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
+} from "typeorm";
 
-@Entity({ name: 'auth_sessions' })
+@Entity({ name: "auth_sessions" })
 export class SessionOrmEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Index('idx_session_user_id')
-  @Column({ name: 'user_id' })
+  @Index("idx_session_user_id")
+  @Column({ name: "user_id" })
   userId!: string;
 
-  @Index('idx_auth_sessions_user_type')
-  @Column({ name: 'user_type', type: 'varchar', length: 20 })
-  userType!: 'user' | 'customer';
+  @Index("idx_auth_sessions_user_type")
+  @Column({ name: "user_type", type: "varchar", length: 20 })
+  userType!: "user" | "customer";
 
-  @Index('idx_session_token_id', { unique: true })
-  @Column({ name: 'token_id', unique: true })
+  @Index("idx_session_token_id", { unique: true })
+  @Column({ name: "token_id", unique: true })
   tokenId!: string;
 
-  @Column({ name: 'refresh_token', type: 'text' })
+  @Column({ name: "refresh_token", type: "text" })
   refreshToken!: string;
 
-  @Column({ name: 'refresh_token_expires_at', type: 'timestamp' })
+  @Column({ name: "refresh_token_expires_at", type: "timestamp" })
   refreshTokenExpiresAt!: Date;
 
-  @Column({ name: 'user_agent', nullable: true, type: 'text' })
+  @Column({ name: "user_agent", nullable: true, type: "text" })
   userAgent!: string | null;
 
-  @Column({ name: 'ip_address', type: 'varchar', nullable: true })
+  @Column({ name: "ip_address", type: "varchar", nullable: true })
   ipAddress!: string | null;
 
-  @Column({ name: 'revoked_at', type: 'timestamp', nullable: true })
+  @Column({ name: "revoked_at", type: "timestamp", nullable: true })
   revokedAt!: Date | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt!: Date;
 }

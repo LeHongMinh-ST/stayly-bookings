@@ -1,14 +1,14 @@
 /**
  * GetCustomerProfileHandler resolves customer aggregate for authenticated user
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetCustomerProfileQuery } from '../get-customer-profile.query';
-import { CUSTOMER_REPOSITORY } from '../../../domain/repositories/customer.repository.interface';
-import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
-import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
-import { CustomerResponseDto } from '../../dto/response/customer-response.dto';
-import { ensureEntityExists } from '../../../../../common/application/exceptions';
+import { Inject, Injectable } from "@nestjs/common";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { GetCustomerProfileQuery } from "../get-customer-profile.query";
+import { CUSTOMER_REPOSITORY } from "../../../domain/repositories/customer.repository.interface";
+import type { ICustomerRepository } from "../../../domain/repositories/customer.repository.interface";
+import { CustomerId } from "../../../domain/value-objects/customer-id.vo";
+import { CustomerResponseDto } from "../../dto/response/customer-response.dto";
+import { ensureEntityExists } from "../../../../../common/application/exceptions";
 
 @Injectable()
 @QueryHandler(GetCustomerProfileQuery)
@@ -27,7 +27,7 @@ export class GetCustomerProfileHandler
     const customerId = CustomerId.create(query.customerId);
     const customer = ensureEntityExists(
       await this.customerRepository.findById(customerId),
-      'Customer',
+      "Customer",
       customerId.getValue(),
     );
     return CustomerResponseDto.fromAggregate(customer);

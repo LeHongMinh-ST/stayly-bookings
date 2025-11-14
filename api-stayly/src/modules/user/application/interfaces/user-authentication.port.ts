@@ -4,7 +4,7 @@
  * This is the abstraction that other modules depend on
  * Following Port/Adapter Pattern - Port is defined in application layer
  */
-import { Email } from '../../../../common/domain/value-objects/email.vo';
+import { Email } from "../../../../common/domain/value-objects/email.vo";
 
 /**
  * User authentication data required for authentication flow
@@ -30,4 +30,4 @@ export interface IUserAuthenticationPort {
   findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
 }
 
-export const USER_AUTHENTICATION_PORT = 'USER_AUTHENTICATION_PORT';
+export const USER_AUTHENTICATION_PORT = "USER_AUTHENTICATION_PORT";

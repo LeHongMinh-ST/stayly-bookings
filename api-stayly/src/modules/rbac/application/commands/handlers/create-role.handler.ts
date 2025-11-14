@@ -1,18 +1,18 @@
 /**
  * CreateRoleHandler orchestrates role creation workflow
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
-import { CreateRoleCommand } from '../create-role.command';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import type { IRolePermissionValidationPort } from '../../interfaces/role-permission-validation.port';
-import { ROLE_PERMISSION_VALIDATION_PORT } from '../../interfaces/role-permission-validation.port';
-import { Role } from '../../../domain/entities/role.entity';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { Permission } from '../../../domain/value-objects/permission.vo';
-import { RoleResponseDto } from '../../dto/response/role-response.dto';
+import { Inject, Injectable } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { randomUUID } from "crypto";
+import { CreateRoleCommand } from "../create-role.command";
+import type { IRoleRepository } from "../../../domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../domain/repositories/role.repository.interface";
+import type { IRolePermissionValidationPort } from "../../interfaces/role-permission-validation.port";
+import { ROLE_PERMISSION_VALIDATION_PORT } from "../../interfaces/role-permission-validation.port";
+import { Role } from "../../../domain/entities/role.entity";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
+import { Permission } from "../../../domain/value-objects/permission.vo";
+import { RoleResponseDto } from "../../dto/response/role-response.dto";
 
 @Injectable()
 @CommandHandler(CreateRoleCommand)

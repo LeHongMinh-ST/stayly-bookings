@@ -12,7 +12,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 
 /**
  * Throws NotFoundException for entity not found scenarios
@@ -23,14 +23,14 @@ export function throwEntityNotFound(
   identifier?: string | Record<string, unknown>,
 ): never {
   const identifierStr =
-    typeof identifier === 'string'
+    typeof identifier === "string"
       ? identifier
       : identifier
         ? JSON.stringify(identifier)
-        : 'unknown';
+        : "unknown";
 
   throw new NotFoundException(
-    `${entityName} not found${identifier ? ` with identifier: ${identifierStr}` : ''}`,
+    `${entityName} not found${identifier ? ` with identifier: ${identifierStr}` : ""}`,
   );
 }
 
@@ -57,7 +57,7 @@ export function throwConflict(message: string, conflictType?: string): never {
  * Use when authentication is required but missing or invalid
  */
 export function throwUnauthorized(
-  message: string = 'Authentication required',
+  message: string = "Authentication required",
   reason?: string,
 ): never {
   const fullMessage = reason ? `${message}. Reason: ${reason}` : message;
@@ -69,7 +69,7 @@ export function throwUnauthorized(
  * Use when user is authenticated but lacks required permissions
  */
 export function throwForbidden(
-  message: string = 'Access denied',
+  message: string = "Access denied",
   requiredPermission?: string,
   requiredRole?: string,
 ): never {
@@ -78,7 +78,7 @@ export function throwForbidden(
     requiredRole && `role=${requiredRole}`,
   ]
     .filter(Boolean)
-    .join(', ');
+    .join(", ");
   const fullMessage = details ? `${message} (${details})` : message;
   throw new ForbiddenException(fullMessage);
 }
@@ -97,7 +97,7 @@ export function throwInvalidOperation(
     reason && `reason=${reason}`,
   ]
     .filter(Boolean)
-    .join(', ');
+    .join(", ");
   const fullMessage = details ? `${message} (${details})` : message;
   throw new UnprocessableEntityException(fullMessage);
 }
@@ -107,7 +107,7 @@ export function throwInvalidOperation(
  * Use as last resort when error cannot be categorized
  */
 export function throwInternalError(
-  message: string = 'An unexpected error occurred',
+  message: string = "An unexpected error occurred",
   originalError?: Error,
 ): never {
   if (originalError) {

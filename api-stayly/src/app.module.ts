@@ -3,40 +3,40 @@
  * Imports all infrastructure modules and common modules
  */
 
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from '@nestjs/core';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import configuration from './config/configuration';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER, APP_PIPE } from "@nestjs/core";
+import { EventEmitterModule } from "@nestjs/event-emitter";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import configuration from "./config/configuration";
 
 // Infrastructure modules
-import { DatabaseModule } from './common/infrastructure/database/database.module';
-import { CacheModuleConfig } from './common/infrastructure/cache/cache.module';
-import { KafkaModule } from './common/infrastructure/kafka/kafka.module';
-import { LoggerModuleConfig } from './common/infrastructure/logger/logger.module';
-import { SecurityModule } from './common/infrastructure/security/security.module';
+import { DatabaseModule } from "./common/infrastructure/database/database.module";
+import { CacheModuleConfig } from "./common/infrastructure/cache/cache.module";
+import { KafkaModule } from "./common/infrastructure/kafka/kafka.module";
+import { LoggerModuleConfig } from "./common/infrastructure/logger/logger.module";
+import { SecurityModule } from "./common/infrastructure/security/security.module";
 
 // Guards
-import { RolesGuard } from './common/guards/roles.guard';
-import { PermissionsGuard } from './common/guards/permissions.guard';
+import { RolesGuard } from "./common/guards/roles.guard";
+import { PermissionsGuard } from "./common/guards/permissions.guard";
 
 // Interceptors
-import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 
 // Filters
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
+import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
 
 // Pipes
-import { ValidationPipe } from './common/pipes/validation.pipe';
+import { ValidationPipe } from "./common/pipes/validation.pipe";
 
 // Bounded Context Modules
-import { AuthModule } from './modules/auth/auth.module';
-import { RbacModule } from './modules/rbac/rbac.module';
-import { UserModule } from './modules/user/user.module';
-import { CustomerModule } from './modules/customer/customer.module';
+import { AuthModule } from "./modules/auth/auth.module";
+import { RbacModule } from "./modules/rbac/rbac.module";
+import { UserModule } from "./modules/user/user.module";
+import { CustomerModule } from "./modules/customer/customer.module";
 
 @Module({
   imports: [
@@ -44,7 +44,7 @@ import { CustomerModule } from './modules/customer/customer.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: [".env.local", ".env"],
     }),
 
     // Event Emitter for Domain Events

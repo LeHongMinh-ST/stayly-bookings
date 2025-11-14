@@ -3,41 +3,41 @@
  * Root controller with health check endpoint
  */
 
-import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { AppService } from './app.service';
-import { Public } from './common/decorators/public.decorator';
+import { Controller, Get } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { AppService } from "./app.service";
+import { Public } from "./common/decorators/public.decorator";
 
-@ApiTags('health')
+@ApiTags("health")
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
   @Public() // This endpoint is public (no authentication required)
-  @ApiOperation({ summary: 'Get welcome message' })
-  @ApiResponse({ status: 200, description: 'Returns welcome message' })
+  @ApiOperation({ summary: "Get welcome message" })
+  @ApiResponse({ status: 200, description: "Returns welcome message" })
   getHello(): string {
     return this.appService.getHello();
   }
 
-  @Get('health')
+  @Get("health")
   @Public() // Health check endpoint is public
-  @ApiOperation({ summary: 'Health check endpoint' })
+  @ApiOperation({ summary: "Health check endpoint" })
   @ApiResponse({
     status: 200,
-    description: 'Returns health status and timestamp',
+    description: "Returns health status and timestamp",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        status: { type: 'string', example: 'ok' },
-        timestamp: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
+        status: { type: "string", example: "ok" },
+        timestamp: { type: "string", example: "2024-01-01T00:00:00.000Z" },
       },
     },
   })
   getHealth(): { status: string; timestamp: string } {
     return {
-      status: 'ok',
+      status: "ok",
       timestamp: new Date().toISOString(),
     };
   }

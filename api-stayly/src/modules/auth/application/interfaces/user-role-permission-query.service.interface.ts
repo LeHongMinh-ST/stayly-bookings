@@ -19,4 +19,4 @@ export interface IUserRolePermissionQueryService {
 }
 
 export const USER_ROLE_PERMISSION_QUERY_SERVICE =
-  'USER_ROLE_PERMISSION_QUERY_SERVICE';
+  "USER_ROLE_PERMISSION_QUERY_SERVICE";

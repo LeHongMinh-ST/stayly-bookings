@@ -6,18 +6,18 @@ import {
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { AuthGuard } from "@nestjs/passport";
+import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
 
 type JwtCustomerPayload = {
-  userType?: 'user' | 'customer';
+  userType?: "user" | "customer";
   roles?: string[];
 } & Record<string, unknown>;
 
 @Injectable()
-export class JwtCustomerGuard extends AuthGuard('jwt-customer') {
+export class JwtCustomerGuard extends AuthGuard("jwt-customer") {
   constructor(private reflector: Reflector) {
     super();
   }
@@ -44,12 +44,12 @@ export class JwtCustomerGuard extends AuthGuard('jwt-customer') {
       if (err instanceof Error) {
         throw err;
       }
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException("Invalid or expired token");
     }
 
-    if (user.userType !== 'customer' && !user.roles?.includes('customer')) {
+    if (user.userType !== "customer" && !user.roles?.includes("customer")) {
       throw new UnauthorizedException(
-        'Admin tokens are not allowed for customer endpoints',
+        "Admin tokens are not allowed for customer endpoints",
       );
     }
 

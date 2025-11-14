@@ -1,19 +1,19 @@
 /**
  * JwtTokenService issues and verifies JWT access/refresh tokens
  */
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import type { JwtSignOptions } from '@nestjs/jwt';
-import { TokenService } from '../../../../common/application/interfaces/token-service.interface';
-import { JwtPayload } from '../../domain/value-objects/jwt-payload.vo';
-import { AccessToken } from '../../domain/value-objects/access-token.vo';
-import { RefreshToken } from '../../domain/value-objects/refresh-token.vo';
-import { TokenPair } from '../../domain/value-objects/token-pair.vo';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import type { JwtSignOptions } from "@nestjs/jwt";
+import { TokenService } from "../../../../common/application/interfaces/token-service.interface";
+import { JwtPayload } from "../../domain/value-objects/jwt-payload.vo";
+import { AccessToken } from "../../domain/value-objects/access-token.vo";
+import { RefreshToken } from "../../domain/value-objects/refresh-token.vo";
+import { TokenPair } from "../../domain/value-objects/token-pair.vo";
 import {
   throwInternalError,
   throwInvalidInput,
-} from '../../../../common/application/exceptions';
+} from "../../../../common/application/exceptions";
 
 type DecodedRefreshPayload = {
   sub?: string;
@@ -28,28 +28,28 @@ export class JwtTokenService implements TokenService {
   private readonly refreshSecret: string;
   private readonly accessExpiresInSeconds: number;
   private readonly refreshExpiresInSeconds: number;
-  private readonly refreshExpiresInRaw: JwtSignOptions['expiresIn'];
+  private readonly refreshExpiresInRaw: JwtSignOptions["expiresIn"];
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    const accessSecret = this.configService.get<string>('jwt.secret');
+    const accessSecret = this.configService.get<string>("jwt.secret");
     if (!accessSecret) {
-      throwInternalError('jwt.secret is not configured');
+      throwInternalError("jwt.secret is not configured");
     }
-    const refreshSecret = this.configService.get<string>('jwt.refreshSecret');
+    const refreshSecret = this.configService.get<string>("jwt.refreshSecret");
     if (!refreshSecret) {
-      throwInternalError('jwt.refreshSecret is not configured');
+      throwInternalError("jwt.refreshSecret is not configured");
     }
     this.refreshSecret = refreshSecret;
     const refreshExpiresInConfig = this.configService.get<string | number>(
-      'jwt.refreshExpiresIn',
+      "jwt.refreshExpiresIn",
     );
     this.refreshExpiresInRaw = (refreshExpiresInConfig ??
-      '7d') as JwtSignOptions['expiresIn'];
+      "7d") as JwtSignOptions["expiresIn"];
     this.accessExpiresInSeconds = this.resolveSeconds(
-      this.configService.get<string | number>('jwt.expiresIn') ?? '15m',
+      this.configService.get<string | number>("jwt.expiresIn") ?? "15m",
     );
     this.refreshExpiresInSeconds = this.resolveSeconds(
       this.refreshExpiresInRaw as string | number | undefined,
@@ -60,7 +60,7 @@ export class JwtTokenService implements TokenService {
     const payloadProps = payload.getProps();
     const expiresIn = (
       this.accessExpiresInSeconds > 0 ? this.accessExpiresInSeconds : undefined
-    ) as JwtSignOptions['expiresIn'];
+    ) as JwtSignOptions["expiresIn"];
     const token = await this.jwtService.signAsync(payloadProps, {
       expiresIn,
     });
@@ -77,7 +77,7 @@ export class JwtTokenService implements TokenService {
       Date.now() + this.refreshExpiresInSeconds * 1000,
     );
     if (!payloadProps.tokenId) {
-      throwInvalidInput('Refresh token requires tokenId claim', 'tokenId');
+      throwInvalidInput("Refresh token requires tokenId claim", "tokenId");
     }
     return RefreshToken.create(token, expiresAt, payloadProps.tokenId);
   }
@@ -98,8 +98,8 @@ export class JwtTokenService implements TokenService {
       },
     );
     return JwtPayload.create({
-      sub: payload.sub ?? '',
-      email: payload.email ?? '',
+      sub: payload.sub ?? "",
+      email: payload.email ?? "",
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
       tokenId: payload.tokenId,
@@ -110,7 +110,7 @@ export class JwtTokenService implements TokenService {
     if (!value) {
       return 0;
     }
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return value;
     }
 
@@ -124,13 +124,13 @@ export class JwtTokenService implements TokenService {
     const unit = match[2].toLowerCase();
 
     switch (unit) {
-      case 's':
+      case "s":
         return amount;
-      case 'm':
+      case "m":
         return amount * 60;
-      case 'h':
+      case "h":
         return amount * 60 * 60;
-      case 'd':
+      case "d":
         return amount * 60 * 60 * 24;
       default:
         return amount;

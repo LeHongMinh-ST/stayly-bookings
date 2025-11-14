@@ -1,13 +1,13 @@
 /**
  * Unit tests for ListPermissionsHandler
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { ListPermissionsHandler } from '../list-permissions.handler';
-import { ListPermissionsQuery } from '../../list-permissions.query';
-import { PERMISSION_REPOSITORY } from '../../../../domain/repositories/permission.repository.interface';
-import { Permission } from '../../../../domain/value-objects/permission.vo';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ListPermissionsHandler } from "../list-permissions.handler";
+import { ListPermissionsQuery } from "../../list-permissions.query";
+import { PERMISSION_REPOSITORY } from "../../../../domain/repositories/permission.repository.interface";
+import { Permission } from "../../../../domain/value-objects/permission.vo";
 
-describe('ListPermissionsHandler', () => {
+describe("ListPermissionsHandler", () => {
   let handler: ListPermissionsHandler;
   let findAllMock: jest.Mock;
 
@@ -36,14 +36,14 @@ describe('ListPermissionsHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should return list of permissions', async () => {
+  describe("execute", () => {
+    it("should return list of permissions", async () => {
       // Arrange
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
-        Permission.create('user:update'),
-        Permission.create('user:delete'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
+        Permission.create("user:update"),
+        Permission.create("user:delete"),
       ];
       const query = new ListPermissionsQuery();
       findAllMock.mockResolvedValue(permissions);
@@ -54,8 +54,8 @@ describe('ListPermissionsHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result).toHaveLength(4);
-      expect(result[0].getValue()).toBe('user:read');
-      expect(result[1].getValue()).toBe('user:create');
+      expect(result[0].getValue()).toBe("user:read");
+      expect(result[1].getValue()).toBe("user:create");
       expect(findAllMock).toHaveBeenCalledWith(
         query.limit,
         query.offset,
@@ -63,7 +63,7 @@ describe('ListPermissionsHandler', () => {
       );
     });
 
-    it('should return empty array when no permissions exist', async () => {
+    it("should return empty array when no permissions exist", async () => {
       // Arrange
       const query = new ListPermissionsQuery();
       findAllMock.mockResolvedValue([]);

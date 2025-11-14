@@ -8,7 +8,7 @@
  * - @CurrentUser('id') userId: string - Get specific property
  * - Use type guards: isUser() or isCustomer() to narrow types
  */
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
 
 /**
  * Base payload structure shared by both user and customer
@@ -25,7 +25,7 @@ interface BaseUserPayload {
  * Returned by JwtUserStrategy when using JwtUserGuard
  */
 export interface CurrentUserPayload extends BaseUserPayload {
-  userType: 'user';
+  userType: "user";
   roles: string[]; // Admin roles: SUPER_ADMIN, OWNER, MANAGER, STAFF
   permissions: string[]; // Admin permissions
 }
@@ -35,8 +35,8 @@ export interface CurrentUserPayload extends BaseUserPayload {
  * Returned by JwtCustomerStrategy when using JwtCustomerGuard
  */
 export interface CurrentCustomerPayload extends BaseUserPayload {
-  userType: 'customer';
-  roles: ['customer']; // Always ['customer']
+  userType: "customer";
+  roles: ["customer"]; // Always ['customer']
   permissions: []; // Usually empty for customers
 }
 
@@ -62,7 +62,7 @@ export type CurrentAuthPayload = CurrentUserPayload | CurrentCustomerPayload;
 export function isUser(
   payload: CurrentAuthPayload | null,
 ): payload is CurrentUserPayload {
-  return payload !== null && payload.userType === 'user';
+  return payload !== null && payload.userType === "user";
 }
 
 /**
@@ -81,7 +81,7 @@ export function isUser(
 export function isCustomer(
   payload: CurrentAuthPayload | null,
 ): payload is CurrentCustomerPayload {
-  return payload !== null && payload.userType === 'customer';
+  return payload !== null && payload.userType === "customer";
 }
 
 /**

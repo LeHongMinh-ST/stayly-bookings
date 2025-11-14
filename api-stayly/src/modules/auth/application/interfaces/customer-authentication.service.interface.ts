@@ -3,7 +3,7 @@
  * This interface abstracts customer service dependency from customer module
  * Following Adapter Pattern to decouple auth module from customer domain
  */
-import { Email } from '../../../../common/domain/value-objects/email.vo';
+import { Email } from "../../../../common/domain/value-objects/email.vo";
 
 /**
  * Customer authentication data required for authentication flow
@@ -27,4 +27,4 @@ export interface ICustomerAuthenticationService {
 }
 
 export const CUSTOMER_AUTHENTICATION_SERVICE =
-  'CUSTOMER_AUTHENTICATION_SERVICE';
+  "CUSTOMER_AUTHENTICATION_SERVICE";

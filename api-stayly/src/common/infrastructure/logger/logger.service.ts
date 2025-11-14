@@ -3,11 +3,11 @@
  * Provides structured logging using Pino
  */
 
-import { Injectable, LoggerService as NestLoggerService } from '@nestjs/common';
-import { PinoLogger } from 'nestjs-pino';
+import { Injectable, LoggerService as NestLoggerService } from "@nestjs/common";
+import { PinoLogger } from "nestjs-pino";
 
 const normalizeMessage = (message: unknown): string => {
-  if (typeof message === 'string') {
+  if (typeof message === "string") {
     return message;
   }
   try {

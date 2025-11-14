@@ -1,13 +1,13 @@
 /**
  * Customer aggregate encapsulates guest registration and profile state
  */
-import { BaseEntity } from '../../../../common/domain/entities/base.entity';
-import { InvalidInputError } from '../../../../common/domain/errors';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../common/domain/value-objects/password-hash.vo';
-import { CustomerId } from '../value-objects/customer-id.vo';
-import { Status, CustomerStatus } from '../value-objects/customer-status.vo';
-import { CustomerRegisteredEvent } from '../events/customer-registered.event';
+import { BaseEntity } from "../../../../common/domain/entities/base.entity";
+import { InvalidInputError } from "../../../../common/domain/errors";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
+import { CustomerId } from "../value-objects/customer-id.vo";
+import { Status, CustomerStatus } from "../value-objects/customer-status.vo";
+import { CustomerRegisteredEvent } from "../events/customer-registered.event";
 
 export interface CreateCustomerProps {
   id: CustomerId;
@@ -36,7 +36,7 @@ export class Customer extends BaseEntity<CustomerId> {
 
   static register(props: CreateCustomerProps): Customer {
     if (!props.fullName?.trim()) {
-      throw new InvalidInputError('Customer full name is required', 'fullName');
+      throw new InvalidInputError("Customer full name is required", "fullName");
     }
 
     const now = new Date();
@@ -85,7 +85,7 @@ export class Customer extends BaseEntity<CustomerId> {
 
   rename(nextFullName: string): void {
     if (!nextFullName?.trim()) {
-      throw new InvalidInputError('Customer full name is required', 'fullName');
+      throw new InvalidInputError("Customer full name is required", "fullName");
     }
     this.fullName = nextFullName.trim();
   }

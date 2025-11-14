@@ -3,7 +3,7 @@
  * This interface abstracts user service dependency from user module
  * Following Adapter Pattern to decouple auth module from user domain
  */
-import { Email } from '../../../../common/domain/value-objects/email.vo';
+import { Email } from "../../../../common/domain/value-objects/email.vo";
 
 /**
  * User authentication data required for authentication flow
@@ -25,4 +25,4 @@ export interface IUserAuthenticationService {
   findForAuthentication(email: Email): Promise<UserAuthenticationData | null>;
 }
 
-export const USER_AUTHENTICATION_SERVICE = 'USER_AUTHENTICATION_SERVICE';
+export const USER_AUTHENTICATION_SERVICE = "USER_AUTHENTICATION_SERVICE";

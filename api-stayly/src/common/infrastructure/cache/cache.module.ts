@@ -3,10 +3,10 @@
  * Configures Redis cache manager
  */
 
-import { Module } from '@nestjs/common';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { getCacheConfig } from './cache.config';
+import { Module } from "@nestjs/common";
+import { CacheModule } from "@nestjs/cache-manager";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { getCacheConfig } from "./cache.config";
 
 @Module({
   imports: [

@@ -1,12 +1,12 @@
 /**
  * PermissionRepository provides lookup for permission catalog
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, In, Like, Repository } from 'typeorm';
-import { IPermissionRepository } from '../../../domain/repositories/permission.repository.interface';
-import { Permission } from '../../../domain/value-objects/permission.vo';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { FindOptionsWhere, In, Like, Repository } from "typeorm";
+import { IPermissionRepository } from "../../../domain/repositories/permission.repository.interface";
+import { Permission } from "../../../domain/value-objects/permission.vo";
+import { PermissionOrmEntity } from "../entities/permission.orm-entity";
 
 @Injectable()
 export class PermissionRepository implements IPermissionRepository {
@@ -28,7 +28,7 @@ export class PermissionRepository implements IPermissionRepository {
       take: limit,
       skip: offset,
       where,
-      order: { code: 'ASC' },
+      order: { code: "ASC" },
     });
     return permissions.map((permission) => Permission.create(permission.code));
   }

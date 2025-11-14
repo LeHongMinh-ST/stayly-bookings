@@ -1,20 +1,20 @@
 /**
  * CreateUserHandler orchestrates administrative user creation workflow
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { randomUUID } from 'crypto';
-import { CreateUserCommand } from '../create-user.command';
-import type { IUserRepository } from '../../../domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../domain/repositories/user.repository.interface';
-import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { User } from '../../../domain/entities/user.entity';
-import { UserResponseDto } from '../../dto/response/user-response.dto';
-import { throwConflict } from '../../../../../common/application/exceptions';
+import { Inject, Injectable } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { randomUUID } from "crypto";
+import { CreateUserCommand } from "../create-user.command";
+import type { IUserRepository } from "../../../domain/repositories/user.repository.interface";
+import { USER_REPOSITORY } from "../../../domain/repositories/user.repository.interface";
+import type { PasswordHasher } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../../common/domain/value-objects/password-hash.vo";
+import { UserId } from "../../../domain/value-objects/user-id.vo";
+import { User } from "../../../domain/entities/user.entity";
+import { UserResponseDto } from "../../dto/response/user-response.dto";
+import { throwConflict } from "../../../../../common/application/exceptions";
 
 @Injectable()
 @CommandHandler(CreateUserCommand)
@@ -35,7 +35,7 @@ export class CreateUserHandler
     const email = Email.create(command.email);
     const existingUser = await this.userRepository.findByEmail(email);
     if (existingUser) {
-      throwConflict('User with email already exists', 'DUPLICATE_EMAIL');
+      throwConflict("User with email already exists", "DUPLICATE_EMAIL");
     }
 
     const passwordHashValue = await this.passwordHasher.hash(command.password);

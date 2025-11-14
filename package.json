@@ -8,6 +8,8 @@
     "lint:backend": "pnpm --dir api-stayly lint",
     "lint:frontend": "pnpm --dir app-stayly lint",
     "lint:all": "pnpm run lint:backend && pnpm run lint:frontend",
+    "test:backend": "pnpm --dir api-stayly test",
+    "test:all": "pnpm run test:backend",
     "commitlint": "commitlint --edit"
   },
   "devDependencies": {

@@ -1,26 +1,26 @@
 /**
  * RegisterCustomerDto validates signup payload for customers
  */
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   IsEmail,
   IsOptional,
   IsString,
   Matches,
   MinLength,
-} from 'class-validator';
+} from "class-validator";
 
 export class RegisterCustomerDto {
   @ApiProperty({
-    description: 'Customer email address',
-    example: 'customer@example.com',
+    description: "Customer email address",
+    example: "customer@example.com",
   })
   @IsEmail()
   email!: string;
 
   @ApiProperty({
-    description: 'Customer password (minimum 8 characters)',
-    example: 'SecurePassword123!',
+    description: "Customer password (minimum 8 characters)",
+    example: "SecurePassword123!",
     minLength: 8,
   })
   @IsString()
@@ -28,8 +28,8 @@ export class RegisterCustomerDto {
   password!: string;
 
   @ApiProperty({
-    description: 'Customer full name',
-    example: 'John Doe',
+    description: "Customer full name",
+    example: "John Doe",
     minLength: 2,
   })
   @IsString()
@@ -37,9 +37,9 @@ export class RegisterCustomerDto {
   fullName!: string;
 
   @ApiPropertyOptional({
-    description: 'Customer phone number',
-    example: '+1234567890',
-    pattern: '^[0-9+\\-()\\s]{6,20}$',
+    description: "Customer phone number",
+    example: "+1234567890",
+    pattern: "^[0-9+\\-()\\s]{6,20}$",
   })
   @IsOptional()
   @Matches(/^[0-9+\-()\s]{6,20}$/)

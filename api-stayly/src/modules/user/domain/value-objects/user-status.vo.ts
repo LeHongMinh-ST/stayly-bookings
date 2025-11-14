@@ -1,12 +1,12 @@
 /**
  * UserStatus value object constrains allowed lifecycle states
  */
-import { InvalidInputError } from '../../../../common/domain/errors';
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
 }
 
 export class Status {
@@ -17,7 +17,7 @@ export class Status {
     if (!Object.values(UserStatus).includes(normalized)) {
       throw new InvalidInputError(
         `Unsupported user status: ${value}`,
-        'status',
+        "status",
         value,
       );
     }

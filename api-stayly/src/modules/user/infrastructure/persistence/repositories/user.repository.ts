@@ -1,15 +1,15 @@
 /**
  * UserRepository provides TypeORM implementation of IUserRepository
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
-import { User } from '../../../domain/entities/user.entity';
-import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { UserOrmEntity } from '../entities/user.orm-entity';
-import { UserOrmMapper } from '../mappers/user.mapper';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { IUserRepository } from "../../../domain/repositories/user.repository.interface";
+import { User } from "../../../domain/entities/user.entity";
+import { UserId } from "../../../domain/value-objects/user-id.vo";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { UserOrmEntity } from "../entities/user.orm-entity";
+import { UserOrmMapper } from "../mappers/user.mapper";
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -48,7 +48,7 @@ export class UserRepository implements IUserRepository {
     const entities = await this.userRepo.find({
       take: limit,
       skip: offset,
-      order: { createdAt: 'DESC' },
+      order: { createdAt: "DESC" },
     });
     return entities.map((entity) => UserOrmMapper.toDomain(entity));
   }

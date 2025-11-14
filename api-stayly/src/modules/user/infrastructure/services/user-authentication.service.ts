@@ -6,14 +6,14 @@
  * Note: This service only returns user information. Roles and permissions are queried
  * separately from RBAC module via IUserRolePermissionQueryPort
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { IUserRepository } from '../../domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../domain/repositories/user.repository.interface';
+import { Inject, Injectable } from "@nestjs/common";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
+import type { IUserRepository } from "../../domain/repositories/user.repository.interface";
+import { USER_REPOSITORY } from "../../domain/repositories/user.repository.interface";
 import type {
   IUserAuthenticationPort,
   UserAuthenticationData,
-} from '../../application/interfaces/user-authentication.port';
+} from "../../application/interfaces/user-authentication.port";
 
 @Injectable()
 export class UserAuthenticationService implements IUserAuthenticationPort {

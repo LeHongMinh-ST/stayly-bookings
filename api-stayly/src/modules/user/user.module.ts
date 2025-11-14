@@ -3,25 +3,25 @@
  * Provides user administration capabilities for staff roles
  */
 
-import { Module } from '@nestjs/common';
-import { CqrsModule } from '@nestjs/cqrs';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { SecurityModule } from '../../common/infrastructure/security/security.module';
-import { CreateUserHandler } from './application/commands/handlers/create-user.handler';
-import { UpdateUserStatusHandler } from './application/commands/handlers/update-user-status.handler';
-import { GetUserHandler } from './application/queries/handlers/get-user.handler';
-import { ListUsersHandler } from './application/queries/handlers/list-users.handler';
-import { USER_REPOSITORY } from './domain/repositories/user.repository.interface';
-import { UserRepository } from './infrastructure/persistence/repositories/user.repository';
-import { DefaultUsersSeedService } from './infrastructure/persistence/seeds/default-users-seed.service';
-import { UsersController } from './presentation/controllers/users.controller';
-import { UserOrmEntity } from './infrastructure/persistence/entities/user.orm-entity';
-import { RoleOrmEntity } from '../rbac/infrastructure/persistence/entities/role.orm-entity';
-import { PermissionOrmEntity } from '../rbac/infrastructure/persistence/entities/permission.orm-entity';
-import { UserAuthenticationService } from './infrastructure/services/user-authentication.service';
-import { USER_AUTHENTICATION_PORT } from './application/interfaces/user-authentication.port';
-import { USER_ACCESS_PORT } from './application/interfaces/user-access.port';
-import { UserAccessService } from './infrastructure/services/user-access.service';
+import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { SecurityModule } from "../../common/infrastructure/security/security.module";
+import { CreateUserHandler } from "./application/commands/handlers/create-user.handler";
+import { UpdateUserStatusHandler } from "./application/commands/handlers/update-user-status.handler";
+import { GetUserHandler } from "./application/queries/handlers/get-user.handler";
+import { ListUsersHandler } from "./application/queries/handlers/list-users.handler";
+import { USER_REPOSITORY } from "./domain/repositories/user.repository.interface";
+import { UserRepository } from "./infrastructure/persistence/repositories/user.repository";
+import { DefaultUsersSeedService } from "./infrastructure/persistence/seeds/default-users-seed.service";
+import { UsersController } from "./presentation/controllers/users.controller";
+import { UserOrmEntity } from "./infrastructure/persistence/entities/user.orm-entity";
+import { RoleOrmEntity } from "../rbac/infrastructure/persistence/entities/role.orm-entity";
+import { PermissionOrmEntity } from "../rbac/infrastructure/persistence/entities/permission.orm-entity";
+import { UserAuthenticationService } from "./infrastructure/services/user-authentication.service";
+import { USER_AUTHENTICATION_PORT } from "./application/interfaces/user-authentication.port";
+import { USER_ACCESS_PORT } from "./application/interfaces/user-access.port";
+import { UserAccessService } from "./infrastructure/services/user-access.service";
 
 const commandHandlers = [CreateUserHandler, UpdateUserStatusHandler];
 

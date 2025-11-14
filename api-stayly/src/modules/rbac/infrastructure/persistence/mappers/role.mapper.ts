@@ -1,11 +1,11 @@
 /**
  * RoleOrmMapper converts between domain role aggregate and ORM entity
  */
-import { Role } from '../../../domain/entities/role.entity';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { Permission } from '../../../domain/value-objects/permission.vo';
-import { RoleOrmEntity } from '../entities/role.orm-entity';
-import { PermissionOrmEntity } from '../entities/permission.orm-entity';
+import { Role } from "../../../domain/entities/role.entity";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
+import { Permission } from "../../../domain/value-objects/permission.vo";
+import { RoleOrmEntity } from "../entities/role.orm-entity";
+import { PermissionOrmEntity } from "../entities/permission.orm-entity";
 
 export class RoleOrmMapper {
   /**

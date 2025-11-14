@@ -1,10 +1,10 @@
 /**
  * Role aggregate root encapsulates role business logic
  */
-import { BaseEntity } from '../../../../common/domain/entities/base.entity';
-import { InvalidInputError } from '../../../../common/domain/errors';
-import { RoleId } from '../value-objects/role-id.vo';
-import { Permission } from '../value-objects/permission.vo';
+import { BaseEntity } from "../../../../common/domain/entities/base.entity";
+import { InvalidInputError } from "../../../../common/domain/errors";
+import { RoleId } from "../value-objects/role-id.vo";
+import { Permission } from "../value-objects/permission.vo";
 
 export interface CreateRoleProps {
   id: RoleId;
@@ -26,8 +26,8 @@ export class Role extends BaseEntity<RoleId> {
   static create(props: CreateRoleProps): Role {
     if (!props.displayName?.trim()) {
       throw new InvalidInputError(
-        'Role display name is required',
-        'displayName',
+        "Role display name is required",
+        "displayName",
       );
     }
 
@@ -58,8 +58,8 @@ export class Role extends BaseEntity<RoleId> {
   updateDisplayName(displayName: string): void {
     if (!displayName?.trim()) {
       throw new InvalidInputError(
-        'Role display name is required',
-        'displayName',
+        "Role display name is required",
+        "displayName",
       );
     }
     this.displayName = displayName.trim();

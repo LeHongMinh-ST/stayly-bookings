@@ -2,7 +2,7 @@
  * NotFoundError represents when an entity or resource is not found
  * Should be mapped to HTTP 404 Not Found
  */
-import { DomainError } from './domain-error';
+import { DomainError } from "./domain-error";
 
 export class NotFoundError extends DomainError {
   constructor(
@@ -11,15 +11,15 @@ export class NotFoundError extends DomainError {
     metadata?: Record<string, unknown>,
   ) {
     const identifierStr =
-      typeof identifier === 'string'
+      typeof identifier === "string"
         ? identifier
         : identifier
           ? JSON.stringify(identifier)
-          : 'unknown';
+          : "unknown";
 
     super(
-      `${entityName} not found${identifier ? ` with identifier: ${identifierStr}` : ''}`,
-      'NOT_FOUND',
+      `${entityName} not found${identifier ? ` with identifier: ${identifierStr}` : ""}`,
+      "NOT_FOUND",
       {
         entityName,
         identifier,

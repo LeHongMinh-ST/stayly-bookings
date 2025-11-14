@@ -1,18 +1,18 @@
 /**
  * UnassignRoleFromUserHandler removes a single role from a user
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UnassignRoleFromUserCommand } from '../unassign-role-from-user.command';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import type { IUserRoleLinkPort } from '../../interfaces/user-role-link.port';
-import { USER_ROLE_LINK_PORT } from '../../interfaces/user-role-link.port';
-import type { IUserAccessPort } from '../../../../user/application/interfaces/user-access.port';
-import { USER_ACCESS_PORT } from '../../../../user/application/interfaces/user-access.port';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { UserResponseDto } from '../../../../user/application/dto/response/user-response.dto';
-import { ensureEntityExists } from '../../../../../common/application/exceptions';
+import { Inject, Injectable } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { UnassignRoleFromUserCommand } from "../unassign-role-from-user.command";
+import type { IRoleRepository } from "../../../domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../domain/repositories/role.repository.interface";
+import type { IUserRoleLinkPort } from "../../interfaces/user-role-link.port";
+import { USER_ROLE_LINK_PORT } from "../../interfaces/user-role-link.port";
+import type { IUserAccessPort } from "../../../../user/application/interfaces/user-access.port";
+import { USER_ACCESS_PORT } from "../../../../user/application/interfaces/user-access.port";
+import { RoleId } from "../../../domain/value-objects/role-id.vo";
+import { UserResponseDto } from "../../../../user/application/dto/response/user-response.dto";
+import { ensureEntityExists } from "../../../../../common/application/exceptions";
 
 @Injectable()
 @CommandHandler(UnassignRoleFromUserCommand)
@@ -39,7 +39,7 @@ export class UnassignRoleFromUserHandler
     const roleId = RoleId.create(command.roleId);
     ensureEntityExists(
       await this.roleRepository.findById(roleId),
-      'Role',
+      "Role",
       roleId.getValue(),
     );
 

@@ -1,17 +1,17 @@
 /**
  * DefaultCustomersSeeder provisions sample customer accounts
  */
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { randomUUID } from 'crypto';
-import type { ICustomerRepository } from '../../../domain/repositories/customer.repository.interface';
-import { CUSTOMER_REPOSITORY } from '../../../domain/repositories/customer.repository.interface';
-import type { PasswordHasher } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { PASSWORD_HASHER } from '../../../../../common/application/interfaces/password-hasher.interface';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { Customer } from '../../../domain/entities/customer.entity';
-import { CustomerId } from '../../../domain/value-objects/customer-id.vo';
+import { Inject, Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { randomUUID } from "crypto";
+import type { ICustomerRepository } from "../../../domain/repositories/customer.repository.interface";
+import { CUSTOMER_REPOSITORY } from "../../../domain/repositories/customer.repository.interface";
+import type { PasswordHasher } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { PASSWORD_HASHER } from "../../../../../common/application/interfaces/password-hasher.interface";
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../../common/domain/value-objects/password-hash.vo";
+import { Customer } from "../../../domain/entities/customer.entity";
+import { CustomerId } from "../../../domain/value-objects/customer-id.vo";
 
 @Injectable()
 export class DefaultCustomersSeeder implements OnModuleInit {
@@ -27,17 +27,17 @@ export class DefaultCustomersSeeder implements OnModuleInit {
 
   async onModuleInit(): Promise<void> {
     const email =
-      this.configService.get<string>('seeds.sampleCustomerEmail') ??
-      'customer@stayly.dev';
+      this.configService.get<string>("seeds.sampleCustomerEmail") ??
+      "customer@stayly.dev";
     const password =
-      this.configService.get<string>('seeds.sampleCustomerPassword') ??
-      'Customer123!';
+      this.configService.get<string>("seeds.sampleCustomerPassword") ??
+      "Customer123!";
     const fullName =
-      this.configService.get<string>('seeds.sampleCustomerName') ??
-      'Sample Customer';
+      this.configService.get<string>("seeds.sampleCustomerName") ??
+      "Sample Customer";
     const phone =
-      this.configService.get<string>('seeds.sampleCustomerPhone') ??
-      '+84000000000';
+      this.configService.get<string>("seeds.sampleCustomerPhone") ??
+      "+84000000000";
 
     const emailVo = Email.create(email);
     const existing = await this.customerRepository.findByEmail(emailVo);

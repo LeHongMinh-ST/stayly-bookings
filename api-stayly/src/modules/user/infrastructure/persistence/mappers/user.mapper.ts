@@ -1,12 +1,12 @@
 /**
  * UserOrmMapper converts between domain user aggregate and ORM entity
  */
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { User } from '../../../domain/entities/user.entity';
-import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { Status } from '../../../domain/value-objects/user-status.vo';
-import { UserOrmEntity } from '../entities/user.orm-entity';
+import { Email } from "../../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../../common/domain/value-objects/password-hash.vo";
+import { User } from "../../../domain/entities/user.entity";
+import { UserId } from "../../../domain/value-objects/user-id.vo";
+import { Status } from "../../../domain/value-objects/user-status.vo";
+import { UserOrmEntity } from "../entities/user.orm-entity";
 
 export class UserOrmMapper {
   /**

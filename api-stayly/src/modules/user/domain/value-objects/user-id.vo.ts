@@ -1,7 +1,7 @@
 /**
  * UserId value object extends BaseId for consistent UUID validation
  */
-import { BaseId } from '../../../../common/domain/value-objects/base-id.vo';
+import { BaseId } from "../../../../common/domain/value-objects/base-id.vo";
 
 export class UserId extends BaseId {
   private constructor(value: string) {

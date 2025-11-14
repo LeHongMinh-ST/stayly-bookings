@@ -3,16 +3,16 @@
  * This service implements IUserRolePermissionQueryPort and encapsulates role/permission query logic
  * Following Port/Adapter Pattern - service implements port defined in application layer
  */
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
 import type {
   IUserRolePermissionQueryPort,
   UserRolePermissionData,
-} from '../../application/interfaces/user-role-permission-query.port';
-import { RoleOrmEntity } from '../persistence/entities/role.orm-entity';
-import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
-import { ensureEntityExists } from '../../../../common/application/exceptions';
+} from "../../application/interfaces/user-role-permission-query.port";
+import { RoleOrmEntity } from "../persistence/entities/role.orm-entity";
+import { UserOrmEntity } from "../../../user/infrastructure/persistence/entities/user.orm-entity";
+import { ensureEntityExists } from "../../../../common/application/exceptions";
 
 @Injectable()
 export class UserRolePermissionQueryService
@@ -37,9 +37,9 @@ export class UserRolePermissionQueryService
     const user = ensureEntityExists(
       await this.userRepository.findOne({
         where: { id: userId },
-        relations: ['roles', 'permissions'],
+        relations: ["roles", "permissions"],
       }),
-      'User',
+      "User",
       userId,
     );
 
@@ -56,7 +56,7 @@ export class UserRolePermissionQueryService
     if (roleIds.length > 0) {
       const roles = await this.roleRepository.find({
         where: roleIds.map((id) => ({ id })),
-        relations: ['permissions'],
+        relations: ["permissions"],
       });
 
       for (const role of roles) {

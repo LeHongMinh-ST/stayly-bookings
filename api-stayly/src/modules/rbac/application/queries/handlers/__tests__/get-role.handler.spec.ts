@@ -1,21 +1,21 @@
 /**
  * Unit tests for GetRoleHandler
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { GetRoleHandler } from '../get-role.handler';
-import { GetRoleQuery } from '../../get-role.query';
-import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
-import { Role } from '../../../../domain/entities/role.entity';
-import { RoleId } from '../../../../domain/value-objects/role-id.vo';
-import { Permission } from '../../../../domain/value-objects/permission.vo';
-import { randomUUID } from 'crypto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { GetRoleHandler } from "../get-role.handler";
+import { GetRoleQuery } from "../../get-role.query";
+import { ROLE_REPOSITORY } from "../../../../domain/repositories/role.repository.interface";
+import { Role } from "../../../../domain/entities/role.entity";
+import { RoleId } from "../../../../domain/value-objects/role-id.vo";
+import { Permission } from "../../../../domain/value-objects/permission.vo";
+import { randomUUID } from "crypto";
 
-describe('GetRoleHandler', () => {
+describe("GetRoleHandler", () => {
   let handler: GetRoleHandler;
   let findByIdMock: jest.Mock;
 
   const roleId = RoleId.create(randomUUID());
-  const displayName = 'Editor';
+  const displayName = "Editor";
 
   beforeEach(async () => {
     findByIdMock = jest.fn();
@@ -45,12 +45,12 @@ describe('GetRoleHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should return role by ID successfully', async () => {
+  describe("execute", () => {
+    it("should return role by ID successfully", async () => {
       // Arrange
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
       ];
       const role = Role.create({
         id: roleId,
@@ -67,21 +67,21 @@ describe('GetRoleHandler', () => {
       expect(result).toBeDefined();
       expect(result.id).toBe(roleId.getValue());
       expect(result.displayName).toBe(displayName);
-      expect(result.permissions).toEqual(['user:read', 'user:create']);
+      expect(result.permissions).toEqual(["user:read", "user:create"]);
       expect(findByIdMock).toHaveBeenCalledWith(roleId);
     });
 
-    it('should throw error when role not found', async () => {
+    it("should throw error when role not found", async () => {
       // Arrange
       const query = new GetRoleQuery(roleId.getValue());
       findByIdMock.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(handler.execute(query)).rejects.toThrow('Role not found');
+      await expect(handler.execute(query)).rejects.toThrow("Role not found");
       expect(findByIdMock).toHaveBeenCalledWith(roleId);
     });
 
-    it('should return role with empty permissions', async () => {
+    it("should return role with empty permissions", async () => {
       // Arrange
       const role = Role.create({
         id: roleId,
@@ -97,11 +97,11 @@ describe('GetRoleHandler', () => {
       expect(result.permissions).toEqual([]);
     });
 
-    it('should return role with isSuperAdmin flag', async () => {
+    it("should return role with isSuperAdmin flag", async () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        displayName: 'Super Admin',
+        displayName: "Super Admin",
         isSuperAdmin: true,
       });
       const query = new GetRoleQuery(roleId.getValue());

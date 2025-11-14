@@ -1,21 +1,21 @@
 /**
  * Unit tests for DeleteRoleHandler
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { DeleteRoleHandler } from '../delete-role.handler';
-import { DeleteRoleCommand } from '../../delete-role.command';
-import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
-import { Role } from '../../../../domain/entities/role.entity';
-import { RoleId } from '../../../../domain/value-objects/role-id.vo';
-import { randomUUID } from 'crypto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { DeleteRoleHandler } from "../delete-role.handler";
+import { DeleteRoleCommand } from "../../delete-role.command";
+import { ROLE_REPOSITORY } from "../../../../domain/repositories/role.repository.interface";
+import { Role } from "../../../../domain/entities/role.entity";
+import { RoleId } from "../../../../domain/value-objects/role-id.vo";
+import { randomUUID } from "crypto";
 
-describe('DeleteRoleHandler', () => {
+describe("DeleteRoleHandler", () => {
   let handler: DeleteRoleHandler;
   let findByIdMock: jest.Mock;
   let deleteMock: jest.Mock;
 
   const roleId = RoleId.create(randomUUID());
-  const displayName = 'Editor';
+  const displayName = "Editor";
 
   beforeEach(async () => {
     findByIdMock = jest.fn();
@@ -46,8 +46,8 @@ describe('DeleteRoleHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should delete role successfully', async () => {
+  describe("execute", () => {
+    it("should delete role successfully", async () => {
       // Arrange
       const role = Role.create({
         id: roleId,
@@ -66,22 +66,22 @@ describe('DeleteRoleHandler', () => {
       expect(deleteMock).toHaveBeenCalledWith(role);
     });
 
-    it('should throw error when role not found', async () => {
+    it("should throw error when role not found", async () => {
       // Arrange
       const command = new DeleteRoleCommand(roleId.getValue());
       findByIdMock.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow('Role not found');
+      await expect(handler.execute(command)).rejects.toThrow("Role not found");
       expect(findByIdMock).toHaveBeenCalledWith(roleId);
       expect(deleteMock).not.toHaveBeenCalled();
     });
 
-    it('should throw error when trying to delete super admin role', async () => {
+    it("should throw error when trying to delete super admin role", async () => {
       // Arrange
       const superAdminRole = Role.create({
         id: roleId,
-        displayName: 'Super Admin',
+        displayName: "Super Admin",
         isSuperAdmin: true,
       });
       const command = new DeleteRoleCommand(roleId.getValue());
@@ -89,13 +89,13 @@ describe('DeleteRoleHandler', () => {
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(
-        'Cannot delete super admin role',
+        "Cannot delete super admin role",
       );
       expect(findByIdMock).toHaveBeenCalledWith(roleId);
       expect(deleteMock).not.toHaveBeenCalled();
     });
 
-    it('should allow deletion of non-super-admin roles', async () => {
+    it("should allow deletion of non-super-admin roles", async () => {
       // Arrange
       const regularRole = Role.create({
         id: roleId,

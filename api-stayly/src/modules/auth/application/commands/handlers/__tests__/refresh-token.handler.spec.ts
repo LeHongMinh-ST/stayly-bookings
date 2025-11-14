@@ -2,23 +2,23 @@
  * Unit tests for RefreshTokenHandler
  * Tests token refresh flow
  */
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { RefreshTokenHandler } from '../refresh-token.handler';
-import { RefreshTokenCommand } from '../../refresh-token.command';
-import type { TokenService } from '../../../../../../common/application/interfaces/token-service.interface';
-import { TOKEN_SERVICE } from '../../../../../../common/application/interfaces/token-service.interface';
-import type { ISessionRepository } from '../../../../domain/repositories/session.repository.interface';
-import { SESSION_REPOSITORY } from '../../../../domain/repositories/session.repository.interface';
-import { JwtPayload } from '../../../../domain/value-objects/jwt-payload.vo';
-import { AccessToken } from '../../../../domain/value-objects/access-token.vo';
-import { RefreshToken } from '../../../../domain/value-objects/refresh-token.vo';
-import { TokenPair } from '../../../../domain/value-objects/token-pair.vo';
-import { Session } from '../../../../domain/entities/session.entity';
-import { SessionId } from '../../../../domain/value-objects/session-id.vo';
-import { randomUUID } from 'crypto';
+import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
+import { RefreshTokenHandler } from "../refresh-token.handler";
+import { RefreshTokenCommand } from "../../refresh-token.command";
+import type { TokenService } from "../../../../../../common/application/interfaces/token-service.interface";
+import { TOKEN_SERVICE } from "../../../../../../common/application/interfaces/token-service.interface";
+import type { ISessionRepository } from "../../../../domain/repositories/session.repository.interface";
+import { SESSION_REPOSITORY } from "../../../../domain/repositories/session.repository.interface";
+import { JwtPayload } from "../../../../domain/value-objects/jwt-payload.vo";
+import { AccessToken } from "../../../../domain/value-objects/access-token.vo";
+import { RefreshToken } from "../../../../domain/value-objects/refresh-token.vo";
+import { TokenPair } from "../../../../domain/value-objects/token-pair.vo";
+import { Session } from "../../../../domain/entities/session.entity";
+import { SessionId } from "../../../../domain/value-objects/session-id.vo";
+import { randomUUID } from "crypto";
 
-describe('RefreshTokenHandler', () => {
+describe("RefreshTokenHandler", () => {
   let handler: RefreshTokenHandler;
   let tokenService: jest.Mocked<TokenService>;
   let sessionRepository: jest.Mocked<ISessionRepository>;
@@ -26,17 +26,17 @@ describe('RefreshTokenHandler', () => {
   const tokenId = randomUUID();
   const userId = randomUUID();
   const refreshTokenValue =
-    'refresh-token-value-long-enough-to-pass-validation';
-  const userAgent = 'Mozilla/5.0';
-  const ipAddress = '192.168.1.1';
+    "refresh-token-value-long-enough-to-pass-validation";
+  const userAgent = "Mozilla/5.0";
+  const ipAddress = "192.168.1.1";
 
   const mockPayload = JwtPayload.create({
     sub: userId,
-    email: 'user@stayly.dev',
-    roles: ['super_admin'],
-    permissions: ['user:manage'],
+    email: "user@stayly.dev",
+    roles: ["super_admin"],
+    permissions: ["user:manage"],
     tokenId: tokenId,
-    userType: 'user',
+    userType: "user",
   });
 
   const expiresAt = new Date(Date.now() + 604800 * 1000);
@@ -48,7 +48,7 @@ describe('RefreshTokenHandler', () => {
   const mockSession = Session.create({
     id: SessionId.create(randomUUID()),
     userId: userId,
-    userType: 'user',
+    userType: "user",
     refreshToken: mockRefreshToken,
     userAgent: userAgent,
     ipAddress: ipAddress,
@@ -90,8 +90,8 @@ describe('RefreshTokenHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should refresh token successfully and return new token pair', async () => {
+  describe("execute", () => {
+    it("should refresh token successfully and return new token pair", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -100,13 +100,13 @@ describe('RefreshTokenHandler', () => {
       );
 
       const newAccessToken = AccessToken.create(
-        'new-access-token-long-enough',
+        "new-access-token-long-enough",
         3600,
       );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
       const newRefreshToken = RefreshToken.create(
-        'new-refresh-token-long-enough-to-pass',
+        "new-refresh-token-long-enough-to-pass",
         newExpiresAt,
         newTokenId,
       );
@@ -122,9 +122,9 @@ describe('RefreshTokenHandler', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.accessToken).toBe('new-access-token-long-enough');
-      expect(result.refreshToken).toBe('new-refresh-token-long-enough-to-pass');
-      expect(result.tokenType).toBe('Bearer');
+      expect(result.accessToken).toBe("new-access-token-long-enough");
+      expect(result.refreshToken).toBe("new-refresh-token-long-enough-to-pass");
+      expect(result.tokenType).toBe("Bearer");
       expect(tokenService.verifyRefreshToken.mock.calls.length).toBeGreaterThan(
         0,
       );
@@ -139,7 +139,7 @@ describe('RefreshTokenHandler', () => {
       expect(sessionRepository.save.mock.calls.length).toBeGreaterThan(0);
     });
 
-    it('should preserve userType in new token payload', async () => {
+    it("should preserve userType in new token payload", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -148,13 +148,13 @@ describe('RefreshTokenHandler', () => {
       );
 
       const newAccessToken = AccessToken.create(
-        'new-access-token-long-enough',
+        "new-access-token-long-enough",
         3600,
       );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
       const newRefreshToken = RefreshToken.create(
-        'new-refresh-token-long-enough-to-pass',
+        "new-refresh-token-long-enough-to-pass",
         newExpiresAt,
         newTokenId,
       );
@@ -172,12 +172,12 @@ describe('RefreshTokenHandler', () => {
       expect(tokenService.issueTokenPair.mock.calls.length).toBeGreaterThan(0);
       const newPayload = tokenService.issueTokenPair.mock.calls[0][0];
       const newPayloadProps = newPayload.getProps();
-      expect(newPayloadProps.userType).toBe('user');
+      expect(newPayloadProps.userType).toBe("user");
       expect(newPayloadProps.sub).toBe(userId);
-      expect(newPayloadProps.email).toBe('user@stayly.dev');
+      expect(newPayloadProps.email).toBe("user@stayly.dev");
     });
 
-    it('should rotate refresh token in session', async () => {
+    it("should rotate refresh token in session", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -186,13 +186,13 @@ describe('RefreshTokenHandler', () => {
       );
 
       const newAccessToken = AccessToken.create(
-        'new-access-token-long-enough',
+        "new-access-token-long-enough",
         3600,
       );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
       const newRefreshToken = RefreshToken.create(
-        'new-refresh-token-long-enough-to-pass',
+        "new-refresh-token-long-enough-to-pass",
         newExpiresAt,
         newTokenId,
       );
@@ -211,18 +211,18 @@ describe('RefreshTokenHandler', () => {
       // Assert
       expect(mockSession.getRefreshToken()).not.toBe(oldRefreshToken);
       expect(mockSession.getRefreshToken().getValue()).toBe(
-        'new-refresh-token-long-enough-to-pass',
+        "new-refresh-token-long-enough-to-pass",
       );
       expect(sessionRepository.save.mock.calls.length).toBeGreaterThan(0);
       expect(sessionRepository.save.mock.calls[0][0]).toBe(mockSession);
     });
 
-    it('should throw BadRequestException when refresh token missing tokenId', async () => {
+    it("should throw BadRequestException when refresh token missing tokenId", async () => {
       // Arrange
       const payloadWithoutTokenId = JwtPayload.create({
         sub: userId,
-        email: 'user@stayly.dev',
-        roles: ['super_admin'],
+        email: "user@stayly.dev",
+        roles: ["super_admin"],
         permissions: [],
       });
 
@@ -239,12 +239,12 @@ describe('RefreshTokenHandler', () => {
         BadRequestException,
       );
       await expect(handler.execute(command)).rejects.toThrow(
-        'Refresh token missing token identifier',
+        "Refresh token missing token identifier",
       );
       expect(sessionRepository.findActiveByTokenId.mock.calls.length).toBe(0);
     });
 
-    it('should throw NotFoundException when session not found', async () => {
+    it("should throw NotFoundException when session not found", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -275,7 +275,7 @@ describe('RefreshTokenHandler', () => {
       expect(tokenService.issueTokenPair.mock.calls.length).toBe(0);
     });
 
-    it('should throw Error when session is not active', async () => {
+    it("should throw Error when session is not active", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -286,7 +286,7 @@ describe('RefreshTokenHandler', () => {
       const revokedSession = Session.rehydrate({
         id: SessionId.create(randomUUID()),
         userId: userId,
-        userType: 'user',
+        userType: "user",
         refreshToken: mockRefreshToken,
         userAgent: userAgent,
         ipAddress: ipAddress,
@@ -298,12 +298,12 @@ describe('RefreshTokenHandler', () => {
 
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow(
-        'Refresh token expired or revoked',
+        "Refresh token expired or revoked",
       );
       expect(tokenService.issueTokenPair.mock.calls.length).toBe(0);
     });
 
-    it('should generate new tokenId for new token pair', async () => {
+    it("should generate new tokenId for new token pair", async () => {
       // Arrange
       const command = new RefreshTokenCommand(
         refreshTokenValue,
@@ -312,13 +312,13 @@ describe('RefreshTokenHandler', () => {
       );
 
       const newAccessToken = AccessToken.create(
-        'new-access-token-long-enough',
+        "new-access-token-long-enough",
         3600,
       );
       const newExpiresAt = new Date(Date.now() + 604800 * 1000);
       const newTokenId = randomUUID();
       const newRefreshToken = RefreshToken.create(
-        'new-refresh-token-long-enough-to-pass',
+        "new-refresh-token-long-enough-to-pass",
         newExpiresAt,
         newTokenId,
       );

@@ -1,9 +1,9 @@
 /**
  * IUserRepository declares persistence operations for user aggregate
  */
-import { User } from '../entities/user.entity';
-import { UserId } from '../value-objects/user-id.vo';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
+import { User } from "../entities/user.entity";
+import { UserId } from "../value-objects/user-id.vo";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
 
 export interface IUserRepository {
   save(user: User): Promise<void>;
@@ -13,4 +13,4 @@ export interface IUserRepository {
   count(): Promise<number>;
 }
 
-export const USER_REPOSITORY = 'USER_REPOSITORY';
+export const USER_REPOSITORY = "USER_REPOSITORY";

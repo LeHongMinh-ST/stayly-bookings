@@ -30,4 +30,4 @@ export interface IUserPermissionLinkPort {
   ): Promise<void>;
 }
 
-export const USER_PERMISSION_LINK_PORT = 'USER_PERMISSION_LINK_PORT';
+export const USER_PERMISSION_LINK_PORT = "USER_PERMISSION_LINK_PORT";

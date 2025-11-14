@@ -1,22 +1,22 @@
 /**
  * Unit tests for Permission value object
  */
-import { Permission } from '../permission.vo';
+import { Permission } from "../permission.vo";
 
-describe('Permission', () => {
-  describe('create', () => {
-    it('should create Permission with valid format', () => {
+describe("Permission", () => {
+  describe("create", () => {
+    it("should create Permission with valid format", () => {
       // Arrange
       const validPermissions = [
-        'user:create',
-        'user:read',
-        'user:update',
-        'user:delete',
-        'user:manage',
-        'booking:read',
-        'booking:create',
-        'role:assign',
-        'permission:grant',
+        "user:create",
+        "user:read",
+        "user:update",
+        "user:delete",
+        "user:manage",
+        "booking:read",
+        "booking:create",
+        "role:assign",
+        "permission:grant",
       ];
 
       // Act & Assert
@@ -27,42 +27,42 @@ describe('Permission', () => {
       });
     });
 
-    it('should normalize permission to lowercase', () => {
+    it("should normalize permission to lowercase", () => {
       // Arrange
-      const permission = 'USER:CREATE';
+      const permission = "USER:CREATE";
 
       // Act
       const perm = Permission.create(permission);
 
       // Assert
-      expect(perm.getValue()).toBe('user:create');
+      expect(perm.getValue()).toBe("user:create");
     });
 
-    it('should trim whitespace from permission', () => {
+    it("should trim whitespace from permission", () => {
       // Arrange
-      const permission = '  user:create  ';
+      const permission = "  user:create  ";
 
       // Act
       const perm = Permission.create(permission);
 
       // Assert
-      expect(perm.getValue()).toBe('user:create');
+      expect(perm.getValue()).toBe("user:create");
     });
 
-    it('should throw error when permission is empty', () => {
+    it("should throw error when permission is empty", () => {
       // Act & Assert
-      expect(() => Permission.create('')).toThrow('Permission cannot be empty');
-      expect(() => Permission.create('   ')).toThrow(
-        'Permission cannot be empty',
+      expect(() => Permission.create("")).toThrow("Permission cannot be empty");
+      expect(() => Permission.create("   ")).toThrow(
+        "Permission cannot be empty",
       );
     });
 
-    it('should throw error when permission format is invalid', () => {
+    it("should throw error when permission format is invalid", () => {
       // Arrange
       const invalidPermissions = [
-        'user', // Missing colon
-        'user:', // Missing action
-        ':create', // Missing module
+        "user", // Missing colon
+        "user:", // Missing action
+        ":create", // Missing module
       ];
 
       // Act & Assert
@@ -71,13 +71,13 @@ describe('Permission', () => {
       });
     });
 
-    it('should accept permissions with underscores and dashes in action', () => {
+    it("should accept permissions with underscores and dashes in action", () => {
       // Arrange
       const validPermissions = [
-        'user:create_role',
-        'user:assign-permission',
-        'booking:check_in',
-        'booking:check-out',
+        "user:create_role",
+        "user:assign-permission",
+        "booking:check_in",
+        "booking:check-out",
       ];
 
       // Act & Assert
@@ -87,9 +87,9 @@ describe('Permission', () => {
       });
     });
 
-    it('should accept permissions with wildcard in action', () => {
+    it("should accept permissions with wildcard in action", () => {
       // Arrange
-      const wildcardPermissions = ['user:manage', 'booking:manage'];
+      const wildcardPermissions = ["user:manage", "booking:manage"];
 
       // Act & Assert
       wildcardPermissions.forEach((permission) => {
@@ -99,17 +99,17 @@ describe('Permission', () => {
     });
   });
 
-  describe('getValue', () => {
-    it('should return the normalized permission value', () => {
+  describe("getValue", () => {
+    it("should return the normalized permission value", () => {
       // Arrange
-      const permission = 'USER:CREATE';
+      const permission = "USER:CREATE";
       const perm = Permission.create(permission);
 
       // Act
       const value = perm.getValue();
 
       // Assert
-      expect(value).toBe('user:create');
+      expect(value).toBe("user:create");
     });
   });
 });

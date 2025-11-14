@@ -1,16 +1,16 @@
 /**
  * Unit tests for ListRolesHandler
  */
-import { Test, TestingModule } from '@nestjs/testing';
-import { ListRolesHandler } from '../list-roles.handler';
-import type { IRoleRepository } from '../../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../../domain/repositories/role.repository.interface';
-import { Role } from '../../../../domain/entities/role.entity';
-import { RoleId } from '../../../../domain/value-objects/role-id.vo';
-import { Permission } from '../../../../domain/value-objects/permission.vo';
-import { randomUUID } from 'crypto';
+import { Test, TestingModule } from "@nestjs/testing";
+import { ListRolesHandler } from "../list-roles.handler";
+import type { IRoleRepository } from "../../../../domain/repositories/role.repository.interface";
+import { ROLE_REPOSITORY } from "../../../../domain/repositories/role.repository.interface";
+import { Role } from "../../../../domain/entities/role.entity";
+import { RoleId } from "../../../../domain/value-objects/role-id.vo";
+import { Permission } from "../../../../domain/value-objects/permission.vo";
+import { randomUUID } from "crypto";
 
-describe('ListRolesHandler', () => {
+describe("ListRolesHandler", () => {
   let handler: ListRolesHandler;
   let roleRepository: jest.Mocked<IRoleRepository>;
 
@@ -41,20 +41,20 @@ describe('ListRolesHandler', () => {
     jest.clearAllMocks();
   });
 
-  describe('execute', () => {
-    it('should return list of roles', async () => {
+  describe("execute", () => {
+    it("should return list of roles", async () => {
       // Arrange
       const role1 = Role.create({
         id: RoleId.create(randomUUID()),
-        displayName: 'Editor',
-        permissions: [Permission.create('user:read')],
+        displayName: "Editor",
+        permissions: [Permission.create("user:read")],
       });
       const role2 = Role.create({
         id: RoleId.create(randomUUID()),
-        displayName: 'Manager',
+        displayName: "Manager",
         permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
+          Permission.create("user:read"),
+          Permission.create("user:create"),
         ],
       });
       const roles = [role1, role2];
@@ -66,12 +66,12 @@ describe('ListRolesHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result).toHaveLength(2);
-      expect(result[0].displayName).toBe('Editor');
-      expect(result[1].displayName).toBe('Manager');
+      expect(result[0].displayName).toBe("Editor");
+      expect(result[1].displayName).toBe("Manager");
       expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
     });
 
-    it('should return empty array when no roles exist', async () => {
+    it("should return empty array when no roles exist", async () => {
       // Arrange
       roleRepository.findAll.mockResolvedValue([]);
 
@@ -83,15 +83,15 @@ describe('ListRolesHandler', () => {
       expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
     });
 
-    it('should map roles to DTOs correctly', async () => {
+    it("should map roles to DTOs correctly", async () => {
       // Arrange
       const role = Role.create({
         id: RoleId.create(randomUUID()),
-        displayName: 'Editor',
+        displayName: "Editor",
         isSuperAdmin: false,
         permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
+          Permission.create("user:read"),
+          Permission.create("user:create"),
         ],
       });
       roleRepository.findAll.mockResolvedValue([role]);
@@ -102,9 +102,9 @@ describe('ListRolesHandler', () => {
       // Assert
       expect(result[0]).toMatchObject({
         id: role.getId().getValue(),
-        displayName: 'Editor',
+        displayName: "Editor",
         isSuperAdmin: false,
-        permissions: ['user:read', 'user:create'],
+        permissions: ["user:read", "user:create"],
       });
     });
   });

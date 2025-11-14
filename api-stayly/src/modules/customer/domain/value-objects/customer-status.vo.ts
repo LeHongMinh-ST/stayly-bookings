@@ -1,12 +1,12 @@
 /**
  * CustomerStatus value object expresses lifecycle state for guests
  */
-import { InvalidInputError } from '../../../../common/domain/errors';
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export enum CustomerStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+  SUSPENDED = "suspended",
 }
 
 export class Status {
@@ -17,7 +17,7 @@ export class Status {
     if (!Object.values(CustomerStatus).includes(normalized)) {
       throw new InvalidInputError(
         `Unsupported customer status: ${value}`,
-        'status',
+        "status",
         value,
       );
     }

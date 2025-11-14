@@ -3,4 +3,4 @@
  * Re-export utility functions
  */
 
-export * from './commons';
+export * from "./commons";

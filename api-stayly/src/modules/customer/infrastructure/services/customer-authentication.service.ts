@@ -3,14 +3,14 @@
  * This service implements ICustomerAuthenticationPort and encapsulates customer authentication logic
  * Following Port/Adapter Pattern - service implements port defined in application layer
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { Email } from '../../../../common/domain/value-objects/email.vo';
-import type { ICustomerRepository } from '../../domain/repositories/customer.repository.interface';
-import { CUSTOMER_REPOSITORY } from '../../domain/repositories/customer.repository.interface';
+import { Inject, Injectable } from "@nestjs/common";
+import { Email } from "../../../../common/domain/value-objects/email.vo";
+import type { ICustomerRepository } from "../../domain/repositories/customer.repository.interface";
+import { CUSTOMER_REPOSITORY } from "../../domain/repositories/customer.repository.interface";
 import type {
   ICustomerAuthenticationPort,
   CustomerAuthenticationData,
-} from '../../application/interfaces/customer-authentication.port';
+} from "../../application/interfaces/customer-authentication.port";
 
 @Injectable()
 export class CustomerAuthenticationService

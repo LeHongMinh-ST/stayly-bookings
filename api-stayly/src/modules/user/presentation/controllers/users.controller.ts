@@ -11,7 +11,7 @@ import {
   Post,
   Query,
   UseGuards,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -20,23 +20,23 @@ import {
   ApiBody,
   ApiParam,
   ApiQuery,
-} from '@nestjs/swagger';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { JwtUserGuard } from '../../../../common/guards/jwt-user.guard';
-import { Permissions } from '../../../../common/decorators/permissions.decorator';
-import { CreateUserDto } from '../../application/dto/request/create-user.dto';
-import { CreateUserCommand } from '../../application/commands/create-user.command';
-import { UserResponseDto } from '../../application/dto/response/user-response.dto';
-import { ListUsersQuery } from '../../application/queries/list-users.query';
-import { UserCollectionDto } from '../../application/dto/response/user-collection.dto';
-import { GetUserQuery } from '../../application/queries/get-user.query';
-import { UpdateUserStatusDto } from '../../application/dto/request/update-user-status.dto';
-import { UpdateUserStatusCommand } from '../../application/commands/update-user-status.command';
+} from "@nestjs/swagger";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
+import { Permissions } from "../../../../common/decorators/permissions.decorator";
+import { CreateUserDto } from "../../application/dto/request/create-user.dto";
+import { CreateUserCommand } from "../../application/commands/create-user.command";
+import { UserResponseDto } from "../../application/dto/response/user-response.dto";
+import { ListUsersQuery } from "../../application/queries/list-users.query";
+import { UserCollectionDto } from "../../application/dto/response/user-collection.dto";
+import { GetUserQuery } from "../../application/queries/get-user.query";
+import { UpdateUserStatusDto } from "../../application/dto/request/update-user-status.dto";
+import { UpdateUserStatusCommand } from "../../application/commands/update-user-status.command";
 
-@ApiTags('users')
+@ApiTags("users")
 @UseGuards(JwtUserGuard)
-@ApiBearerAuth('JWT-auth')
-@Controller('v1/users')
+@ApiBearerAuth("JWT-auth")
+@Controller("v1/users")
 export class UsersController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -47,18 +47,18 @@ export class UsersController {
    * Creates a new administrative user
    */
   @Post()
-  @Permissions('user:manage')
-  @ApiOperation({ summary: 'Create a new administrative user' })
+  @Permissions("user:manage")
+  @ApiOperation({ summary: "Create a new administrative user" })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
     status: 201,
-    description: 'User successfully created',
+    description: "User successfully created",
     type: UserResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
+  @ApiResponse({ status: 400, description: "Bad request - validation failed" })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - insufficient permissions',
+    description: "Forbidden - insufficient permissions",
   })
   async createUser(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
     const command = new CreateUserCommand(
@@ -73,34 +73,34 @@ export class UsersController {
    * Lists users with pagination support
    */
   @Get()
-  @Permissions('user:read')
-  @ApiOperation({ summary: 'List users with pagination' })
+  @Permissions("user:read")
+  @ApiOperation({ summary: "List users with pagination" })
   @ApiQuery({
-    name: 'limit',
+    name: "limit",
     required: false,
     type: Number,
-    description: 'Number of items per page',
+    description: "Number of items per page",
     example: 20,
   })
   @ApiQuery({
-    name: 'offset',
+    name: "offset",
     required: false,
     type: Number,
-    description: 'Number of items to skip',
+    description: "Number of items to skip",
     example: 0,
   })
   @ApiResponse({
     status: 200,
-    description: 'Returns paginated list of users',
+    description: "Returns paginated list of users",
     type: UserCollectionDto,
   })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - insufficient permissions',
+    description: "Forbidden - insufficient permissions",
   })
   async listUsers(
-    @Query('limit', new ParseIntPipe({ optional: true })) limit = 20,
-    @Query('offset', new ParseIntPipe({ optional: true })) offset = 0,
+    @Query("limit", new ParseIntPipe({ optional: true })) limit = 20,
+    @Query("offset", new ParseIntPipe({ optional: true })) offset = 0,
   ): Promise<UserCollectionDto> {
     return this.queryBus.execute(new ListUsersQuery(limit, offset));
   }
@@ -108,53 +108,53 @@ export class UsersController {
   /**
    * Retrieves a single user by identifier
    */
-  @Get(':id')
-  @Permissions('user:read')
-  @ApiOperation({ summary: 'Get user by ID' })
+  @Get(":id")
+  @Permissions("user:read")
+  @ApiOperation({ summary: "Get user by ID" })
   @ApiParam({
-    name: 'id',
-    description: 'User unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "User unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiResponse({
     status: 200,
-    description: 'Returns user details',
+    description: "Returns user details",
     type: UserResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 404, description: "User not found" })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - insufficient permissions',
+    description: "Forbidden - insufficient permissions",
   })
-  async getUser(@Param('id') id: string): Promise<UserResponseDto> {
+  async getUser(@Param("id") id: string): Promise<UserResponseDto> {
     return this.queryBus.execute(new GetUserQuery(id));
   }
 
   /**
    * Updates user lifecycle status
    */
-  @Patch(':id/status')
-  @Permissions('user:manage')
-  @ApiOperation({ summary: 'Update user status' })
+  @Patch(":id/status")
+  @Permissions("user:manage")
+  @ApiOperation({ summary: "Update user status" })
   @ApiParam({
-    name: 'id',
-    description: 'User unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    name: "id",
+    description: "User unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @ApiBody({ type: UpdateUserStatusDto })
   @ApiResponse({
     status: 200,
-    description: 'User status updated successfully',
+    description: "User status updated successfully",
     type: UserResponseDto,
   })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 404, description: 'User not found' })
+  @ApiResponse({ status: 400, description: "Bad request - validation failed" })
+  @ApiResponse({ status: 404, description: "User not found" })
   @ApiResponse({
     status: 403,
-    description: 'Forbidden - insufficient permissions',
+    description: "Forbidden - insufficient permissions",
   })
   async updateStatus(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() dto: UpdateUserStatusDto,
   ): Promise<UserResponseDto> {
     const command = new UpdateUserStatusCommand(id, dto.status);

@@ -1,4 +1,4 @@
-import { InvalidInputError } from '../errors';
+import { InvalidInputError } from "../errors";
 
 /**
  * PasswordHash value object represents a hashed password string
@@ -9,8 +9,8 @@ export class PasswordHash {
   static create(value: string): PasswordHash {
     if (!value || value.length < 20) {
       throw new InvalidInputError(
-        'Password hash must be at least 20 characters',
-        'passwordHash',
+        "Password hash must be at least 20 characters",
+        "passwordHash",
       );
     }
     return new PasswordHash(value);

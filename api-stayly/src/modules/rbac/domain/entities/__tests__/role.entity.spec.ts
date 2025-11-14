@@ -1,17 +1,17 @@
 /**
  * Unit tests for Role domain entity
  */
-import { Role } from '../role.entity';
-import { RoleId } from '../../value-objects/role-id.vo';
-import { Permission } from '../../value-objects/permission.vo';
-import { randomUUID } from 'crypto';
+import { Role } from "../role.entity";
+import { RoleId } from "../../value-objects/role-id.vo";
+import { Permission } from "../../value-objects/permission.vo";
+import { randomUUID } from "crypto";
 
-describe('Role', () => {
+describe("Role", () => {
   const validRoleId = RoleId.create(randomUUID());
-  const validDisplayName = 'Editor';
+  const validDisplayName = "Editor";
 
-  describe('create', () => {
-    it('should create Role with valid props', () => {
+  describe("create", () => {
+    it("should create Role with valid props", () => {
       // Arrange
       const props = {
         id: validRoleId,
@@ -29,21 +29,21 @@ describe('Role', () => {
       expect(role.getPermissions()).toEqual([]);
     });
 
-    it('should trim displayName', () => {
+    it("should trim displayName", () => {
       // Arrange
       const props = {
         id: validRoleId,
-        displayName: '  Editor  ',
+        displayName: "  Editor  ",
       };
 
       // Act
       const role = Role.create(props);
 
       // Assert
-      expect(role.getDisplayName()).toBe('Editor');
+      expect(role.getDisplayName()).toBe("Editor");
     });
 
-    it('should create Role with isSuperAdmin flag', () => {
+    it("should create Role with isSuperAdmin flag", () => {
       // Arrange
       const props = {
         id: validRoleId,
@@ -58,11 +58,11 @@ describe('Role', () => {
       expect(role.getIsSuperAdmin()).toBe(true);
     });
 
-    it('should create Role with permissions', () => {
+    it("should create Role with permissions", () => {
       // Arrange
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
       ];
       const props = {
         id: validRoleId,
@@ -75,28 +75,28 @@ describe('Role', () => {
 
       // Assert
       expect(role.getPermissions()).toHaveLength(2);
-      expect(role.getPermissions()[0].getValue()).toBe('user:read');
-      expect(role.getPermissions()[1].getValue()).toBe('user:create');
+      expect(role.getPermissions()[0].getValue()).toBe("user:read");
+      expect(role.getPermissions()[1].getValue()).toBe("user:create");
     });
 
-    it('should throw error when displayName is empty', () => {
+    it("should throw error when displayName is empty", () => {
       // Arrange
       const props = {
         id: validRoleId,
-        displayName: '',
+        displayName: "",
       };
 
       // Act & Assert
-      expect(() => Role.create(props)).toThrow('Role display name is required');
+      expect(() => Role.create(props)).toThrow("Role display name is required");
     });
   });
 
-  describe('rehydrate', () => {
-    it('should rehydrate Role from persisted data', () => {
+  describe("rehydrate", () => {
+    it("should rehydrate Role from persisted data", () => {
       // Arrange
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
       ];
       const props = {
         id: validRoleId,
@@ -116,14 +116,14 @@ describe('Role', () => {
     });
   });
 
-  describe('updateDisplayName', () => {
-    it('should update display name', () => {
+  describe("updateDisplayName", () => {
+    it("should update display name", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
       });
-      const newDisplayName = 'Content Editor';
+      const newDisplayName = "Content Editor";
 
       // Act
       role.updateDisplayName(newDisplayName);
@@ -132,7 +132,7 @@ describe('Role', () => {
       expect(role.getDisplayName()).toBe(newDisplayName);
     });
 
-    it('should trim display name', () => {
+    it("should trim display name", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
@@ -140,13 +140,13 @@ describe('Role', () => {
       });
 
       // Act
-      role.updateDisplayName('  New Display Name  ');
+      role.updateDisplayName("  New Display Name  ");
 
       // Assert
-      expect(role.getDisplayName()).toBe('New Display Name');
+      expect(role.getDisplayName()).toBe("New Display Name");
     });
 
-    it('should throw error when display name is empty', () => {
+    it("should throw error when display name is empty", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
@@ -154,25 +154,25 @@ describe('Role', () => {
       });
 
       // Act & Assert
-      expect(() => role.updateDisplayName('')).toThrow(
-        'Role display name is required',
+      expect(() => role.updateDisplayName("")).toThrow(
+        "Role display name is required",
       );
-      expect(() => role.updateDisplayName('   ')).toThrow(
-        'Role display name is required',
+      expect(() => role.updateDisplayName("   ")).toThrow(
+        "Role display name is required",
       );
     });
   });
 
-  describe('assignPermissions', () => {
-    it('should assign permissions to role', () => {
+  describe("assignPermissions", () => {
+    it("should assign permissions to role", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
       });
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
       ];
 
       // Act
@@ -180,21 +180,21 @@ describe('Role', () => {
 
       // Assert
       expect(role.getPermissions()).toHaveLength(2);
-      expect(role.getPermissions()[0].getValue()).toBe('user:read');
-      expect(role.getPermissions()[1].getValue()).toBe('user:create');
+      expect(role.getPermissions()[0].getValue()).toBe("user:read");
+      expect(role.getPermissions()[1].getValue()).toBe("user:create");
     });
 
-    it('should remove duplicate permissions', () => {
+    it("should remove duplicate permissions", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
       });
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:read'), // Duplicate
-        Permission.create('user:create'),
-        Permission.create('user:read'), // Duplicate again
+        Permission.create("user:read"),
+        Permission.create("user:read"), // Duplicate
+        Permission.create("user:create"),
+        Permission.create("user:read"), // Duplicate again
       ];
 
       // Act
@@ -202,20 +202,20 @@ describe('Role', () => {
 
       // Assert
       expect(role.getPermissions()).toHaveLength(2);
-      expect(role.getPermissions()[0].getValue()).toBe('user:read');
-      expect(role.getPermissions()[1].getValue()).toBe('user:create');
+      expect(role.getPermissions()[0].getValue()).toBe("user:read");
+      expect(role.getPermissions()[1].getValue()).toBe("user:create");
     });
 
-    it('should replace existing permissions', () => {
+    it("should replace existing permissions", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
-        permissions: [Permission.create('user:read')],
+        permissions: [Permission.create("user:read")],
       });
       const newPermissions = [
-        Permission.create('user:create'),
-        Permission.create('user:update'),
+        Permission.create("user:create"),
+        Permission.create("user:update"),
       ];
 
       // Act
@@ -223,70 +223,70 @@ describe('Role', () => {
 
       // Assert
       expect(role.getPermissions()).toHaveLength(2);
-      expect(role.getPermissions()[0].getValue()).toBe('user:create');
-      expect(role.getPermissions()[1].getValue()).toBe('user:update');
+      expect(role.getPermissions()[0].getValue()).toBe("user:create");
+      expect(role.getPermissions()[1].getValue()).toBe("user:update");
     });
   });
 
-  describe('removePermissions', () => {
-    it('should remove specified permissions', () => {
+  describe("removePermissions", () => {
+    it("should remove specified permissions", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
         permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
-          Permission.create('user:update'),
+          Permission.create("user:read"),
+          Permission.create("user:create"),
+          Permission.create("user:update"),
         ],
       });
 
       // Act
-      role.removePermissions(['user:read', 'user:create']);
+      role.removePermissions(["user:read", "user:create"]);
 
       // Assert
       expect(role.getPermissions()).toHaveLength(1);
-      expect(role.getPermissions()[0].getValue()).toBe('user:update');
+      expect(role.getPermissions()[0].getValue()).toBe("user:update");
     });
 
-    it('should handle case-insensitive permission codes', () => {
+    it("should handle case-insensitive permission codes", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
         permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
+          Permission.create("user:read"),
+          Permission.create("user:create"),
         ],
       });
 
       // Act
-      role.removePermissions(['USER:READ']);
+      role.removePermissions(["USER:READ"]);
 
       // Assert
       expect(role.getPermissions()).toHaveLength(1);
-      expect(role.getPermissions()[0].getValue()).toBe('user:create');
+      expect(role.getPermissions()[0].getValue()).toBe("user:create");
     });
 
-    it('should not throw error when removing non-existent permissions', () => {
+    it("should not throw error when removing non-existent permissions", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
         displayName: validDisplayName,
-        permissions: [Permission.create('user:read')],
+        permissions: [Permission.create("user:read")],
       });
 
       // Act
-      role.removePermissions(['user:delete', 'user:update']);
+      role.removePermissions(["user:delete", "user:update"]);
 
       // Assert
       expect(role.getPermissions()).toHaveLength(1);
-      expect(role.getPermissions()[0].getValue()).toBe('user:read');
+      expect(role.getPermissions()[0].getValue()).toBe("user:read");
     });
   });
 
-  describe('canDelete', () => {
-    it('should return true for non-super-admin role', () => {
+  describe("canDelete", () => {
+    it("should return true for non-super-admin role", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
@@ -301,7 +301,7 @@ describe('Role', () => {
       expect(canDelete).toBe(true);
     });
 
-    it('should return false for super-admin role', () => {
+    it("should return false for super-admin role", () => {
       // Arrange
       const role = Role.create({
         id: validRoleId,
@@ -317,12 +317,12 @@ describe('Role', () => {
     });
   });
 
-  describe('getters', () => {
-    it('should return immutable permissions array', () => {
+  describe("getters", () => {
+    it("should return immutable permissions array", () => {
       // Arrange
       const permissions = [
-        Permission.create('user:read'),
-        Permission.create('user:create'),
+        Permission.create("user:read"),
+        Permission.create("user:create"),
       ];
       const role = Role.create({
         id: validRoleId,
@@ -332,7 +332,7 @@ describe('Role', () => {
 
       // Act
       const retrievedPermissions = role.getPermissions();
-      retrievedPermissions.push(Permission.create('user:update'));
+      retrievedPermissions.push(Permission.create("user:update"));
 
       // Assert
       expect(role.getPermissions()).toHaveLength(2);

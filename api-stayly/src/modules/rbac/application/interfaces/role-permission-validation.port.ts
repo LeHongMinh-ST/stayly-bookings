@@ -21,4 +21,4 @@ export interface IRolePermissionValidationPort {
 }
 
 export const ROLE_PERMISSION_VALIDATION_PORT =
-  'ROLE_PERMISSION_VALIDATION_PORT';
+  "ROLE_PERMISSION_VALIDATION_PORT";

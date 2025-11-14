@@ -1,8 +1,8 @@
 /**
  * TokenPair groups access and refresh tokens issued during authentication
  */
-import { AccessToken } from './access-token.vo';
-import { RefreshToken } from './refresh-token.vo';
+import { AccessToken } from "./access-token.vo";
+import { RefreshToken } from "./refresh-token.vo";
 
 export class TokenPair {
   constructor(

@@ -9,13 +9,13 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorators/roles.decorator';
-import type { Request } from 'express';
+} from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { ROLES_KEY } from "../decorators/roles.decorator";
+import type { Request } from "express";
 
 type JwtUserContext = {
-  userType?: 'user' | 'customer';
+  userType?: "user" | "customer";
   roles?: string[];
 };
 
@@ -38,12 +38,12 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user;
     if (!user) {
-      throw new UnauthorizedException('Missing authenticated user context');
+      throw new UnauthorizedException("Missing authenticated user context");
     }
 
     // Only apply role check to user (admin/staff), not customer
     // Customer endpoints should use JwtCustomerGuard without role checks
-    if (user.userType === 'customer') {
+    if (user.userType === "customer") {
       return false; // Roles guard only for user type
     }
 

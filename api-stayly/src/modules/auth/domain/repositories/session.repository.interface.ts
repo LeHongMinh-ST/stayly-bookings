@@ -1,7 +1,7 @@
 /**
  * ISessionRepository persists refresh token sessions for authentication flow
  */
-import { Session } from '../entities/session.entity';
+import { Session } from "../entities/session.entity";
 
 export interface ISessionRepository {
   save(session: Session): Promise<void>;
@@ -10,4 +10,4 @@ export interface ISessionRepository {
   revokeById(id: string, revokedAt: Date): Promise<void>;
 }
 
-export const SESSION_REPOSITORY = 'SESSION_REPOSITORY';
+export const SESSION_REPOSITORY = "SESSION_REPOSITORY";

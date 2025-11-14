@@ -3,12 +3,12 @@
  * Bootstraps NestJS application with global configuration
  */
 
-import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
-import { Logger } from 'nestjs-pino';
+import { NestFactory } from "@nestjs/core";
+import { ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { AppModule } from "./app.module";
+import { Logger } from "nestjs-pino";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -21,14 +21,14 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Global prefix for all routes
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
 
   // CORS configuration
   app.enableCors({
-    origin: configService.get<string>('cors.origin') || 'http://localhost:3001',
+    origin: configService.get<string>("cors.origin") || "http://localhost:3001",
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   });
 
   // Global validation pipe
@@ -43,34 +43,34 @@ async function bootstrap() {
     }),
   );
 
-  const port = configService.get<number>('app.port') || 3000;
-  const appName = configService.get<string>('app.name') || 'Stayly API';
-  const env = configService.get<string>('app.env') || 'development';
+  const port = configService.get<number>("app.port") || 3000;
+  const appName = configService.get<string>("app.name") || "Stayly API";
+  const env = configService.get<string>("app.env") || "development";
 
   // Swagger configuration
   const swaggerConfig = new DocumentBuilder()
     .setTitle(appName)
-    .setDescription('Stayly Bookings API Documentation')
-    .setVersion('1.0')
+    .setDescription("Stayly Bookings API Documentation")
+    .setVersion("1.0")
     .addBearerAuth(
       {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+        name: "JWT",
+        description: "Enter JWT token",
+        in: "header",
       },
-      'JWT-auth', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+      "JWT-auth", // This name here is important for matching up with @ApiBearerAuth() in your controller!
     )
-    .addTag('health', 'Health check endpoints')
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management endpoints')
-    .addTag('customers', 'Customer management endpoints')
+    .addTag("health", "Health check endpoints")
+    .addTag("auth", "Authentication endpoints")
+    .addTag("users", "User management endpoints")
+    .addTag("customers", "Customer management endpoints")
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup("api/docs", app, document, {
     swaggerOptions: {
       persistAuthorization: true, // Keep authorization token after page refresh
     },
@@ -86,6 +86,6 @@ async function bootstrap() {
 }
 
 bootstrap().catch((error) => {
-  console.error('Application failed to start', error);
+  console.error("Application failed to start", error);
   process.exit(1);
 });

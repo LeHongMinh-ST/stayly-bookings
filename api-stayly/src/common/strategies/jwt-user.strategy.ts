@@ -2,12 +2,12 @@
  * JWT User Strategy
  * Validates JWT tokens for User (admin/staff) authentication
  */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-jwt';
-import { ConfigService } from '@nestjs/config';
-import { bearerTokenExtractor } from './utils/bearer-token-extractor';
-import type { RequestTokenExtractor } from './utils/bearer-token-extractor';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { Strategy } from "passport-jwt";
+import { ConfigService } from "@nestjs/config";
+import { bearerTokenExtractor } from "./utils/bearer-token-extractor";
+import type { RequestTokenExtractor } from "./utils/bearer-token-extractor";
 
 type JwtStrategyOptions = {
   jwtFromRequest: RequestTokenExtractor;
@@ -20,15 +20,15 @@ type JwtUserClaims = {
   email: string;
   roles?: string[];
   permissions?: string[];
-  userType?: 'user' | 'customer';
+  userType?: "user" | "customer";
 };
 
 @Injectable()
-export class JwtUserStrategy extends PassportStrategy(Strategy, 'jwt-user') {
+export class JwtUserStrategy extends PassportStrategy(Strategy, "jwt-user") {
   constructor(private configService: ConfigService) {
-    const secret = configService.get<string>('jwt.secret');
+    const secret = configService.get<string>("jwt.secret");
     if (!secret) {
-      throw new Error('jwt.secret is not configured');
+      throw new Error("jwt.secret is not configured");
     }
     const secretKey: string = secret;
     const options: JwtStrategyOptions = {
@@ -43,13 +43,13 @@ export class JwtUserStrategy extends PassportStrategy(Strategy, 'jwt-user') {
 
   validate(payload: JwtUserClaims) {
     if (!payload.sub || !payload.email) {
-      throw new UnauthorizedException('Invalid token payload');
+      throw new UnauthorizedException("Invalid token payload");
     }
 
     // Only allow user type (admin/staff), reject customer
-    if (payload.userType === 'customer') {
+    if (payload.userType === "customer") {
       throw new UnauthorizedException(
-        'Customer tokens are not allowed for admin endpoints',
+        "Customer tokens are not allowed for admin endpoints",
       );
     }
 
@@ -58,7 +58,7 @@ export class JwtUserStrategy extends PassportStrategy(Strategy, 'jwt-user') {
       email: payload.email,
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
-      userType: payload.userType ?? 'user',
+      userType: payload.userType ?? "user",
     };
   }
 }

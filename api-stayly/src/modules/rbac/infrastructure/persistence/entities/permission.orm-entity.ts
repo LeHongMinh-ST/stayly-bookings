@@ -8,28 +8,28 @@ import {
   ManyToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import type { UserOrmEntity } from '../../../../user/infrastructure/persistence/entities/user.orm-entity';
-import { RoleOrmEntity } from './role.orm-entity';
+} from "typeorm";
+import type { UserOrmEntity } from "../../../../user/infrastructure/persistence/entities/user.orm-entity";
+import { RoleOrmEntity } from "./role.orm-entity";
 
-@Entity({ name: 'permissions' })
+@Entity({ name: "permissions" })
 export class PermissionOrmEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Column({ name: 'code', unique: true })
+  @Column({ name: "code", unique: true })
   code!: string;
 
-  @Column({ name: 'description', nullable: true, type: 'text' })
+  @Column({ name: "description", nullable: true, type: "text" })
   description!: string | null;
 
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn({ name: "created_at" })
   createdAt!: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn({ name: "updated_at" })
   updatedAt!: Date;
 
-  @ManyToMany('UserOrmEntity', 'permissions')
+  @ManyToMany("UserOrmEntity", "permissions")
   users!: UserOrmEntity[];
 
   @ManyToMany(() => RoleOrmEntity, (role) => role.permissions)

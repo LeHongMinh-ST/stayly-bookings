@@ -3,9 +3,9 @@
  * Base service for publishing events to Kafka topics
  */
 
-import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
-import { ClientKafka } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { Injectable, Inject, OnModuleInit } from "@nestjs/common";
+import { ClientKafka } from "@nestjs/microservices";
+import { lastValueFrom } from "rxjs";
 
 type KafkaEventPayload = {
   aggregateId?: string;
@@ -16,7 +16,7 @@ type KafkaEventPayload = {
 @Injectable()
 export class KafkaProducerService implements OnModuleInit {
   constructor(
-    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
+    @Inject("KAFKA_SERVICE") private readonly kafkaClient: ClientKafka,
   ) {}
 
   async onModuleInit() {

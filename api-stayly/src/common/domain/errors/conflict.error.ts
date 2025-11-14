@@ -3,7 +3,7 @@
  * Should be mapped to HTTP 409 Conflict
  * Examples: duplicate resource, concurrent modification, optimistic locking failure
  */
-import { DomainError } from './domain-error';
+import { DomainError } from "./domain-error";
 
 export class ConflictError extends DomainError {
   constructor(
@@ -12,7 +12,7 @@ export class ConflictError extends DomainError {
     conflictingValue?: unknown,
     metadata?: Record<string, unknown>,
   ) {
-    super(message, 'CONFLICT', {
+    super(message, "CONFLICT", {
       conflictType,
       conflictingValue,
       ...metadata,

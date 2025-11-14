@@ -9,10 +9,10 @@ import {
   ExecutionContext,
   CallHandler,
   Logger,
-} from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import type { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Observable } from "rxjs";
+import { tap } from "rxjs/operators";
+import type { Request, Response } from "express";
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -37,7 +37,7 @@ export class LoggingInterceptor implements NestInterceptor {
         error: (error: unknown) => {
           const delay = Date.now() - now;
           const status =
-            typeof error === 'object' && error !== null && 'status' in error
+            typeof error === "object" && error !== null && "status" in error
               ? ((error as { status?: number }).status ?? 500)
               : 500;
           const message =

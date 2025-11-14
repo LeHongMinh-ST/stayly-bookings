@@ -9,8 +9,8 @@ import {
   ArgumentsHost,
   HttpException,
   Logger,
-} from '@nestjs/common';
-import { Request, Response } from 'express';
+} from "@nestjs/common";
+import { Request, Response } from "express";
 
 const extractField = <T extends string>(
   response: unknown,
@@ -18,9 +18,9 @@ const extractField = <T extends string>(
 ): string | undefined => {
   if (
     response &&
-    typeof response === 'object' &&
+    typeof response === "object" &&
     field in response &&
-    typeof (response as Record<string, unknown>)[field] === 'string'
+    typeof (response as Record<string, unknown>)[field] === "string"
   ) {
     return (response as Record<T, string>)[field];
   }
@@ -44,10 +44,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       path: request.url,
       method: request.method,
       message:
-        typeof exceptionResponse === 'string'
+        typeof exceptionResponse === "string"
           ? exceptionResponse
-          : (extractField(exceptionResponse, 'message') ?? exception.message),
-      error: extractField(exceptionResponse, 'error'),
+          : (extractField(exceptionResponse, "message") ?? exception.message),
+      error: extractField(exceptionResponse, "error"),
     };
 
     this.logger.error(

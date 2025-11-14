@@ -25,4 +25,4 @@ export interface IUserRoleLinkPort {
   removeRoleFromUser(userId: string, roleId: string): Promise<void>;
 }
 
-export const USER_ROLE_LINK_PORT = 'USER_ROLE_LINK_PORT';
+export const USER_ROLE_LINK_PORT = "USER_ROLE_LINK_PORT";

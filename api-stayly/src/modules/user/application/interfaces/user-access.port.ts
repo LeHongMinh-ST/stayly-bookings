@@ -2,7 +2,7 @@
  * IUserAccessPort exposes user lookup capabilities for external modules.
  * Following the Port/Adapter pattern, this contract resides in the application layer.
  */
-import type { UserResponseDto } from '../dto/response/user-response.dto';
+import type { UserResponseDto } from "../dto/response/user-response.dto";
 
 export interface IUserAccessPort {
   /**
@@ -17,4 +17,4 @@ export interface IUserAccessPort {
   getUserResponse(userId: string): Promise<UserResponseDto>;
 }
 
-export const USER_ACCESS_PORT = 'USER_ACCESS_PORT';
+export const USER_ACCESS_PORT = "USER_ACCESS_PORT";

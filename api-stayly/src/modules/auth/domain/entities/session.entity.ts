@@ -1,16 +1,16 @@
 /**
  * Session aggregate manages refresh token lifecycle for authenticated principals
  */
-import { BaseEntity } from '../../../../common/domain/entities/base.entity';
-import { RefreshToken } from '../value-objects/refresh-token.vo';
-import { SessionIssuedEvent } from '../events/session-issued.event';
-import { SessionRevokedEvent } from '../events/session-revoked.event';
-import { SessionId } from '../value-objects/session-id.vo';
+import { BaseEntity } from "../../../../common/domain/entities/base.entity";
+import { RefreshToken } from "../value-objects/refresh-token.vo";
+import { SessionIssuedEvent } from "../events/session-issued.event";
+import { SessionRevokedEvent } from "../events/session-revoked.event";
+import { SessionId } from "../value-objects/session-id.vo";
 
 export interface CreateSessionProps {
   id: SessionId;
   userId: string;
-  userType: 'user' | 'customer';
+  userType: "user" | "customer";
   refreshToken: RefreshToken;
   userAgent?: string | null;
   ipAddress?: string | null;
@@ -23,7 +23,7 @@ export class Session extends BaseEntity<SessionId> {
   private constructor(
     id: SessionId,
     private readonly userId: string,
-    private readonly userType: 'user' | 'customer',
+    private readonly userType: "user" | "customer",
     private refreshToken: RefreshToken,
     private readonly userAgent: string | null,
     private readonly ipAddress: string | null,
@@ -57,7 +57,7 @@ export class Session extends BaseEntity<SessionId> {
   static rehydrate(props: {
     id: SessionId;
     userId: string;
-    userType: 'user' | 'customer';
+    userType: "user" | "customer";
     refreshToken: RefreshToken;
     userAgent: string | null;
     ipAddress: string | null;
@@ -103,7 +103,7 @@ export class Session extends BaseEntity<SessionId> {
     return this.userId;
   }
 
-  getUserType(): 'user' | 'customer' {
+  getUserType(): "user" | "customer" {
     return this.userType;
   }
 

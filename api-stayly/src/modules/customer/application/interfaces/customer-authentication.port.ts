@@ -4,7 +4,7 @@
  * This is the abstraction that other modules depend on
  * Following Port/Adapter Pattern - Port is defined in application layer
  */
-import { Email } from '../../../../common/domain/value-objects/email.vo';
+import { Email } from "../../../../common/domain/value-objects/email.vo";
 
 /**
  * Customer authentication data required for authentication flow
@@ -31,4 +31,4 @@ export interface ICustomerAuthenticationPort {
   ): Promise<CustomerAuthenticationData | null>;
 }
 
-export const CUSTOMER_AUTHENTICATION_PORT = 'CUSTOMER_AUTHENTICATION_PORT';
+export const CUSTOMER_AUTHENTICATION_PORT = "CUSTOMER_AUTHENTICATION_PORT";

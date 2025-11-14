@@ -1,11 +1,11 @@
 /**
  * RevokeSessionHandler revokes active refresh session
  */
-import { Inject, Injectable } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RevokeSessionCommand } from '../revoke-session.command';
-import type { ISessionRepository } from '../../../domain/repositories/session.repository.interface';
-import { SESSION_REPOSITORY } from '../../../domain/repositories/session.repository.interface';
+import { Inject, Injectable } from "@nestjs/common";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { RevokeSessionCommand } from "../revoke-session.command";
+import type { ISessionRepository } from "../../../domain/repositories/session.repository.interface";
+import { SESSION_REPOSITORY } from "../../../domain/repositories/session.repository.interface";
 
 @Injectable()
 @CommandHandler(RevokeSessionCommand)

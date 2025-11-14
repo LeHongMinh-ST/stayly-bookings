@@ -1,7 +1,7 @@
 /**
  * SessionId value object extends BaseId to validate session identifiers
  */
-import { BaseId } from '../../../../common/domain/value-objects/base-id.vo';
+import { BaseId } from "../../../../common/domain/value-objects/base-id.vo";
 
 export class SessionId extends BaseId {
   private constructor(value: string) {

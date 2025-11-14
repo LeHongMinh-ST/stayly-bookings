@@ -1,15 +1,15 @@
 /**
  * PermissionResponseDto defines response shape for permission resources
  */
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class PermissionResponseDto {
-  @ApiProperty({ description: 'Permission code', example: 'user:manage' })
+  @ApiProperty({ description: "Permission code", example: "user:manage" })
   code!: string;
 
   @ApiProperty({
-    description: 'Permission description',
-    example: 'Full user management',
+    description: "Permission description",
+    example: "Full user management",
   })
   description!: string | null;
 

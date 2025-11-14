@@ -1,30 +1,30 @@
 /**
  * UserCollectionDto represents paginated administrative user list results
  */
-import { ApiProperty } from '@nestjs/swagger';
-import { UserResponseDto } from './user-response.dto';
+import { ApiProperty } from "@nestjs/swagger";
+import { UserResponseDto } from "./user-response.dto";
 
 export class UserCollectionDto {
   @ApiProperty({
-    description: 'Array of user items',
+    description: "Array of user items",
     type: [UserResponseDto],
   })
   data!: UserResponseDto[];
 
   @ApiProperty({
-    description: 'Total number of users',
+    description: "Total number of users",
     example: 100,
   })
   total!: number;
 
   @ApiProperty({
-    description: 'Number of items per page',
+    description: "Number of items per page",
     example: 20,
   })
   limit!: number;
 
   @ApiProperty({
-    description: 'Number of items skipped',
+    description: "Number of items skipped",
     example: 0,
   })
   offset!: number;
