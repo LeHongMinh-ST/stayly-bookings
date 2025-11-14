@@ -1065,15 +1065,76 @@ export class RoomNotFoundError extends DomainError {
 }
 ```
 
-### 13.2. Exception Handling
+### 13.2. HTTP Exception Types & Status Codes
 
-- **Use try-catch** cho async operations
-- **Log errors** với context
-- **Throw domain errors** từ domain layer
-- **Map to HTTP errors** trong presentation layer
+**NestJS HTTP Exceptions và khi nào sử dụng:**
 
-**Example:**
+| HTTP Exception | Status Code | Khi nào sử dụng | Ví dụ |
+|----------------|-------------|-----------------|-------|
+| `BadRequestException` | 400 | Request không hợp lệ, validation failed, business rule violation | Invalid input, invalid date range, invalid status transition |
+| `UnauthorizedException` | 401 | Thiếu hoặc invalid authentication token | Missing JWT token, expired token, invalid credentials |
+| `ForbiddenException` | 403 | User đã authenticated nhưng không có quyền | Insufficient permissions, role not allowed |
+| `NotFoundException` | 404 | Resource không tồn tại | Entity not found, endpoint not found |
+| `ConflictException` | 409 | Conflict với trạng thái hiện tại của resource | Duplicate email, booking already confirmed, concurrent modification |
+| `UnprocessableEntityException` | 422 | Request hợp lệ về syntax nhưng không thể xử lý | Business logic validation failed, invalid state |
+| `InternalServerErrorException` | 500 | Lỗi server không mong đợi | Database error, external service failure |
+| `ServiceUnavailableException` | 503 | Service tạm thời không available | Database connection lost, external API down |
+
+**Quy tắc:**
+- **Domain Layer:** Chỉ throw Domain Errors, KHÔNG throw HTTP Exceptions
+- **Application Layer:** Có thể throw Domain Errors hoặc HTTP Exceptions (tùy context)
+- **Presentation Layer:** Map Domain Errors sang HTTP Exceptions phù hợp
+
+### 13.3. Exception Mapping Rules
+
+**Mapping giữa Domain Errors và HTTP Status Codes:**
+
+| Domain Error Type | HTTP Exception | Status Code | Use Case |
+|-------------------|----------------|-------------|----------|
+| `{Entity}NotFoundError` | `NotFoundException` | 404 | Entity không tồn tại trong database |
+| `Invalid{Property}Error` | `BadRequestException` | 400 | Input validation failed, invalid format |
+| `Invalid{State}Error` | `BadRequestException` | 400 | Invalid state transition, business rule violation |
+| `{Entity}AlreadyExistsError` | `ConflictException` | 409 | Duplicate resource (email, code, etc.) |
+| `{Entity}ConflictError` | `ConflictException` | 409 | Concurrent modification, optimistic locking |
+| `UnauthorizedError` | `UnauthorizedException` | 401 | Authentication failed, invalid credentials |
+| `ForbiddenError` | `ForbiddenException` | 403 | Insufficient permissions, role not allowed |
+| `InvalidOperationError` | `UnprocessableEntityException` | 422 | Operation không thể thực hiện trong trạng thái hiện tại |
+
+**Examples:**
+
 ```typescript
+// ✅ CORRECT: Domain Layer - Throw Domain Errors only
+export class Booking {
+  confirm(): void {
+    if (this.status !== BookingStatus.PENDING_PAYMENT) {
+      throw new InvalidBookingStatusError(
+        `Cannot confirm booking with status ${this.status}`,
+      );
+    }
+    // ...
+  }
+}
+
+// ✅ CORRECT: Application Layer - Throw HTTP Exceptions hoặc Domain Errors
+@CommandHandler(CreateBookingCommand)
+export class CreateBookingHandler {
+  async execute(command: CreateBookingCommand): Promise<BookingDto> {
+    const room = await this.roomRepository.findById(command.roomId);
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    if (!room.isAvailable(command.dateRange)) {
+      throw new ConflictException('Room is not available for selected dates');
+    }
+
+    // Domain layer throws domain errors
+    const booking = Booking.create({ /* ... */ });
+    // ...
+  }
+}
+
+// ✅ CORRECT: Presentation Layer - Map Domain Errors to HTTP Exceptions
 @Controller('bookings')
 export class BookingController {
   @Post()
@@ -1082,17 +1143,325 @@ export class BookingController {
       const command = new CreateBookingCommand(dto);
       return await this.createBookingHandler.execute(command);
     } catch (error) {
+      // Map domain errors to HTTP exceptions
       if (error instanceof RoomNotFoundError) {
         throw new NotFoundException(error.message);
       }
       if (error instanceof InvalidDateRangeError) {
         throw new BadRequestException(error.message);
       }
-      throw error;
+      if (error instanceof BookingConflictError) {
+        throw new ConflictException(error.message);
+      }
+      // Re-throw HTTP exceptions
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      // Unknown errors
+      throw new InternalServerErrorException('An unexpected error occurred');
     }
   }
 }
 ```
+
+### 13.4. Exception Handling by Layer
+
+**Domain Layer:**
+```typescript
+// ✅ CORRECT: Domain layer chỉ throw Domain Errors
+export class Booking {
+  cancel(): void {
+    if (this.status === BookingStatus.CANCELLED) {
+      throw new InvalidBookingStatusError('Booking is already cancelled');
+    }
+    if (this.status === BookingStatus.COMPLETED) {
+      throw new InvalidBookingStatusError('Cannot cancel completed booking');
+    }
+    // ...
+  }
+}
+
+// ❌ WRONG: KHÔNG throw HTTP Exceptions trong Domain Layer
+export class Booking {
+  cancel(): void {
+    if (this.status === BookingStatus.CANCELLED) {
+      throw new BadRequestException('Booking is already cancelled'); // ❌
+    }
+  }
+}
+```
+
+**Application Layer:**
+```typescript
+// ✅ CORRECT: Application layer có thể throw HTTP Exceptions hoặc Domain Errors
+@CommandHandler(CancelBookingCommand)
+export class CancelBookingHandler {
+  async execute(command: CancelBookingCommand): Promise<void> {
+    const booking = await this.bookingRepository.findById(command.bookingId);
+    
+    // Throw HTTP Exception cho infrastructure concerns
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+
+    // Domain layer throws Domain Errors
+    booking.cancel(); // May throw InvalidBookingStatusError
+    
+    await this.bookingRepository.save(booking);
+  }
+}
+```
+
+**Infrastructure Layer:**
+```typescript
+// ✅ CORRECT: Infrastructure layer throw HTTP Exceptions cho technical errors
+@Injectable()
+export class BookingRepository implements IBookingRepository {
+  async findById(id: BookingId): Promise<Booking | null> {
+    try {
+      const ormEntity = await this.bookingRepo.findOne({
+        where: { id: id.getValue() },
+      });
+      return ormEntity ? this.mapper.toDomain(ormEntity) : null;
+    } catch (error) {
+      // Log technical errors
+      this.logger.error('Database error when finding booking', error);
+      throw new InternalServerErrorException('Failed to retrieve booking');
+    }
+  }
+}
+```
+
+**Presentation Layer:**
+```typescript
+// ✅ CORRECT: Presentation layer map tất cả errors sang HTTP Exceptions
+@Controller('bookings')
+export class BookingController {
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreateBookingDto): Promise<BookingDto> {
+    try {
+      const command = new CreateBookingCommand(dto);
+      return await this.createBookingHandler.execute(command);
+    } catch (error) {
+      // Map domain errors
+      if (error instanceof RoomNotFoundError) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof InvalidDateRangeError) {
+        throw new BadRequestException(error.message);
+      }
+      if (error instanceof BookingConflictError) {
+        throw new ConflictException(error.message);
+      }
+      
+      // Re-throw HTTP exceptions (from application/infrastructure layers)
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      
+      // Unknown errors
+      this.logger.error('Unexpected error in create booking', error);
+      throw new InternalServerErrorException('An unexpected error occurred');
+    }
+  }
+}
+```
+
+### 13.5. Common Exception Scenarios
+
+**Validation Errors (400 Bad Request):**
+```typescript
+// Input validation failed
+if (!dto.email || !isValidEmail(dto.email)) {
+  throw new BadRequestException('Invalid email format');
+}
+
+// Business rule violation
+if (checkOutDate <= checkInDate) {
+  throw new BadRequestException('Check-out date must be after check-in date');
+}
+```
+
+**Not Found Errors (404 Not Found):**
+```typescript
+// Entity not found
+const booking = await this.bookingRepository.findById(bookingId);
+if (!booking) {
+  throw new NotFoundException(`Booking with id ${bookingId.getValue()} not found`);
+}
+```
+
+**Conflict Errors (409 Conflict):**
+```typescript
+// Duplicate resource
+const existingUser = await this.userRepository.findByEmail(email);
+if (existingUser) {
+  throw new ConflictException('User with this email already exists');
+}
+
+// Concurrent modification
+if (booking.version !== command.expectedVersion) {
+  throw new ConflictException('Booking has been modified by another user');
+}
+```
+
+**Unauthorized Errors (401 Unauthorized):**
+```typescript
+// Invalid or missing token
+if (!token || !isValidToken(token)) {
+  throw new UnauthorizedException('Invalid or expired token');
+}
+
+// Invalid credentials
+const user = await this.userRepository.findByEmail(email);
+if (!user || !await this.passwordService.compare(password, user.passwordHash)) {
+  throw new UnauthorizedException('Invalid email or password');
+}
+```
+
+**Forbidden Errors (403 Forbidden):**
+```typescript
+// Insufficient permissions
+if (!user.hasPermission('booking:delete')) {
+  throw new ForbiddenException('You do not have permission to delete bookings');
+}
+
+// Role not allowed
+if (!user.hasRole('admin') && !user.hasRole('manager')) {
+  throw new ForbiddenException('Only admins and managers can perform this action');
+}
+```
+
+**Unprocessable Entity Errors (422 Unprocessable Entity):**
+```typescript
+// Business logic validation failed
+if (booking.status !== BookingStatus.PENDING_PAYMENT) {
+  throw new UnprocessableEntityException(
+    'Cannot confirm booking. Booking must be in pending payment status',
+  );
+}
+```
+
+### 13.6. Exception Response Format
+
+**Standard Error Response:**
+```typescript
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "error": "Bad Request",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "path": "/api/v1/bookings"
+}
+```
+
+**Validation Error Response (with details):**
+```typescript
+{
+  "statusCode": 400,
+  "message": [
+    "email must be an email",
+    "checkInDate must be a valid date",
+    "numberOfGuests must be a positive number"
+  ],
+  "error": "Bad Request",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "path": "/api/v1/bookings"
+}
+```
+
+**Custom Error Response (with additional context):**
+```typescript
+// In exception filter or controller
+throw new BadRequestException({
+  message: 'Invalid booking date range',
+  errors: [
+    {
+      field: 'checkInDate',
+      message: 'Check-in date must be in the future',
+    },
+    {
+      field: 'checkOutDate',
+      message: 'Check-out date must be after check-in date',
+    },
+  ],
+});
+```
+
+### 13.7. Global Exception Filter
+
+**Best Practice: Sử dụng Global Exception Filter để handle errors consistently:**
+
+```typescript
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+
+    let status = 500;
+    let message = 'Internal server error';
+
+    if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+      message =
+        typeof exceptionResponse === 'string'
+          ? exceptionResponse
+          : (exceptionResponse as any).message || exception.message;
+    } else if (exception instanceof DomainError) {
+      // Map domain errors to HTTP exceptions
+      status = this.mapDomainErrorToHttpStatus(exception);
+      message = exception.message;
+    }
+
+    response.status(status).json({
+      statusCode: status,
+      message,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    });
+  }
+
+  private mapDomainErrorToHttpStatus(error: DomainError): number {
+    if (error instanceof NotFoundError) return 404;
+    if (error instanceof InvalidInputError) return 400;
+    if (error instanceof ConflictError) return 409;
+    if (error instanceof UnauthorizedError) return 401;
+    if (error instanceof ForbiddenError) return 403;
+    return 500;
+  }
+}
+```
+
+### 13.8. Exception Handling Best Practices
+
+1. **Consistent Error Messages:**
+   - Sử dụng clear, descriptive error messages
+   - Include relevant context (IDs, values) trong error message
+   - Tránh expose sensitive information
+
+2. **Error Logging:**
+   - Log tất cả errors với context (user ID, request ID, entity IDs)
+   - Log technical errors ở level ERROR
+   - Log business errors ở level WARN
+
+3. **Error Propagation:**
+   - Let exceptions propagate naturally
+   - Don't catch exceptions unless you can handle them meaningfully
+   - Use try-catch ở presentation layer để map errors
+
+4. **Error Recovery:**
+   - Retry transient errors (database connection, external API)
+   - Don't retry client errors (400, 401, 403, 404)
+   - Use circuit breakers cho external services
+
+5. **Error Documentation:**
+   - Document possible exceptions trong API documentation
+   - Include error responses trong Swagger/OpenAPI
+   - Provide examples cho common error scenarios
 
 ---
 
