@@ -6,12 +6,12 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { UserResponseDto } from "src/modules/user/application/dto/response/user-response.dto";
+import { UserResponseDto } from "../../../../modules/user/application/dto/response/user-response.dto";
 import { AssignPermissionToUserCommand } from "../../application/commands/assign-permission-to-user.command";
 import { Permissions } from "../../../../common/decorators/permissions.decorator";
 import { CommandBus } from "@nestjs/cqrs";
 import { AssignRoleToUserCommand } from "../../application/commands/assign-role-to-user.command";
-import { JwtUserGuard } from "src/common/guards/jwt-user.guard";
+import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
 import { UnassignRoleFromUserCommand } from "../../application/commands/unassign-role-from-user.command";
 import { UnassignPermissionFromUserCommand } from "../../application/commands/unassign-permission-from-user.command";
 
