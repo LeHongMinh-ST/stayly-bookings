@@ -3,6 +3,7 @@
  */
 import { Test, TestingModule } from "@nestjs/testing";
 import { ListRolesHandler } from "../list-roles.handler";
+import { ListRolesQuery } from "../../list-roles.query";
 import type { IRoleRepository } from "../../../../domain/repositories/role.repository.interface";
 import { ROLE_REPOSITORY } from "../../../../domain/repositories/role.repository.interface";
 import { Role } from "../../../../domain/entities/role.entity";
@@ -17,6 +18,7 @@ describe("ListRolesHandler", () => {
   beforeEach(async () => {
     const mockRoleRepository = {
       findAll: jest.fn(),
+      count: jest.fn(),
       findById: jest.fn(),
       save: jest.fn(),
       delete: jest.fn(),
@@ -42,7 +44,7 @@ describe("ListRolesHandler", () => {
   });
 
   describe("execute", () => {
-    it("should return list of roles", async () => {
+    it("should return paginated list of roles", async () => {
       // Arrange
       const role1 = Role.create({
         id: RoleId.create(randomUUID()),
@@ -58,29 +60,43 @@ describe("ListRolesHandler", () => {
         ],
       });
       const roles = [role1, role2];
+      const query = new ListRolesQuery(1, 10);
       roleRepository.findAll.mockResolvedValue(roles);
+      roleRepository.count.mockResolvedValue(2);
 
       // Act
-      const result = await handler.execute();
+      const result = await handler.execute(query);
 
       // Assert
       expect(result).toBeDefined();
-      expect(result).toHaveLength(2);
-      expect(result[0].displayName).toBe("Editor");
-      expect(result[1].displayName).toBe("Manager");
-      expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0].displayName).toBe("Editor");
+      expect(result.data[1].displayName).toBe("Manager");
+      expect(result.meta.total).toBe(2);
+      expect(result.meta.current_page).toBe(1);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(roleRepository.findAll).toHaveBeenCalledWith(10, 0);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(roleRepository.count).toHaveBeenCalled();
     });
 
-    it("should return empty array when no roles exist", async () => {
+    it("should return empty paginated result when no roles exist", async () => {
       // Arrange
+      const query = new ListRolesQuery(1, 10);
       roleRepository.findAll.mockResolvedValue([]);
+      roleRepository.count.mockResolvedValue(0);
 
       // Act
-      const result = await handler.execute();
+      const result = await handler.execute(query);
 
       // Assert
-      expect(result).toEqual([]);
-      expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
+      expect(result).toBeDefined();
+      expect(result.data).toEqual([]);
+      expect(result.meta.total).toBe(0);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(roleRepository.findAll).toHaveBeenCalledWith(10, 0);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(roleRepository.count).toHaveBeenCalled();
     });
 
     it("should map roles to DTOs correctly", async () => {
@@ -94,18 +110,21 @@ describe("ListRolesHandler", () => {
           Permission.create("user:create"),
         ],
       });
+      const query = new ListRolesQuery(1, 10);
       roleRepository.findAll.mockResolvedValue([role]);
+      roleRepository.count.mockResolvedValue(1);
 
       // Act
-      const result = await handler.execute();
+      const result = await handler.execute(query);
 
       // Assert
-      expect(result[0]).toMatchObject({
+      expect(result.data[0]).toMatchObject({
         id: role.getId().getValue(),
         displayName: "Editor",
         isSuperAdmin: false,
         permissions: ["user:read", "user:create"],
       });
+      expect(result.meta.total).toBe(1);
     });
   });
 });

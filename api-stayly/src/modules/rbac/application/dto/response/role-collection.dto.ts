@@ -1,21 +1,23 @@
 /**
- * UserCollectionDto represents paginated administrative user list results
+ * RoleCollectionDto
+ * Paginated response DTO for roles list
  * Uses common PaginatedResponseDto
  */
+
 import { ApiProperty } from "@nestjs/swagger";
 import { PaginatedResponseDto } from "../../../../../common/application/dto/paginated-response.dto";
-import { UserResponseDto } from "./user-response.dto";
+import { RoleResponseDto } from "./role-response.dto";
 
-export class UserCollectionDto extends PaginatedResponseDto<UserResponseDto> {
+export class RoleCollectionDto extends PaginatedResponseDto<RoleResponseDto> {
   @ApiProperty({
-    description: "Array of user items",
-    type: () => UserResponseDto,
+    description: "Array of role items",
+    type: () => RoleResponseDto,
     isArray: true,
   })
-  declare data: UserResponseDto[];
+  declare data: RoleResponseDto[];
 
   constructor(
-    data: UserResponseDto[],
+    data: RoleResponseDto[],
     total: number,
     perpage: number,
     current_page: number,

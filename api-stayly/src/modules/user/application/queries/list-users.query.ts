@@ -1,14 +1,10 @@
-import {
-  DEFAULT_PAGE_SIZE,
-  DEFAULT_PAGE_OFFSET,
-} from "../../../../common/constants";
+import { PaginationQueryDto } from "../../../../common/application/dto/pagination-query.dto";
 
 /**
  * ListUsersQuery supports pagination and filtering for administrative users
  */
-export class ListUsersQuery {
-  constructor(
-    public readonly limit: number = DEFAULT_PAGE_SIZE,
-    public readonly offset: number = DEFAULT_PAGE_OFFSET,
-  ) {}
+export class ListUsersQuery extends PaginationQueryDto {
+  constructor(page?: number, limit?: number) {
+    super(page, limit);
+  }
 }

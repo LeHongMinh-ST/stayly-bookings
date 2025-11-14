@@ -24,6 +24,10 @@ import {
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
 import { Permissions } from "../../../../common/decorators/permissions.decorator";
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_NUMBER,
+} from "../../../../common/constants";
 import { CreateUserDto } from "../../application/dto/request/create-user.dto";
 import { CreateUserCommand } from "../../application/commands/create-user.command";
 import { UserResponseDto } from "../../application/dto/response/user-response.dto";
@@ -76,18 +80,18 @@ export class UsersController {
   @Permissions("user:read")
   @ApiOperation({ summary: "List users with pagination" })
   @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Page number (starts from 1)",
+    example: 1,
+  })
+  @ApiQuery({
     name: "limit",
     required: false,
     type: Number,
     description: "Number of items per page",
     example: 20,
-  })
-  @ApiQuery({
-    name: "offset",
-    required: false,
-    type: Number,
-    description: "Number of items to skip",
-    example: 0,
   })
   @ApiResponse({
     status: 200,
@@ -99,10 +103,12 @@ export class UsersController {
     description: "Forbidden - insufficient permissions",
   })
   async listUsers(
-    @Query("limit", new ParseIntPipe({ optional: true })) limit = 20,
-    @Query("offset", new ParseIntPipe({ optional: true })) offset = 0,
+    @Query("page", new ParseIntPipe({ optional: true }))
+    page: number = DEFAULT_PAGE_NUMBER,
+    @Query("limit", new ParseIntPipe({ optional: true }))
+    limit: number = DEFAULT_PAGE_SIZE,
   ): Promise<UserCollectionDto> {
-    return this.queryBus.execute(new ListUsersQuery(limit, offset));
+    return this.queryBus.execute(new ListUsersQuery(page, limit));
   }
 
   /**

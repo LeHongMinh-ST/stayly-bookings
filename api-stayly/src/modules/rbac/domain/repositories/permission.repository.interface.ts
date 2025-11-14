@@ -5,10 +5,11 @@ import { Permission } from "../value-objects/permission.vo";
 
 export interface IPermissionRepository {
   findAll(
-    limit: number,
-    offset: number,
+    limit?: number,
+    offset?: number,
     search?: string,
   ): Promise<Permission[]>;
+  count(search?: string): Promise<number>;
   findByCodes(codes: string[]): Promise<Permission[]>;
   findById(id: string): Promise<Permission | null>;
 }

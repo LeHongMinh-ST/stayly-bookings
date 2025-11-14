@@ -24,12 +24,25 @@ export class RoleRepository implements IRoleRepository {
     private readonly permissionRepo: Repository<PermissionOrmEntity>,
   ) {}
 
-  async findAll(): Promise<Role[]> {
-    const roles = await this.roleRepo.find({
-      relations: ["permissions"],
-      order: { displayName: "ASC" },
-    });
+  async findAll(limit?: number, offset?: number): Promise<Role[]> {
+    const queryBuilder = this.roleRepo
+      .createQueryBuilder("role")
+      .leftJoinAndSelect("role.permissions", "permissions")
+      .orderBy("role.displayName", "ASC");
+
+    if (limit !== undefined) {
+      queryBuilder.take(limit);
+    }
+    if (offset !== undefined) {
+      queryBuilder.skip(offset);
+    }
+
+    const roles = await queryBuilder.getMany();
     return roles.map((role) => RoleOrmMapper.toDomain(role));
+  }
+
+  async count(): Promise<number> {
+    return this.roleRepo.count();
   }
 
   async findById(id: RoleId): Promise<Role | null> {

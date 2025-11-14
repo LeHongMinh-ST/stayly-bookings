@@ -3,7 +3,7 @@
  */
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { FindOptionsWhere, In, Like, Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { IPermissionRepository } from "../../../domain/repositories/permission.repository.interface";
 import { Permission } from "../../../domain/value-objects/permission.vo";
 import { PermissionOrmEntity } from "../entities/permission.orm-entity";
@@ -16,21 +16,41 @@ export class PermissionRepository implements IPermissionRepository {
   ) {}
 
   async findAll(
-    limit: number,
-    offset: number,
+    limit?: number,
+    offset?: number,
     search?: string,
   ): Promise<Permission[]> {
-    const where: FindOptionsWhere<PermissionOrmEntity> = {};
+    const queryBuilder = this.permissionRepo
+      .createQueryBuilder("permission")
+      .orderBy("permission.code", "ASC");
+
     if (search) {
-      where.code = Like(`%${search}%`);
+      queryBuilder.where("permission.code LIKE :search", {
+        search: `%${search}%`,
+      });
     }
-    const permissions = await this.permissionRepo.find({
-      take: limit,
-      skip: offset,
-      where,
-      order: { code: "ASC" },
-    });
+
+    if (limit !== undefined) {
+      queryBuilder.take(limit);
+    }
+    if (offset !== undefined) {
+      queryBuilder.skip(offset);
+    }
+
+    const permissions = await queryBuilder.getMany();
     return permissions.map((permission) => Permission.create(permission.code));
+  }
+
+  async count(search?: string): Promise<number> {
+    const queryBuilder = this.permissionRepo.createQueryBuilder("permission");
+
+    if (search) {
+      queryBuilder.where("permission.code LIKE :search", {
+        search: `%${search}%`,
+      });
+    }
+
+    return queryBuilder.getCount();
   }
 
   async findByCodes(codes: string[]): Promise<Permission[]> {

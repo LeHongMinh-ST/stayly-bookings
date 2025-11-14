@@ -14,7 +14,7 @@ export class AccommodationCollectionDto extends PaginatedResponseDto<Accommodati
     type: () => AccommodationResponseDto,
     isArray: true,
   })
-  override data!: AccommodationResponseDto[];
+  declare data: AccommodationResponseDto[];
 
   constructor(
     data: AccommodationResponseDto[],

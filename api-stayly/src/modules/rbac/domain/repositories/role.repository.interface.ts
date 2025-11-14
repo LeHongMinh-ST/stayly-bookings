@@ -5,7 +5,8 @@ import { Role } from "../entities/role.entity";
 import { RoleId } from "../value-objects/role-id.vo";
 
 export interface IRoleRepository {
-  findAll(): Promise<Role[]>;
+  findAll(limit?: number, offset?: number): Promise<Role[]>;
+  count(): Promise<number>;
   findById(id: RoleId): Promise<Role | null>;
   save(role: Role): Promise<void>;
   delete(role: Role): Promise<void>;

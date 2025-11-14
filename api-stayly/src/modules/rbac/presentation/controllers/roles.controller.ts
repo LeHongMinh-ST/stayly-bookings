@@ -18,7 +18,9 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from "@nestjs/swagger";
+import { Query, ParseIntPipe } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
 import { Roles } from "../../../../common/decorators/roles.decorator";
@@ -33,6 +35,11 @@ import { CreateRoleDto } from "../../application/dto/request/create-role.dto";
 import { UpdateRoleDto } from "../../application/dto/request/update-role.dto";
 import { AssignPermissionsToRoleDto } from "../../application/dto/request/assign-permissions-to-role.dto";
 import { RoleResponseDto } from "../../application/dto/response/role-response.dto";
+import { RoleCollectionDto } from "../../application/dto/response/role-collection.dto";
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_NUMBER,
+} from "../../../../common/constants";
 
 @ApiTags("rbac")
 @UseGuards(JwtUserGuard)
@@ -45,22 +52,41 @@ export class RolesController {
   ) {}
 
   /**
-   * Lists all available roles
+   * Lists all available roles with pagination
    */
   @Get()
   @Permissions("role:read")
-  @ApiOperation({ summary: "List all roles" })
+  @ApiOperation({ summary: "List all roles with pagination" })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Page number (starts from 1)",
+    example: 1,
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Number of items per page",
+    example: 20,
+  })
   @ApiResponse({
     status: 200,
-    description: "Returns list of all roles",
-    type: [RoleResponseDto],
+    description: "Returns paginated list of roles",
+    type: RoleCollectionDto,
   })
   @ApiResponse({
     status: 403,
     description: "Forbidden - insufficient permissions",
   })
-  async listRoles(): Promise<RoleResponseDto[]> {
-    return this.queryBus.execute(new ListRolesQuery());
+  async listRoles(
+    @Query("page", new ParseIntPipe({ optional: true }))
+    page: number = DEFAULT_PAGE_NUMBER,
+    @Query("limit", new ParseIntPipe({ optional: true }))
+    limit: number = DEFAULT_PAGE_SIZE,
+  ): Promise<RoleCollectionDto> {
+    return this.queryBus.execute(new ListRolesQuery(page, limit));
   }
 
   /**

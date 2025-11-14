@@ -23,8 +23,8 @@ export class ListUsersHandler
    * Executes paginated user list retrieval
    */
   async execute(query: ListUsersQuery): Promise<UserCollectionDto> {
-    const limit = Math.max(1, Math.min(query.limit, 100));
-    const offset = Math.max(0, query.offset);
+    // Validate and normalize pagination params using common helper
+    const { page, limit, offset } = query.normalize();
 
     const [users, total] = await Promise.all([
       this.userRepository.findMany(limit, offset),
@@ -32,6 +32,6 @@ export class ListUsersHandler
     ]);
 
     const data = users.map((user) => UserResponseDto.fromAggregate(user));
-    return new UserCollectionDto(data, total, limit, offset);
+    return new UserCollectionDto(data, total, limit, page);
   }
 }
