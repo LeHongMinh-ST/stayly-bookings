@@ -90,16 +90,16 @@ export class PermissionsGuard implements CanActivate {
    * Merges permissions from roles and direct user permissions
    */
   private async loadUserPermissions(
-    roleCodes: string[],
+    roleIds: string[],
     directPermissions: string[],
   ): Promise<string[]> {
     const allPermissions = new Set<string>(directPermissions);
 
-    if (roleCodes.length > 0) {
+    if (roleIds.length > 0) {
       // Load roles with permissions from database
       const roles = await this.roleRepository.findAll();
       const userRoles = roles.filter((role) =>
-        roleCodes.includes(role.getCode()),
+        roleIds.includes(role.getId().getValue()),
       );
 
       for (const role of userRoles) {

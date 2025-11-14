@@ -59,10 +59,10 @@ export class DefaultUsersSeedService {
       { strict: false },
     );
     const roles = await roleRepository.findAll();
-    const roleMap = new Map<string, typeof roles[0]>(
-      roles.map((role) => [role.getCode(), role]),
+    // Find super admin role by isSuperAdmin flag
+    const superAdminRoleFromCatalog = roles.find(
+      (role) => role.getIsSuperAdmin() === true,
     );
-    const superAdminRoleFromCatalog = roleMap.get(UserRoleEnum.SUPER_ADMIN);
 
     if (!superAdminRoleFromCatalog) {
       this.logger.warn(
@@ -94,7 +94,7 @@ export class DefaultUsersSeedService {
       { strict: false },
     );
     await userRoleLink.replaceUserRoles(userId.getValue(), [
-      UserRoleEnum.SUPER_ADMIN,
+      superAdminRoleFromCatalog.getId().getValue(),
     ]);
 
     this.logger.log(
