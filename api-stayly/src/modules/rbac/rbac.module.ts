@@ -17,7 +17,6 @@ import { DeleteRoleHandler } from './application/commands/handlers/delete-role.h
 import { AssignPermissionsToRoleHandler } from './application/commands/handlers/assign-permissions-to-role.handler';
 import { ListRolesHandler } from './application/queries/handlers/list-roles.handler';
 import { ListPermissionsHandler } from './application/queries/handlers/list-permissions.handler';
-import { GetRoleHandler } from './application/queries/handlers/get-role.handler';
 import { ROLE_REPOSITORY } from './domain/repositories/role.repository.interface';
 import { PERMISSION_REPOSITORY } from './domain/repositories/permission.repository.interface';
 import { RoleRepository } from './infrastructure/persistence/repositories/role.repository';
@@ -36,6 +35,7 @@ import { USER_PERMISSION_LINK_PORT } from './application/interfaces/user-permiss
 import { RolesController } from './presentation/controllers/roles.controller';
 import { PermissionsController } from './presentation/controllers/permissions.controller';
 import { UserOrmEntity } from '../user/infrastructure/persistence/entities/user.orm-entity';
+import { RbacAssignController } from './presentation/controllers/assign.constoller';
 
 const commandHandlers = [
   CreateRoleHandler,
@@ -60,7 +60,7 @@ const queryHandlers = [ListRolesHandler, ListPermissionsHandler];
       UserOrmEntity,
     ]),
   ],
-  controllers: [RolesController, PermissionsController],
+  controllers: [RolesController, PermissionsController, RbacAssignController],
   providers: [
     ...commandHandlers,
     ...queryHandlers,

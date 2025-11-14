@@ -36,7 +36,7 @@ import { UpdateUserStatusCommand } from '../../application/commands/update-user-
 @ApiTags('users')
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth('JWT-auth')
-@Controller('v1/admin/users')
+@Controller('v1/users')
 export class UsersController {
   constructor(
     private readonly commandBus: CommandBus,

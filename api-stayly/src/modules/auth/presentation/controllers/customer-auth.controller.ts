@@ -30,7 +30,7 @@ import type { TokenService } from '../../../../common/application/interfaces/tok
 import { TOKEN_SERVICE } from '../../../../common/application/interfaces/token-service.interface';
 
 @ApiTags('auth')
-@Controller('v1/customers/auth')
+@Controller('v1/auth/customers')
 export class CustomerAuthController {
   constructor(
     private readonly commandBus: CommandBus,

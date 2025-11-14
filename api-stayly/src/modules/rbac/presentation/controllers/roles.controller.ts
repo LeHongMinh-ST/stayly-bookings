@@ -23,25 +23,21 @@ import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { JwtUserGuard } from '../../../../common/guards/jwt-user.guard';
 import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
-// Using string literals for decorator (decorator accepts string[])
 import { ListRolesQuery } from '../../application/queries/list-roles.query';
 import { GetRoleQuery } from '../../application/queries/get-role.query';
 import { CreateRoleCommand } from '../../application/commands/create-role.command';
 import { UpdateRoleCommand } from '../../application/commands/update-role.command';
 import { DeleteRoleCommand } from '../../application/commands/delete-role.command';
 import { AssignPermissionsToRoleCommand } from '../../application/commands/assign-permissions-to-role.command';
-import { AssignRoleToUserCommand } from '../../application/commands/assign-role-to-user.command';
-import { UnassignRoleFromUserCommand } from '../../application/commands/unassign-role-from-user.command';
 import { CreateRoleDto } from '../../application/dto/request/create-role.dto';
 import { UpdateRoleDto } from '../../application/dto/request/update-role.dto';
 import { AssignPermissionsToRoleDto } from '../../application/dto/request/assign-permissions-to-role.dto';
 import { RoleResponseDto } from '../../application/dto/response/role-response.dto';
-import { UserResponseDto } from '../../../user/application/dto/response/user-response.dto';
 
 @ApiTags('roles')
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth('JWT-auth')
-@Controller('v1/admin/roles')
+@Controller('v1/rbac/roles')
 export class RolesController {
   constructor(
     private readonly commandBus: CommandBus,
@@ -87,71 +83,7 @@ export class RolesController {
     return this.commandBus.execute(command);
   }
 
-  /**
-   * Assigns a single role to a user
-   */
-  @Post(':roleId/users/:userId')
-  @Roles('super_admin')
-  @Permissions('role:assign')
-  @ApiOperation({ summary: 'Assign a single role to user' })
-  @ApiParam({
-    name: 'roleId',
-    description: 'Role unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiParam({
-    name: 'userId',
-    description: 'User unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Role assigned successfully',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 404, description: 'Role or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async assignRoleToUser(
-    @Param('roleId') roleId: string,
-    @Param('userId') userId: string,
-  ): Promise<UserResponseDto> {
-    const command = new AssignRoleToUserCommand(roleId, userId);
-    return this.commandBus.execute(command);
-  }
 
-  /**
-   * Unassigns a single role from a user
-   */
-  @Delete(':roleId/users/:userId')
-  @Roles('super_admin')
-  @Permissions('role:assign')
-  @ApiOperation({ summary: 'Unassign a single role from user' })
-  @ApiParam({
-    name: 'roleId',
-    description: 'Role unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiParam({
-    name: 'userId',
-    description: 'User unique identifier',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Role unassigned successfully',
-    type: UserResponseDto,
-  })
-  @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 404, description: 'Role or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  async unassignRoleFromUser(
-    @Param('roleId') roleId: string,
-    @Param('userId') userId: string,
-  ): Promise<UserResponseDto> {
-    const command = new UnassignRoleFromUserCommand(roleId, userId);
-    return this.commandBus.execute(command);
-  }
 
   /**
    * Gets a single role by ID
