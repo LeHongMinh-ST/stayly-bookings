@@ -37,6 +37,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { RbacModule } from "./modules/rbac/rbac.module";
 import { UserModule } from "./modules/user/user.module";
 import { CustomerModule } from "./modules/customer/customer.module";
+import { AccommodationModule } from "./modules/accommodation/accommodation.module";
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { CustomerModule } from "./modules/customer/customer.module";
     RbacModule, // Import RbacModule before UserModule to ensure proper dependency resolution
     UserModule,
     CustomerModule,
+    AccommodationModule,
   ],
   controllers: [AppController],
   providers: [

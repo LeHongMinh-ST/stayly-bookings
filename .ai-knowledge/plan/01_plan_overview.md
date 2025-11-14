@@ -24,7 +24,6 @@
 
 2. **Accommodation Management**
    - Tạo và quản lý Homestay/Hotel
-   - Duyệt Accommodation (Super Admin)
    - CRUD cơ bản
 
 3. **Room Management**

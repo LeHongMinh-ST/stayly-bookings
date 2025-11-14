@@ -16,7 +16,7 @@ import { UnassignRoleFromUserCommand } from "../../application/commands/unassign
 import { UnassignPermissionFromUserCommand } from "../../application/commands/unassign-permission-from-user.command";
 
 @Controller("v1/rbac/assign")
-@ApiTags("rbac assign")
+@ApiTags("rbac")
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth("JWT-auth")
 export class RbacAssignController {

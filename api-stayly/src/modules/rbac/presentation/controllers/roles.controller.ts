@@ -34,7 +34,7 @@ import { UpdateRoleDto } from "../../application/dto/request/update-role.dto";
 import { AssignPermissionsToRoleDto } from "../../application/dto/request/assign-permissions-to-role.dto";
 import { RoleResponseDto } from "../../application/dto/response/role-response.dto";
 
-@ApiTags("roles")
+@ApiTags("rbac")
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth("JWT-auth")
 @Controller("v1/rbac/roles")

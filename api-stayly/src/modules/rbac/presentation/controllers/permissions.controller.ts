@@ -15,7 +15,7 @@ import { ListPermissionsQuery } from "../../application/queries/list-permissions
 import { PermissionResponseDto } from "../../application/dto/response/permission-response.dto";
 import { Permission } from "../../domain/value-objects/permission.vo";
 
-@ApiTags("permissions")
+@ApiTags("rbac")
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth("JWT-auth")
 @Controller("v1/rbac/permissions")

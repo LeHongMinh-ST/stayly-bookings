@@ -48,8 +48,6 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - `Email`: Email address với validation
 - `Password`: Mật khẩu với encryption
 - `UserStatus`: Enum (active, inactive, suspended)
-- `Role`: Value object từ RBAC module (super_admin, owner, manager, staff)
-- `Permission`: Value object từ RBAC module (user:manage, booking:read, etc.)
 
 **Business Rules:**
 - Email phải unique trong hệ thống
