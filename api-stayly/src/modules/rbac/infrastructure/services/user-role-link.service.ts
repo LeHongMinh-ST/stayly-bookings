@@ -7,6 +7,10 @@ import { In, Repository } from 'typeorm';
 import type { IUserRoleLinkPort } from '../../application/interfaces/user-role-link.port';
 import { UserOrmEntity } from '../../../user/infrastructure/persistence/entities/user.orm-entity';
 import { RoleOrmEntity } from '../persistence/entities/role.orm-entity';
+import {
+  ensureEntityExists,
+  throwConflict,
+} from '../../../../common/application/exceptions';
 
 @Injectable()
 export class UserRoleLinkService implements IUserRoleLinkPort {
@@ -21,13 +25,14 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
    * Replaces user-role relation rows by loading current relations and persisting the new set.
    */
   async replaceUserRoles(userId: string, roleIds: string[]): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['roles'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles'],
+      }),
+      'User',
+      userId,
+    );
 
     if (roleIds.length === 0) {
       user.roles = [];
@@ -40,7 +45,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
     });
 
     if (roles.length !== roleIds.length) {
-      throw new Error('One or more roles are missing from catalog');
+      throwConflict('One or more roles are missing from catalog');
     }
 
     user.roles = roles;
@@ -51,20 +56,22 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
    * Adds a single role to user (if not already assigned)
    */
   async addRoleToUser(userId: string, roleId: string): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['roles'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles'],
+      }),
+      'User',
+      userId,
+    );
 
-    const role = await this.roleRepository.findOne({
-      where: { id: roleId },
-    });
-    if (!role) {
-      throw new Error('Role not found');
-    }
+    const role = ensureEntityExists(
+      await this.roleRepository.findOne({
+        where: { id: roleId },
+      }),
+      'Role',
+      roleId,
+    );
 
     // Check if role already assigned
     const existingRole = user.roles.find((r) => r.id === roleId);
@@ -80,13 +87,14 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
    * Removes a single role from user
    */
   async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['roles'],
-    });
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = ensureEntityExists(
+      await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles'],
+      }),
+      'User',
+      userId,
+    );
 
     user.roles = user.roles.filter((r) => r.id !== roleId);
     await this.userRepository.save(user);
