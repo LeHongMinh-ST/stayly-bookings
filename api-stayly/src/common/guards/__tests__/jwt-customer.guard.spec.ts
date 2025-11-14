@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 /**
  * Unit tests for JwtCustomerGuard
  * Tests customer authentication guard
@@ -12,13 +11,15 @@ const createExecutionContextMock = (
   user: unknown,
 ): jest.Mocked<ExecutionContext> => {
   const getRequest = jest.fn().mockReturnValue({ user });
+  const handlerRef = () => undefined;
+  class ControllerRef {}
   return {
     switchToHttp: jest.fn().mockReturnValue({ getRequest }),
     switchToRpc: jest.fn() as unknown as ExecutionContext["switchToRpc"],
     switchToWs: jest.fn() as unknown as ExecutionContext["switchToWs"],
     getType: jest.fn(),
-    getClass: jest.fn(),
-    getHandler: jest.fn(),
+    getClass: jest.fn().mockReturnValue(ControllerRef),
+    getHandler: jest.fn().mockReturnValue(handlerRef),
     getArgs: jest.fn().mockReturnValue([]),
     getArgByIndex: jest.fn(),
   } as unknown as jest.Mocked<ExecutionContext>;
@@ -26,7 +27,11 @@ const createExecutionContextMock = (
 
 describe("JwtCustomerGuard", () => {
   let guard: JwtCustomerGuard;
-  let reflector: jest.Mocked<Reflector>;
+  let reflector: Reflector;
+  let getAllAndOverrideSpy: jest.SpyInstance<
+    boolean | undefined,
+    Parameters<Reflector["getAllAndOverride"]>
+  >;
   let context: jest.Mocked<ExecutionContext>;
 
   const mockCustomer = {
@@ -47,13 +52,13 @@ describe("JwtCustomerGuard", () => {
 
   beforeEach(() => {
     // Arrange: Create mocks
-    reflector = {
-      getAllAndOverride: jest.fn(),
-    } as unknown as jest.Mocked<Reflector>;
+    reflector = new Reflector();
+    getAllAndOverrideSpy = jest.spyOn(reflector, "getAllAndOverride");
 
     context = createExecutionContextMock(mockCustomer);
 
     guard = new JwtCustomerGuard(reflector);
+    (guard as unknown as { reflector: Reflector }).reflector = reflector;
   });
 
   afterEach(() => {
@@ -63,7 +68,7 @@ describe("JwtCustomerGuard", () => {
   describe("canActivate", () => {
     it("should allow access when route is marked as public", () => {
       // Arrange
-      reflector.getAllAndOverride.mockReturnValue(true);
+      getAllAndOverrideSpy.mockReturnValue(true);
 
       // Act
       const result = guard.canActivate(context);
@@ -73,7 +78,7 @@ describe("JwtCustomerGuard", () => {
       const handler = context.getHandler();
       const targetClass = context.getClass();
       const expectedTargets = [handler, targetClass];
-      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
+      expect(getAllAndOverrideSpy).toHaveBeenCalledWith(
         IS_PUBLIC_KEY,
         expectedTargets,
       );
@@ -81,8 +86,9 @@ describe("JwtCustomerGuard", () => {
 
     it("should call parent canActivate when route is not public", () => {
       // Arrange
-      reflector.getAllAndOverride.mockReturnValue(false);
-      const parentPrototype = Object.getPrototypeOf(guard) as {
+      getAllAndOverrideSpy.mockReturnValue(false);
+      const guardPrototype = Object.getPrototypeOf(guard);
+      const parentPrototype = Object.getPrototypeOf(guardPrototype) as {
         canActivate: (ctx: ExecutionContext) => boolean;
       };
       const parentCanActivate = jest
@@ -97,10 +103,11 @@ describe("JwtCustomerGuard", () => {
       const handler = context.getHandler();
       const targetClass = context.getClass();
       const expectedTargets = [handler, targetClass];
-      expect(reflector.getAllAndOverride).toHaveBeenCalledWith(
+      expect(getAllAndOverrideSpy).toHaveBeenCalledWith(
         IS_PUBLIC_KEY,
         expectedTargets,
       );
+      expect(parentCanActivate).toHaveBeenCalledWith(context);
       parentCanActivate.mockRestore();
     });
   });
