@@ -2,57 +2,41 @@
  * Unit tests for UserRolePermissionQueryService
  */
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UserRolePermissionQueryService } from '../user-role-permission-query.service';
-import type { IUserRepository } from '../../../../user/domain/repositories/user.repository.interface';
-import { USER_REPOSITORY } from '../../../../user/domain/repositories/user.repository.interface';
-import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
-import { ROLE_REPOSITORY } from '../../../domain/repositories/role.repository.interface';
-import { User } from '../../../../user/domain/entities/user.entity';
-import { UserId } from '../../../../user/domain/value-objects/user-id.vo';
-import { UserRole } from '../../../../user/domain/value-objects/user-role.vo';
-import { UserPermission } from '../../../../user/domain/value-objects/user-permission.vo';
-import { Email } from '../../../../../common/domain/value-objects/email.vo';
-import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
-import { Role } from '../../../domain/entities/role.entity';
-import { RoleId } from '../../../domain/value-objects/role-id.vo';
-import { Permission } from '../../../domain/value-objects/permission.vo';
+import { UserOrmEntity } from '../../../../user/infrastructure/persistence/entities/user.orm-entity';
+import { RoleOrmEntity } from '../../persistence/entities/role.orm-entity';
+import { PermissionOrmEntity } from '../../persistence/entities/permission.orm-entity';
 import { randomUUID } from 'crypto';
 
 describe('UserRolePermissionQueryService', () => {
   let service: UserRolePermissionQueryService;
-  let userRepository: jest.Mocked<IUserRepository>;
-  let roleRepository: jest.Mocked<IRoleRepository>;
+  let userRepository: jest.Mocked<Repository<UserOrmEntity>>;
+  let roleRepository: jest.Mocked<Repository<RoleOrmEntity>>;
 
   const userId = randomUUID();
-  const roleId1 = RoleId.create(randomUUID());
-  const roleId2 = RoleId.create(randomUUID());
+  const roleId1 = randomUUID();
+  const roleId2 = randomUUID();
 
   beforeEach(async () => {
     const mockUserRepository = {
-      findById: jest.fn(),
-      findByEmail: jest.fn(),
-      save: jest.fn(),
-      findMany: jest.fn(),
+      findOne: jest.fn(),
     };
 
     const mockRoleRepository = {
-      findAll: jest.fn(),
-      findById: jest.fn(),
-      findByCode: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
-      exists: jest.fn(),
+      find: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserRolePermissionQueryService,
         {
-          provide: USER_REPOSITORY,
+          provide: getRepositoryToken(UserOrmEntity),
           useValue: mockUserRepository,
         },
         {
-          provide: ROLE_REPOSITORY,
+          provide: getRepositoryToken(RoleOrmEntity),
           useValue: mockRoleRepository,
         },
       ],
@@ -61,8 +45,8 @@ describe('UserRolePermissionQueryService', () => {
     service = module.get<UserRolePermissionQueryService>(
       UserRolePermissionQueryService,
     );
-    userRepository = module.get(USER_REPOSITORY);
-    roleRepository = module.get(ROLE_REPOSITORY);
+    userRepository = module.get(getRepositoryToken(UserOrmEntity));
+    roleRepository = module.get(getRepositoryToken(RoleOrmEntity));
   });
 
   afterEach(() => {
@@ -72,41 +56,106 @@ describe('UserRolePermissionQueryService', () => {
   describe('getUserRolesAndPermissions', () => {
     it('should return roles and permissions for user with roles', async () => {
       // Arrange
-      const user = User.create({
-        id: UserId.create(userId),
-        email: Email.create('user@example.com'),
-        fullName: 'Test User',
-        passwordHash: PasswordHash.create('$2b$10$hashedpassword'),
-        roles: [
-          UserRole.from('owner'),
-          UserRole.from('manager'),
-        ],
-        permissions: [UserPermission.create('user:read')],
-      });
+      const userPermission: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
 
-      const ownerRole = Role.create({
+      const ownerRolePermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const ownerRolePermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:create',
+        description: 'Create user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const managerRolePermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const managerRolePermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:update',
+        description: 'Update user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const managerRolePermission3: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'booking:read',
+        description: 'Read booking',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const ownerRole: RoleOrmEntity = {
         id: roleId1,
         code: 'owner',
         displayName: 'Owner',
-        permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
-        ],
-      });
+        isSuperAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        permissions: [ownerRolePermission1, ownerRolePermission2],
+      };
 
-      const managerRole = Role.create({
+      const managerRole: RoleOrmEntity = {
         id: roleId2,
         code: 'manager',
         displayName: 'Manager',
+        isSuperAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
         permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:update'),
-          Permission.create('booking:read'),
+          managerRolePermission1,
+          managerRolePermission2,
+          managerRolePermission3,
         ],
-      });
+      };
 
-      userRepository.findById.mockResolvedValue(user);
-      roleRepository.findAll.mockResolvedValue([ownerRole, managerRole]);
+      const user: UserOrmEntity = {
+        id: userId,
+        email: 'user@example.com',
+        fullName: 'Test User',
+        passwordHash: '$2b$10$hashedpassword',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        roles: [ownerRole, managerRole],
+        permissions: [userPermission],
+      };
+
+      userRepository.findOne.mockResolvedValue(user);
+      roleRepository.find.mockResolvedValue([ownerRole, managerRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -126,20 +175,40 @@ describe('UserRolePermissionQueryService', () => {
 
     it('should return only direct permissions when user has no roles', async () => {
       // Arrange
-      const user = User.create({
-        id: UserId.create(userId),
-        email: Email.create('user@example.com'),
-        fullName: 'Test User',
-        passwordHash: PasswordHash.create('$2b$10$hashedpassword'),
+      const userPermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
         roles: [],
-        permissions: [
-          UserPermission.create('user:read'),
-          UserPermission.create('user:create'),
-        ],
-      });
+      };
 
-      userRepository.findById.mockResolvedValue(user);
-      roleRepository.findAll.mockResolvedValue([]);
+      const userPermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:create',
+        description: 'Create user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const user: UserOrmEntity = {
+        id: userId,
+        email: 'user@example.com',
+        fullName: 'Test User',
+        passwordHash: '$2b$10$hashedpassword',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        roles: [],
+        permissions: [userPermission1, userPermission2],
+      };
+
+      userRepository.findOne.mockResolvedValue(user);
+      roleRepository.find.mockResolvedValue([]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -147,45 +216,87 @@ describe('UserRolePermissionQueryService', () => {
       // Assert
       expect(result.roles).toEqual([]);
       expect(result.permissions).toEqual(['user:read', 'user:create']);
-      expect(roleRepository.findAll).not.toHaveBeenCalled();
+      expect(roleRepository.find).not.toHaveBeenCalled();
     });
 
     it('should merge permissions from multiple roles without duplicates', async () => {
       // Arrange
-      const user = User.create({
-        id: UserId.create(userId),
-        email: Email.create('user@example.com'),
-        fullName: 'Test User',
-        passwordHash: PasswordHash.create('$2b$10$hashedpassword'),
-        roles: [
-          UserRole.from('owner'),
-          UserRole.from('manager'),
-        ],
-        permissions: [],
-      });
+      const ownerRolePermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
 
-      const ownerRole = Role.create({
+      const ownerRolePermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:create',
+        description: 'Create user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const managerRolePermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:read',
+        description: 'Read user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const managerRolePermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:update',
+        description: 'Update user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const ownerRole: RoleOrmEntity = {
         id: roleId1,
         code: 'owner',
         displayName: 'Owner',
-        permissions: [
-          Permission.create('user:read'),
-          Permission.create('user:create'),
-        ],
-      });
+        isSuperAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        permissions: [ownerRolePermission1, ownerRolePermission2],
+      };
 
-      const managerRole = Role.create({
+      const managerRole: RoleOrmEntity = {
         id: roleId2,
         code: 'manager',
         displayName: 'Manager',
-        permissions: [
-          Permission.create('user:read'), // Duplicate
-          Permission.create('user:update'),
-        ],
-      });
+        isSuperAdmin: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        permissions: [managerRolePermission1, managerRolePermission2],
+      };
 
-      userRepository.findById.mockResolvedValue(user);
-      roleRepository.findAll.mockResolvedValue([ownerRole, managerRole]);
+      const user: UserOrmEntity = {
+        id: userId,
+        email: 'user@example.com',
+        fullName: 'Test User',
+        passwordHash: '$2b$10$hashedpassword',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        roles: [ownerRole, managerRole],
+        permissions: [],
+      };
+
+      userRepository.findOne.mockResolvedValue(user);
+      roleRepository.find.mockResolvedValue([ownerRole, managerRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
@@ -202,40 +313,66 @@ describe('UserRolePermissionQueryService', () => {
 
     it('should throw error when user not found', async () => {
       // Arrange
-      userRepository.findById.mockResolvedValue(null);
+      userRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
       await expect(
         service.getUserRolesAndPermissions(userId),
       ).rejects.toThrow('User not found');
-      expect(userRepository.findById).toHaveBeenCalled();
-      expect(roleRepository.findAll).not.toHaveBeenCalled();
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['roles', 'permissions'],
+      });
+      expect(roleRepository.find).not.toHaveBeenCalled();
     });
 
     it('should handle user with super_admin role', async () => {
       // Arrange
-      const user = User.create({
-        id: UserId.create(userId),
-        email: Email.create('user@example.com'),
-        fullName: 'Test User',
-        passwordHash: PasswordHash.create('$2b$10$hashedpassword'),
-        roles: [UserRole.from('super_admin')],
-        permissions: [],
-      });
+      const superAdminPermission1: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'user:manage',
+        description: 'Manage user',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
 
-      const superAdminRole = Role.create({
+      const superAdminPermission2: PermissionOrmEntity = {
+        id: randomUUID(),
+        code: 'booking:manage',
+        description: 'Manage booking',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        roles: [],
+      };
+
+      const superAdminRole: RoleOrmEntity = {
         id: roleId1,
         code: 'super_admin',
         displayName: 'Super Admin',
         isSuperAdmin: true,
-        permissions: [
-          Permission.create('user:manage'),
-          Permission.create('booking:manage'),
-        ],
-      });
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        users: [],
+        permissions: [superAdminPermission1, superAdminPermission2],
+      };
 
-      userRepository.findById.mockResolvedValue(user);
-      roleRepository.findAll.mockResolvedValue([superAdminRole]);
+      const user: UserOrmEntity = {
+        id: userId,
+        email: 'user@example.com',
+        fullName: 'Test User',
+        passwordHash: '$2b$10$hashedpassword',
+        status: 'active',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        roles: [superAdminRole],
+        permissions: [],
+      };
+
+      userRepository.findOne.mockResolvedValue(user);
+      roleRepository.find.mockResolvedValue([superAdminRole]);
 
       // Act
       const result = await service.getUserRolesAndPermissions(userId);
