@@ -41,8 +41,8 @@ export class UserRolePermissionQueryService
       throw new Error('User not found');
     }
 
-    // Get role codes directly from ORM entity
-    const roleCodes = (user.roles ?? []).map((role) => role.code);
+    // Get role IDs directly from ORM entity
+    const roleIds = (user.roles ?? []).map((role) => role.id);
 
     // Get permissions directly assigned to user
     const directPermissions = (user.permissions ?? []).map(
@@ -51,9 +51,9 @@ export class UserRolePermissionQueryService
 
     // Load roles with permissions to get permissions from roles
     const allPermissions = new Set<string>(directPermissions);
-    if (roleCodes.length > 0) {
+    if (roleIds.length > 0) {
       const roles = await this.roleRepository.find({
-        where: roleCodes.map((code) => ({ code })),
+        where: roleIds.map((id) => ({ id })),
         relations: ['permissions'],
       });
 
@@ -66,7 +66,7 @@ export class UserRolePermissionQueryService
     }
 
     return {
-      roles: roleCodes,
+      roles: roleIds,
       permissions: Array.from(allPermissions),
     };
   }

@@ -5,9 +5,6 @@ export class RoleResponseDto {
   @ApiProperty({ description: 'Role unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
   id!: string;
 
-  @ApiProperty({ description: 'Role code', example: 'super_admin' })
-  code!: string;
-
   @ApiProperty({ description: 'Display name for the role', example: 'Super Admin' })
   displayName!: string;
 
@@ -24,7 +21,6 @@ export class RoleResponseDto {
   static fromDomain(role: Role): RoleResponseDto {
     return {
       id: role.getId().getValue(),
-      code: role.getCode(),
       displayName: role.getDisplayName(),
       isSuperAdmin: role.getIsSuperAdmin(),
       permissions: role.getPermissions().map((p) => p.getValue()),
@@ -37,7 +33,6 @@ export class RoleResponseDto {
     // Should be removed after all code is migrated to use domain entities
     return {
       id: '',
-      code: role.getValue ? role.getValue() : role.code,
       displayName: role.getValue
         ? role.getValue().replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
         : role.displayName,

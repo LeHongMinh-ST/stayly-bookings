@@ -15,18 +15,16 @@ describe('DeleteRoleHandler', () => {
   let roleRepository: jest.Mocked<IRoleRepository>;
 
   const roleId = RoleId.create(randomUUID());
-  const code = 'editor';
   const displayName = 'Editor';
 
   beforeEach(async () => {
-    const mockRoleRepository = {
-      findById: jest.fn(),
-      delete: jest.fn(),
-      findAll: jest.fn(),
-      findByCode: jest.fn(),
-      save: jest.fn(),
-      exists: jest.fn(),
-    };
+      const mockRoleRepository = {
+        findById: jest.fn(),
+        delete: jest.fn(),
+        findAll: jest.fn(),
+        save: jest.fn(),
+        exists: jest.fn(),
+      };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,7 +49,6 @@ describe('DeleteRoleHandler', () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        code,
         displayName,
         isSuperAdmin: false,
       });
@@ -82,7 +79,6 @@ describe('DeleteRoleHandler', () => {
       // Arrange
       const superAdminRole = Role.create({
         id: roleId,
-        code: 'super_admin',
         displayName: 'Super Admin',
         isSuperAdmin: true,
       });
@@ -101,7 +97,6 @@ describe('DeleteRoleHandler', () => {
       // Arrange
       const regularRole = Role.create({
         id: roleId,
-        code,
         displayName,
         isSuperAdmin: false,
       });

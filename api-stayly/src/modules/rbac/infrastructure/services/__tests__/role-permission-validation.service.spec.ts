@@ -58,34 +58,34 @@ describe('RolePermissionValidationService', () => {
   });
 
   describe('validateRoles', () => {
-    it('should validate roles successfully', async () => {
+    it('should validate roles successfully when roles have permissions', async () => {
       // Arrange
-      const roleCodes = ['editor', 'manager'];
-      const roles = [
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'editor',
-          displayName: 'Editor',
-        }),
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'manager',
-          displayName: 'Manager',
-        }),
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'staff',
-          displayName: 'Staff',
-        }),
-      ];
-      roleRepository.findAll.mockResolvedValue(roles);
+      const roleId1 = randomUUID();
+      const roleId2 = randomUUID();
+      const roleIds = [roleId1, roleId2];
+
+      const role1 = Role.create({
+        id: RoleId.create(roleId1),
+        displayName: 'Editor',
+        permissions: [Permission.create('user:read')],
+      });
+
+      const role2 = Role.create({
+        id: RoleId.create(roleId2),
+        displayName: 'Manager',
+        permissions: [Permission.create('user:write')],
+      });
+
+      roleRepository.findById
+        .mockResolvedValueOnce(role1)
+        .mockResolvedValueOnce(role2);
 
       // Act
-      const result = await service.validateRoles(roleCodes);
+      const result = await service.validateRoles(roleIds);
 
       // Assert
-      expect(result).toEqual(roleCodes);
-      expect(roleRepository.findAll).toHaveBeenCalled();
+      expect(result).toEqual(roleIds);
+      expect(roleRepository.findById).toHaveBeenCalledTimes(2);
     });
 
     it('should throw error when at least one role is required', async () => {
@@ -93,49 +93,88 @@ describe('RolePermissionValidationService', () => {
       await expect(service.validateRoles([])).rejects.toThrow(
         'At least one role is required',
       );
-      expect(roleRepository.findAll).not.toHaveBeenCalled();
+      expect(roleRepository.findById).not.toHaveBeenCalled();
     });
 
     it('should throw error when role does not exist', async () => {
       // Arrange
-      const roleCodes = ['editor', 'invalid_role'];
-      const roles = [
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'editor',
-          displayName: 'Editor',
-        }),
-      ];
-      roleRepository.findAll.mockResolvedValue(roles);
+      const roleId1 = randomUUID();
+      const invalidRoleId = randomUUID();
+      const roleIds = [roleId1, invalidRoleId];
+
+      const role1 = Role.create({
+        id: RoleId.create(roleId1),
+        displayName: 'Editor',
+        permissions: [Permission.create('user:read')],
+      });
+
+      roleRepository.findById
+        .mockResolvedValueOnce(role1)
+        .mockResolvedValueOnce(null);
 
       // Act & Assert
-      await expect(service.validateRoles(roleCodes)).rejects.toThrow(
-        'Unknown role(s): invalid_role',
+      await expect(service.validateRoles(roleIds)).rejects.toThrow(
+        `Invalid role(s) or role(s) without permissions: ${invalidRoleId}`,
       );
     });
 
-    it('should handle case-insensitive role codes', async () => {
+    it('should throw error when role has no permissions', async () => {
       // Arrange
-      const roleCodes = ['EDITOR', 'MANAGER'];
-      const roles = [
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'editor',
-          displayName: 'Editor',
-        }),
-        Role.create({
-          id: RoleId.create(randomUUID()),
-          code: 'manager',
-          displayName: 'Manager',
-        }),
-      ];
-      roleRepository.findAll.mockResolvedValue(roles);
+      const roleId1 = randomUUID();
+      const roleId2 = randomUUID();
+      const roleIds = [roleId1, roleId2];
+
+      const role1 = Role.create({
+        id: RoleId.create(roleId1),
+        displayName: 'Editor',
+        permissions: [Permission.create('user:read')],
+      });
+
+      const role2 = Role.create({
+        id: RoleId.create(roleId2),
+        displayName: 'Manager',
+        permissions: [], // No permissions
+      });
+
+      roleRepository.findById
+        .mockResolvedValueOnce(role1)
+        .mockResolvedValueOnce(role2);
+
+      // Act & Assert
+      await expect(service.validateRoles(roleIds)).rejects.toThrow(
+        `Invalid role(s) or role(s) without permissions: ${roleId2}`,
+      );
+    });
+
+    it('should validate super admin role even without permissions', async () => {
+      // Arrange
+      const superAdminRoleId = randomUUID();
+      const roleId = randomUUID();
+      const roleIds = [superAdminRoleId, roleId];
+
+      const superAdminRole = Role.create({
+        id: RoleId.create(superAdminRoleId),
+        displayName: 'Super Admin',
+        isSuperAdmin: true,
+        permissions: [], // Super admin can have no permissions
+      });
+
+      const role = Role.create({
+        id: RoleId.create(roleId),
+        displayName: 'Editor',
+        permissions: [Permission.create('user:read')],
+      });
+
+      roleRepository.findById
+        .mockResolvedValueOnce(superAdminRole)
+        .mockResolvedValueOnce(role);
 
       // Act
-      const result = await service.validateRoles(roleCodes);
+      const result = await service.validateRoles(roleIds);
 
       // Assert
-      expect(result).toEqual(roleCodes);
+      expect(result).toEqual(roleIds);
+      expect(superAdminRole.getIsSuperAdmin()).toBe(true);
     });
   });
 
@@ -198,4 +237,3 @@ describe('RolePermissionValidationService', () => {
     });
   });
 });
-

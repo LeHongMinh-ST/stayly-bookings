@@ -8,6 +8,7 @@ import { ROLE_REPOSITORY } from '../../domain/repositories/role.repository.inter
 import type { IPermissionRepository } from '../../domain/repositories/permission.repository.interface';
 import { PERMISSION_REPOSITORY } from '../../domain/repositories/permission.repository.interface';
 import type { IRolePermissionValidationPort } from '../../application/interfaces/role-permission-validation.port';
+import { RoleId } from '../../domain/value-objects/role-id.vo';
 
 @Injectable()
 export class RolePermissionValidationService
@@ -20,25 +21,54 @@ export class RolePermissionValidationService
     private readonly permissionRepository: IPermissionRepository,
   ) {}
 
-  async validateRoles(roleCodes: string[]): Promise<string[]> {
-    if (!roleCodes.length) {
+  /**
+   * Validates role IDs by checking if roles exist and have permissions assigned
+   * Super admin roles are always valid even without permissions
+   */
+  async validateRoles(roleIds: string[]): Promise<string[]> {
+    if (!roleIds.length) {
       throw new Error('At least one role is required');
     }
 
-    const catalog = await this.roleRepository.findAll();
-    const catalogValues = new Set<string>(
-      catalog.map((role) => role.getCode()),
-    );
+    const validatedRoleIds: string[] = [];
+    const invalidRoleIds: string[] = [];
 
-    const unknownRoles = roleCodes.filter(
-      (code) => !catalogValues.has(code.toLowerCase()),
-    );
+    for (const roleIdStr of roleIds) {
+      try {
+        const roleId = RoleId.create(roleIdStr);
+        const role = await this.roleRepository.findById(roleId);
 
-    if (unknownRoles.length) {
-      throw new Error(`Unknown role(s): ${unknownRoles.join(', ')}`);
+        if (!role) {
+          invalidRoleIds.push(roleIdStr);
+          continue;
+        }
+
+        // Super admin roles are always valid
+        if (role.getIsSuperAdmin()) {
+          validatedRoleIds.push(roleIdStr);
+          continue;
+        }
+
+        // Check if role has permissions assigned
+        const permissions = role.getPermissions();
+        if (permissions.length === 0) {
+          invalidRoleIds.push(roleIdStr);
+          continue;
+        }
+
+        validatedRoleIds.push(roleIdStr);
+      } catch (error) {
+        invalidRoleIds.push(roleIdStr);
+      }
     }
 
-    return roleCodes;
+    if (invalidRoleIds.length > 0) {
+      throw new Error(
+        `Invalid role(s) or role(s) without permissions: ${invalidRoleIds.join(', ')}`,
+      );
+    }
+
+    return validatedRoleIds;
   }
 
   async validatePermissions(permissionCodes: string[]): Promise<string[]> {

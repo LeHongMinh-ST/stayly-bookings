@@ -15,19 +15,17 @@ describe('UpdateRoleHandler', () => {
   let roleRepository: jest.Mocked<IRoleRepository>;
 
   const roleId = RoleId.create(randomUUID());
-  const code = 'editor';
   const displayName = 'Editor';
   const newDisplayName = 'Content Editor';
 
   beforeEach(async () => {
-    const mockRoleRepository = {
-      findById: jest.fn(),
-      save: jest.fn(),
-      findAll: jest.fn(),
-      findByCode: jest.fn(),
-      delete: jest.fn(),
-      exists: jest.fn(),
-    };
+      const mockRoleRepository = {
+        findById: jest.fn(),
+        save: jest.fn(),
+        findAll: jest.fn(),
+        delete: jest.fn(),
+        exists: jest.fn(),
+      };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -52,7 +50,6 @@ describe('UpdateRoleHandler', () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        code,
         displayName,
       });
       const command = new UpdateRoleCommand(roleId.getValue(), newDisplayName);
@@ -65,7 +62,6 @@ describe('UpdateRoleHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.displayName).toBe(newDisplayName);
-      expect(result.code).toBe(code);
       expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
       expect(roleRepository.save).toHaveBeenCalled();
     });
@@ -85,7 +81,6 @@ describe('UpdateRoleHandler', () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        code,
         displayName,
       });
       const command = new UpdateRoleCommand(roleId.getValue());

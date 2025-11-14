@@ -45,7 +45,7 @@ export class UnassignRoleFromUserHandler
     await this.userAccess.ensureUserExists(command.userId);
 
     // Remove role from user
-    await this.userRoleLink.removeRoleFromUser(command.userId, role.getCode());
+    await this.userRoleLink.removeRoleFromUser(command.userId, roleId.getValue());
 
     // Return updated user
     return await this.userAccess.getUserResponse(command.userId);

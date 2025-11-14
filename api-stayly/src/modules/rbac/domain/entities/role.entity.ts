@@ -7,7 +7,6 @@ import { Permission } from '../value-objects/permission.vo';
 
 export interface CreateRoleProps {
   id: RoleId;
-  code: string;
   displayName: string;
   isSuperAdmin?: boolean;
   permissions?: Permission[];
@@ -16,7 +15,6 @@ export interface CreateRoleProps {
 export class Role extends BaseEntity<RoleId> {
   private constructor(
     id: RoleId,
-    private code: string,
     private displayName: string,
     private readonly isSuperAdmin: boolean,
     private permissions: Permission[],
@@ -25,25 +23,12 @@ export class Role extends BaseEntity<RoleId> {
   }
 
   static create(props: CreateRoleProps): Role {
-    if (!props.code?.trim()) {
-      throw new Error('Role code is required');
-    }
     if (!props.displayName?.trim()) {
       throw new Error('Role display name is required');
     }
 
-    // Validate code format (lowercase, alphanumeric and underscore)
-    const codeRegex = /^[a-z0-9_]+$/;
-    const normalizedCode = props.code.trim().toLowerCase();
-    if (!codeRegex.test(normalizedCode)) {
-      throw new Error(
-        'Role code must contain only lowercase letters, numbers, and underscores',
-      );
-    }
-
     const role = new Role(
       props.id,
-      normalizedCode,
       props.displayName.trim(),
       props.isSuperAdmin ?? false,
       props.permissions ?? [],
@@ -54,14 +39,12 @@ export class Role extends BaseEntity<RoleId> {
 
   static rehydrate(props: {
     id: RoleId;
-    code: string;
     displayName: string;
     isSuperAdmin: boolean;
     permissions: Permission[];
   }): Role {
     return new Role(
       props.id,
-      props.code,
       props.displayName,
       props.isSuperAdmin,
       props.permissions,
@@ -92,7 +75,9 @@ export class Role extends BaseEntity<RoleId> {
   }
 
   removePermissions(permissionCodes: string[]): void {
-    const codesToRemove = new Set(permissionCodes.map((code) => code.toLowerCase()));
+    const codesToRemove = new Set(
+      permissionCodes.map((code) => code.toLowerCase()),
+    );
     this.permissions = this.permissions.filter(
       (permission) => !codesToRemove.has(permission.getValue()),
     );
@@ -105,10 +90,6 @@ export class Role extends BaseEntity<RoleId> {
 
   getId(): RoleId {
     return super.getId();
-  }
-
-  getCode(): string {
-    return this.code;
   }
 
   getDisplayName(): string {

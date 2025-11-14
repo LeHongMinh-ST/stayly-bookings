@@ -3,14 +3,6 @@ import { IsNotEmpty, IsOptional, IsString, IsArray } from 'class-validator';
 
 export class CreateRoleDto {
   @ApiProperty({
-    description: 'Role code (unique, lowercase, alphanumeric and underscore only)',
-    example: 'custom_manager',
-  })
-  @IsNotEmpty()
-  @IsString()
-  code!: string;
-
-  @ApiProperty({
     description: 'Display name for the role',
     example: 'Custom Manager',
   })

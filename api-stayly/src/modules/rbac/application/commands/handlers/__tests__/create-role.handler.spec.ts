@@ -19,12 +19,10 @@ describe('CreateRoleHandler', () => {
   let rolePermissionValidation: jest.Mocked<IRolePermissionValidationPort>;
 
   const roleId = RoleId.create(randomUUID());
-  const code = 'editor';
   const displayName = 'Editor';
 
   beforeEach(async () => {
     const mockRoleRepository = {
-      findByCode: jest.fn(),
       save: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
@@ -63,8 +61,7 @@ describe('CreateRoleHandler', () => {
   describe('execute', () => {
     it('should create role successfully without permissions', async () => {
       // Arrange
-      const command = new CreateRoleCommand(code, displayName);
-      roleRepository.findByCode.mockResolvedValue(null);
+      const command = new CreateRoleCommand(displayName);
       roleRepository.save.mockResolvedValue();
 
       // Act
@@ -72,11 +69,9 @@ describe('CreateRoleHandler', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.code).toBe(code);
       expect(result.displayName).toBe(displayName);
       expect(result.isSuperAdmin).toBe(false);
       expect(result.permissions).toEqual([]);
-      expect(roleRepository.findByCode).toHaveBeenCalledWith(code);
       expect(roleRepository.save).toHaveBeenCalled();
       expect(rolePermissionValidation.validatePermissions).not.toHaveBeenCalled();
     });
@@ -84,8 +79,7 @@ describe('CreateRoleHandler', () => {
     it('should create role with permissions', async () => {
       // Arrange
       const permissions = ['user:read', 'user:create'];
-      const command = new CreateRoleCommand(code, displayName, permissions);
-      roleRepository.findByCode.mockResolvedValue(null);
+      const command = new CreateRoleCommand(displayName, permissions);
       rolePermissionValidation.validatePermissions.mockResolvedValue(permissions);
       roleRepository.save.mockResolvedValue();
 
@@ -94,7 +88,6 @@ describe('CreateRoleHandler', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.code).toBe(code);
       expect(result.displayName).toBe(displayName);
       expect(result.permissions).toEqual(permissions);
       expect(rolePermissionValidation.validatePermissions).toHaveBeenCalledWith(
@@ -103,29 +96,10 @@ describe('CreateRoleHandler', () => {
       expect(roleRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw error when role code already exists', async () => {
-      // Arrange
-      const command = new CreateRoleCommand(code, displayName);
-      const existingRole = Role.create({
-        id: roleId,
-        code,
-        displayName: 'Existing Editor',
-      });
-      roleRepository.findByCode.mockResolvedValue(existingRole);
-
-      // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow(
-        `Role with code '${code}' already exists`,
-      );
-      expect(roleRepository.findByCode).toHaveBeenCalledWith(code);
-      expect(roleRepository.save).not.toHaveBeenCalled();
-    });
-
     it('should validate permissions before creating role', async () => {
       // Arrange
       const permissions = ['user:read', 'invalid:permission'];
-      const command = new CreateRoleCommand(code, displayName, permissions);
-      roleRepository.findByCode.mockResolvedValue(null);
+      const command = new CreateRoleCommand(displayName, permissions);
       rolePermissionValidation.validatePermissions.mockRejectedValue(
         new Error('Unknown permission(s): invalid:permission'),
       );
@@ -138,21 +112,6 @@ describe('CreateRoleHandler', () => {
         permissions,
       );
       expect(roleRepository.save).not.toHaveBeenCalled();
-    });
-
-    it('should normalize role code to lowercase', async () => {
-      // Arrange
-      const upperCode = 'EDITOR';
-      const command = new CreateRoleCommand(upperCode, displayName);
-      roleRepository.findByCode.mockResolvedValue(null);
-      roleRepository.save.mockResolvedValue();
-
-      // Act
-      const result = await handler.execute(command);
-
-      // Assert
-      expect(result.code).toBe('editor');
-      expect(roleRepository.findByCode).toHaveBeenCalledWith(upperCode);
     });
   });
 });

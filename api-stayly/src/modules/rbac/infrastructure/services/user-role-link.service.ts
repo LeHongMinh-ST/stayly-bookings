@@ -20,7 +20,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
   /**
    * Replaces user-role relation rows by loading current relations and persisting the new set.
    */
-  async replaceUserRoles(userId: string, roleCodes: string[]): Promise<void> {
+  async replaceUserRoles(userId: string, roleIds: string[]): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -29,18 +29,17 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
       throw new Error('User not found');
     }
 
-    if (roleCodes.length === 0) {
+    if (roleIds.length === 0) {
       user.roles = [];
       await this.userRepository.save(user);
       return;
     }
 
-    const normalizedCodes = roleCodes.map((code) => code.toLowerCase());
     const roles = await this.roleRepository.find({
-      where: { code: In(normalizedCodes) },
+      where: { id: In(roleIds) },
     });
 
-    if (roles.length !== normalizedCodes.length) {
+    if (roles.length !== roleIds.length) {
       throw new Error('One or more roles are missing from catalog');
     }
 
@@ -51,7 +50,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
   /**
    * Adds a single role to user (if not already assigned)
    */
-  async addRoleToUser(userId: string, roleCode: string): Promise<void> {
+  async addRoleToUser(userId: string, roleId: string): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -60,16 +59,15 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
       throw new Error('User not found');
     }
 
-    const normalizedCode = roleCode.toLowerCase();
     const role = await this.roleRepository.findOne({
-      where: { code: normalizedCode },
+      where: { id: roleId },
     });
     if (!role) {
       throw new Error('Role not found');
     }
 
     // Check if role already assigned
-    const existingRole = user.roles.find((r) => r.code === normalizedCode);
+    const existingRole = user.roles.find((r) => r.id === roleId);
     if (existingRole) {
       return; // Already assigned, no-op
     }
@@ -81,7 +79,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
   /**
    * Removes a single role from user
    */
-  async removeRoleFromUser(userId: string, roleCode: string): Promise<void> {
+  async removeRoleFromUser(userId: string, roleId: string): Promise<void> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['roles'],
@@ -90,8 +88,7 @@ export class UserRoleLinkService implements IUserRoleLinkPort {
       throw new Error('User not found');
     }
 
-    const normalizedCode = roleCode.toLowerCase();
-    user.roles = user.roles.filter((r) => r.code !== normalizedCode);
+    user.roles = user.roles.filter((r) => r.id !== roleId);
     await this.userRepository.save(user);
   }
 }

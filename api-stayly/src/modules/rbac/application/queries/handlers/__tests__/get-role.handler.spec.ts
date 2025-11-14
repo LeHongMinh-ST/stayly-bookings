@@ -16,18 +16,16 @@ describe('GetRoleHandler', () => {
   let roleRepository: jest.Mocked<IRoleRepository>;
 
   const roleId = RoleId.create(randomUUID());
-  const code = 'editor';
   const displayName = 'Editor';
 
   beforeEach(async () => {
-    const mockRoleRepository = {
-      findById: jest.fn(),
-      findAll: jest.fn(),
-      findByCode: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
-      exists: jest.fn(),
-    };
+      const mockRoleRepository = {
+        findById: jest.fn(),
+        findAll: jest.fn(),
+        save: jest.fn(),
+        delete: jest.fn(),
+        exists: jest.fn(),
+      };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -56,7 +54,6 @@ describe('GetRoleHandler', () => {
       ];
       const role = Role.create({
         id: roleId,
-        code,
         displayName,
         permissions,
       });
@@ -69,7 +66,6 @@ describe('GetRoleHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.id).toBe(roleId.getValue());
-      expect(result.code).toBe(code);
       expect(result.displayName).toBe(displayName);
       expect(result.permissions).toEqual(['user:read', 'user:create']);
       expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
@@ -89,7 +85,6 @@ describe('GetRoleHandler', () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        code,
         displayName,
       });
       const query = new GetRoleQuery(roleId.getValue());
@@ -106,7 +101,6 @@ describe('GetRoleHandler', () => {
       // Arrange
       const role = Role.create({
         id: roleId,
-        code: 'super_admin',
         displayName: 'Super Admin',
         isSuperAdmin: true,
       });

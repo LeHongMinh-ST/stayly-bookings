@@ -75,16 +75,9 @@ export class RolesController {
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
   async createRole(@Body() dto: CreateRoleDto): Promise<RoleResponseDto> {
-    const command = new CreateRoleCommand(
-      dto.code,
-      dto.displayName,
-      dto.permissions,
-    );
+    const command = new CreateRoleCommand(dto.displayName, dto.permissions);
     return this.commandBus.execute(command);
   }
-
-
-
   /**
    * Gets a single role by ID
    */

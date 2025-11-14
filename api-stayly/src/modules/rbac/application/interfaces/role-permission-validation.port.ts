@@ -4,12 +4,12 @@
  */
 export interface IRolePermissionValidationPort {
   /**
-   * Validates role codes against catalog
-   * @param roleCodes - Array of role codes to validate
-   * @returns Array of valid role codes
-   * @throws Error if any role code is invalid
+   * Validates role IDs by checking if roles exist and have permissions assigned
+   * @param roleIds - Array of role IDs to validate
+   * @returns Array of valid role IDs
+   * @throws Error if any role ID is invalid or role has no permissions
    */
-  validateRoles(roleCodes: string[]): Promise<string[]>;
+  validateRoles(roleIds: string[]): Promise<string[]>;
 
   /**
    * Validates permission codes against catalog

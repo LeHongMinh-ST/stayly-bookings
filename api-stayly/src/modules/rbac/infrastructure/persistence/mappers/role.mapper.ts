@@ -18,7 +18,6 @@ export class RoleOrmMapper {
 
     return Role.rehydrate({
       id: RoleId.create(entity.id),
-      code: entity.code,
       displayName: entity.displayName,
       isSuperAdmin: entity.isSuperAdmin,
       permissions,
@@ -35,7 +34,6 @@ export class RoleOrmMapper {
   ): RoleOrmEntity {
     const entity = existing ?? new RoleOrmEntity();
     entity.id = aggregate.getId().getValue();
-    entity.code = aggregate.getCode();
     entity.displayName = aggregate.getDisplayName();
     entity.isSuperAdmin = aggregate.getIsSuperAdmin();
     entity.permissions = permissionEntities;

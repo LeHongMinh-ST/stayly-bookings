@@ -1,7 +1,7 @@
 /**
  * UpdateRoleHandler orchestrates role update workflow
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UpdateRoleCommand } from '../update-role.command';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
@@ -23,7 +23,7 @@ export class UpdateRoleHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundException('Role not found');
     }
 
     if (command.displayName) {

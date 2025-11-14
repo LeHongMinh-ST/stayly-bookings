@@ -15,14 +15,13 @@ describe('ListRolesHandler', () => {
   let roleRepository: jest.Mocked<IRoleRepository>;
 
   beforeEach(async () => {
-    const mockRoleRepository = {
-      findAll: jest.fn(),
-      findById: jest.fn(),
-      findByCode: jest.fn(),
-      save: jest.fn(),
-      delete: jest.fn(),
-      exists: jest.fn(),
-    };
+      const mockRoleRepository = {
+        findAll: jest.fn(),
+        findById: jest.fn(),
+        save: jest.fn(),
+        delete: jest.fn(),
+        exists: jest.fn(),
+      };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,13 +46,11 @@ describe('ListRolesHandler', () => {
       // Arrange
       const role1 = Role.create({
         id: RoleId.create(randomUUID()),
-        code: 'editor',
         displayName: 'Editor',
         permissions: [Permission.create('user:read')],
       });
       const role2 = Role.create({
         id: RoleId.create(randomUUID()),
-        code: 'manager',
         displayName: 'Manager',
         permissions: [
           Permission.create('user:read'),
@@ -69,8 +66,8 @@ describe('ListRolesHandler', () => {
       // Assert
       expect(result).toBeDefined();
       expect(result).toHaveLength(2);
-      expect(result[0].code).toBe('editor');
-      expect(result[1].code).toBe('manager');
+      expect(result[0].displayName).toBe('Editor');
+      expect(result[1].displayName).toBe('Manager');
       expect(roleRepository.findAll.mock.calls.length).toBeGreaterThan(0);
     });
 
@@ -90,7 +87,6 @@ describe('ListRolesHandler', () => {
       // Arrange
       const role = Role.create({
         id: RoleId.create(randomUUID()),
-        code: 'editor',
         displayName: 'Editor',
         isSuperAdmin: false,
         permissions: [
@@ -106,7 +102,6 @@ describe('ListRolesHandler', () => {
       // Assert
       expect(result[0]).toMatchObject({
         id: role.getId().getValue(),
-        code: 'editor',
         displayName: 'Editor',
         isSuperAdmin: false,
         permissions: ['user:read', 'user:create'],

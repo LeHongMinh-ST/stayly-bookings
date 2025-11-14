@@ -8,9 +8,8 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { QueryBus } from '@nestjs/cqrs';
 import { JwtUserGuard } from '../../../../common/guards/jwt-user.guard';
-import { Roles } from '../../../../common/decorators/roles.decorator';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
 import { ListPermissionsQuery } from '../../application/queries/list-permissions.query';
 import { PermissionResponseDto } from '../../application/dto/response/permission-response.dto';
@@ -29,7 +28,6 @@ export class PermissionsController {
    * Lists all available permissions
    */
   @Get()
-  @Roles('super_admin', 'owner', 'manager')
   @Permissions('permission:read')
   @ApiOperation({ summary: 'List all permissions' })
   @ApiResponse({

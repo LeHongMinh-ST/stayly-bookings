@@ -8,10 +8,10 @@ import { RoleOrmEntity } from '../entities/role.orm-entity';
 import { PermissionOrmEntity } from '../entities/permission.orm-entity';
 
 const DEFAULT_ROLES = [
-  { code: 'super_admin', displayName: 'Super Admin' },
-  { code: 'owner', displayName: 'Owner' },
-  { code: 'manager', displayName: 'Manager' },
-  { code: 'staff', displayName: 'Staff' },
+  { displayName: 'Super Admin', isSuperAdmin: true },
+  { displayName: 'Owner', isSuperAdmin: false },
+  { displayName: 'Manager', isSuperAdmin: false },
+  { displayName: 'Staff', isSuperAdmin: false },
 ];
 
 const DEFAULT_PERMISSIONS = [
@@ -105,42 +105,39 @@ export class RolePermissionSeedService {
   }
 
   private async ensureRoles(): Promise<void> {
-    const existingCodes = await this.roleRepo.find({
-      where: { code: In(DEFAULT_ROLES.map((role) => role.code)) },
-      select: ['code'],
+    const existingRoles = await this.roleRepo.find({
+      select: ['displayName'],
     });
-    const existing = new Set(existingCodes.map((role) => role.code));
-    const missing = DEFAULT_ROLES.filter((role) => !existing.has(role.code));
+    const existing = new Set(existingRoles.map((role) => role.displayName));
+    const missing = DEFAULT_ROLES.filter(
+      (role) => !existing.has(role.displayName),
+    );
 
     if (!missing.length) {
       this.logger.log('All roles already exist');
-      // Update is_super_admin flag for super_admin role if it exists
+      // Update is_super_admin flag for Super Admin role if it exists
       await this.updateSuperAdminFlag();
       return;
     }
 
-    // Insert missing roles with is_super_admin flag
-    const rolesToInsert = missing.map((role) => ({
-      ...role,
-      isSuperAdmin: role.code === 'super_admin',
-    }));
-    await this.roleRepo.insert(rolesToInsert);
+    // Insert missing roles
+    await this.roleRepo.insert(missing);
     this.logger.log(
-      `Seeded roles: ${missing.map((role) => role.code).join(', ')}`,
+      `Seeded roles: ${missing.map((role) => role.displayName).join(', ')}`,
     );
 
-    // Update is_super_admin flag for super_admin role
+    // Update is_super_admin flag for Super Admin role
     await this.updateSuperAdminFlag();
   }
 
   private async updateSuperAdminFlag(): Promise<void> {
     const superAdminRole = await this.roleRepo.findOne({
-      where: { code: 'super_admin' },
+      where: { displayName: 'Super Admin' },
     });
     if (superAdminRole && !superAdminRole.isSuperAdmin) {
       superAdminRole.isSuperAdmin = true;
       await this.roleRepo.save(superAdminRole);
-      this.logger.log('Updated is_super_admin flag for super_admin role');
+      this.logger.log('Updated is_super_admin flag for Super Admin role');
     }
   }
 

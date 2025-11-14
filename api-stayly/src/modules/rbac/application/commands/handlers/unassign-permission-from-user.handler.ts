@@ -1,7 +1,7 @@
 /**
  * UnassignPermissionFromUserHandler removes a single permission from a user
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UnassignPermissionFromUserCommand } from '../unassign-permission-from-user.command';
 import type { IPermissionRepository } from '../../../domain/repositories/permission.repository.interface';
@@ -38,7 +38,7 @@ export class UnassignPermissionFromUserHandler
       command.permissionId,
     );
     if (!permission) {
-      throw new Error('Permission not found');
+      throw new NotFoundException('Permission not found');
     }
 
     // Validate user exists

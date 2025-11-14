@@ -1,7 +1,7 @@
 /**
  * DeleteRoleHandler orchestrates role deletion workflow
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DeleteRoleCommand } from '../delete-role.command';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
@@ -22,11 +22,11 @@ export class DeleteRoleHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundException('Role not found');
     }
 
     if (!role.canDelete()) {
-      throw new Error('Cannot delete super admin role');
+      throw new BadRequestException('Cannot delete super admin role');
     }
 
     await this.roleRepository.delete(role);

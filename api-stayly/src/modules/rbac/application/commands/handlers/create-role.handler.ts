@@ -27,12 +27,6 @@ export class CreateRoleHandler
   ) {}
 
   async execute(command: CreateRoleCommand): Promise<RoleResponseDto> {
-    // Check if role code already exists
-    const existing = await this.roleRepository.findByCode(command.code);
-    if (existing) {
-      throw new Error(`Role with code '${command.code}' already exists`);
-    }
-
     // Validate permissions if provided
     let permissions: Permission[] = [];
     if (command.permissions && command.permissions.length > 0) {
@@ -47,7 +41,6 @@ export class CreateRoleHandler
 
     const role = Role.create({
       id: RoleId.create(randomUUID()),
-      code: command.code,
       displayName: command.displayName,
       isSuperAdmin: false, // Only seed service can create super admin role
       permissions,

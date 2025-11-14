@@ -118,7 +118,6 @@ describe('UserRolePermissionQueryService', () => {
 
       const ownerRole: RoleOrmEntity = {
         id: roleId1,
-        code: 'owner',
         displayName: 'Owner',
         isSuperAdmin: false,
         createdAt: new Date(),
@@ -129,7 +128,6 @@ describe('UserRolePermissionQueryService', () => {
 
       const managerRole: RoleOrmEntity = {
         id: roleId2,
-        code: 'manager',
         displayName: 'Manager',
         isSuperAdmin: false,
         createdAt: new Date(),
@@ -162,7 +160,7 @@ describe('UserRolePermissionQueryService', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(result.roles).toEqual(['owner', 'manager']);
+      expect(result.roles).toEqual([roleId1, roleId2]);
       expect(result.permissions).toContain('user:read'); // Direct permission
       expect(result.permissions).toContain('user:create'); // From owner role
       expect(result.permissions).toContain('user:update'); // From manager role
@@ -263,7 +261,6 @@ describe('UserRolePermissionQueryService', () => {
 
       const ownerRole: RoleOrmEntity = {
         id: roleId1,
-        code: 'owner',
         displayName: 'Owner',
         isSuperAdmin: false,
         createdAt: new Date(),
@@ -274,7 +271,6 @@ describe('UserRolePermissionQueryService', () => {
 
       const managerRole: RoleOrmEntity = {
         id: roleId2,
-        code: 'manager',
         displayName: 'Manager',
         isSuperAdmin: false,
         createdAt: new Date(),
@@ -350,7 +346,6 @@ describe('UserRolePermissionQueryService', () => {
 
       const superAdminRole: RoleOrmEntity = {
         id: roleId1,
-        code: 'super_admin',
         displayName: 'Super Admin',
         isSuperAdmin: true,
         createdAt: new Date(),
@@ -378,7 +373,7 @@ describe('UserRolePermissionQueryService', () => {
       const result = await service.getUserRolesAndPermissions(userId);
 
       // Assert
-      expect(result.roles).toEqual(['super_admin']);
+      expect(result.roles).toEqual([roleId1]);
       expect(result.permissions).toContain('user:manage');
       expect(result.permissions).toContain('booking:manage');
     });

@@ -23,7 +23,7 @@ export class RoleRepository implements IRoleRepository {
   async findAll(): Promise<Role[]> {
     const roles = await this.roleRepo.find({
       relations: ['permissions'],
-      order: { code: 'ASC' },
+      order: { displayName: 'ASC' },
     });
     return roles.map((role) => RoleOrmMapper.toDomain(role));
   }
@@ -31,17 +31,6 @@ export class RoleRepository implements IRoleRepository {
   async findById(id: RoleId): Promise<Role | null> {
     const entity = await this.roleRepo.findOne({
       where: { id: id.getValue() },
-      relations: ['permissions'],
-    });
-    if (!entity) {
-      return null;
-    }
-    return RoleOrmMapper.toDomain(entity);
-  }
-
-  async findByCode(code: string): Promise<Role | null> {
-    const entity = await this.roleRepo.findOne({
-      where: { code: code.toLowerCase() },
       relations: ['permissions'],
     });
     if (!entity) {
@@ -78,7 +67,7 @@ export class RoleRepository implements IRoleRepository {
 
   async exists(role: Role): Promise<boolean> {
     const count = await this.roleRepo.count({
-      where: { code: role.getCode() },
+      where: { id: role.getId().getValue() },
     });
     return count > 0;
   }

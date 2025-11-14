@@ -1,7 +1,7 @@
 /**
  * AssignPermissionsToRoleHandler validates and applies permissions to role
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AssignPermissionsToRoleCommand } from '../assign-permissions-to-role.command';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
@@ -30,7 +30,7 @@ export class AssignPermissionsToRoleHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new Error('Role not found');
+      throw new NotFoundException('Role not found');
     }
 
     // Validate permissions

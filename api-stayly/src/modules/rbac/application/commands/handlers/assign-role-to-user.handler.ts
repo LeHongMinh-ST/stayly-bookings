@@ -1,7 +1,7 @@
 /**
  * AssignRoleToUserHandler assigns a single role to a user
  */
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AssignRoleToUserCommand } from '../assign-role-to-user.command';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
@@ -36,14 +36,14 @@ export class AssignRoleToUserHandler
     const roleId = RoleId.create(command.roleId);
     const role = await this.roleRepository.findById(roleId);
     if (!role) {
-      throw new Error('Role not found');
+      throw new BadRequestException('Role not found');
     }
 
     // Validate user exists
     await this.userAccess.ensureUserExists(command.userId);
 
     // Add role to user
-    await this.userRoleLink.addRoleToUser(command.userId, role.getCode());
+    await this.userRoleLink.addRoleToUser(command.userId, roleId.getValue());
 
     // Return updated user
     return await this.userAccess.getUserResponse(command.userId);

@@ -18,9 +18,6 @@ export class RoleOrmEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column({ name: 'code', unique: true })
-  code!: string;
-
   @Column({ name: 'display_name' })
   displayName!: string;
 
