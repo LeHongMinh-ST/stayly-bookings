@@ -30,6 +30,8 @@ import { GetAccommodationQuery } from "../../application/queries/get-accommodati
 import { ListAccommodationsQuery } from "../../application/queries/list-accommodations.query";
 import { CreateAccommodationDto } from "../../application/dto/request/create-accommodation.dto";
 import { AccommodationResponseDto } from "../../application/dto/response/accommodation-response.dto";
+import { AccommodationType } from "../../domain/entities/accommodation.entity";
+import { AccommodationDtoMapper } from "../../infrastructure/persistence/mappers/accommodation-dto.mapper";
 
 @Controller("v1/accommodations")
 @ApiTags("accommodations")
@@ -39,6 +41,7 @@ export class AccommodationsController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly dtoMapper: AccommodationDtoMapper,
   ) {}
 
   /**
@@ -74,9 +77,7 @@ export class AccommodationsController {
       dto.cancellationPolicy,
     );
 
-    const accommodation = await this.commandBus.execute(command);
-    // TODO: Map to DTO
-    return accommodation;
+    return this.commandBus.execute(command);
   }
 
   /**
@@ -134,7 +135,16 @@ export class AccommodationsController {
     @Query("type") type?: string,
     @Query("status") status?: string,
   ): Promise<AccommodationResponseDto[]> {
-    const query = new ListAccommodationsQuery(ownerId, type as any, status);
+    const accommodationType: AccommodationType | undefined =
+      type &&
+      Object.values(AccommodationType).includes(type as AccommodationType)
+        ? (type as AccommodationType)
+        : undefined;
+    const query = new ListAccommodationsQuery(
+      ownerId,
+      accommodationType,
+      status,
+    );
     return this.queryBus.execute(query);
   }
 }

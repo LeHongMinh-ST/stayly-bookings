@@ -7,10 +7,7 @@ import { Injectable } from "@nestjs/common";
 import { Accommodation } from "../../../domain/entities/accommodation.entity";
 import { AccommodationOrmEntity } from "../entities/accommodation.orm-entity";
 import { AccommodationId } from "../../../domain/value-objects/accommodation-id.vo";
-import {
-  AccommodationStatus,
-  AccommodationStatusVO,
-} from "../../../domain/value-objects/accommodation-status.vo";
+import { AccommodationStatusVO } from "../../../domain/value-objects/accommodation-status.vo";
 import { Address } from "../../../domain/value-objects/address.vo";
 import { Location } from "../../../domain/value-objects/location.vo";
 import { Policies } from "../../../domain/value-objects/policies.vo";

@@ -16,6 +16,8 @@ import {
   CancellationPolicy,
   CancellationPolicyType,
 } from "../../../domain/value-objects/cancellation-policy.vo";
+import { AccommodationResponseDto } from "../../dto/response/accommodation-response.dto";
+import { AccommodationDtoMapper } from "../../../infrastructure/persistence/mappers/accommodation-dto.mapper";
 
 @CommandHandler(CreateAccommodationCommand)
 export class CreateAccommodationHandler
@@ -25,9 +27,12 @@ export class CreateAccommodationHandler
     @Inject(ACCOMMODATION_REPOSITORY)
     private readonly accommodationRepo: IAccommodationRepository,
     private readonly eventBus: EventBus,
+    private readonly dtoMapper: AccommodationDtoMapper,
   ) {}
 
-  async execute(command: CreateAccommodationCommand): Promise<Accommodation> {
+  async execute(
+    command: CreateAccommodationCommand,
+  ): Promise<AccommodationResponseDto> {
     // Create value objects
     const address = Address.create(command.address);
     const location = Location.create(
@@ -64,6 +69,7 @@ export class CreateAccommodationHandler
       this.eventBus.publish(event);
     });
 
-    return accommodation;
+    // Map to DTO
+    return this.dtoMapper.toDto(accommodation);
   }
 }

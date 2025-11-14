@@ -10,8 +10,6 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
 } from "typeorm";
 import { AccommodationType } from "../../../domain/entities/accommodation.entity";
 import { AccommodationStatus } from "../../../domain/value-objects/accommodation-status.vo";

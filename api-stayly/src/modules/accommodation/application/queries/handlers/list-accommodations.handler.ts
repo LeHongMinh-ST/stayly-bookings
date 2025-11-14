@@ -9,6 +9,8 @@ import { ListAccommodationsQuery } from "../list-accommodations.query";
 import { ACCOMMODATION_REPOSITORY } from "../../../domain/repositories/accommodation.repository.interface";
 import type { IAccommodationRepository } from "../../../domain/repositories/accommodation.repository.interface";
 import { AccommodationResponseDto } from "../../dto/response/accommodation-response.dto";
+import { AccommodationDtoMapper } from "../../../infrastructure/persistence/mappers/accommodation-dto.mapper";
+import { Accommodation } from "../../../domain/entities/accommodation.entity";
 
 @QueryHandler(ListAccommodationsQuery)
 export class ListAccommodationsHandler
@@ -17,12 +19,13 @@ export class ListAccommodationsHandler
   constructor(
     @Inject(ACCOMMODATION_REPOSITORY)
     private readonly accommodationRepo: IAccommodationRepository,
+    private readonly dtoMapper: AccommodationDtoMapper,
   ) {}
 
   async execute(
     query: ListAccommodationsQuery,
   ): Promise<AccommodationResponseDto[]> {
-    let accommodations;
+    let accommodations: Accommodation[];
 
     if (query.ownerId) {
       accommodations = await this.accommodationRepo.findByOwnerId(
@@ -37,50 +40,6 @@ export class ListAccommodationsHandler
     // TODO: Filter by status if provided
     // TODO: Apply pagination (limit, offset)
 
-    return accommodations.map((acc) => this.toDto(acc));
-  }
-
-  private toDto(accommodation: any): AccommodationResponseDto {
-    return {
-      id: accommodation.getId().getValue(),
-      type: accommodation.getType(),
-      name: accommodation.getName(),
-      status: accommodation.getStatus().getValue(),
-      ownerId: accommodation.getOwnerId(),
-      address: {
-        street: accommodation.getAddress().getStreet(),
-        ward: accommodation.getAddress().getWard(),
-        district: accommodation.getAddress().getDistrict(),
-        province: accommodation.getAddress().getProvince(),
-        country: accommodation.getAddress().getCountry(),
-      },
-      location: {
-        latitude: accommodation.getLocation().getLatitude(),
-        longitude: accommodation.getLocation().getLongitude(),
-      },
-      description: accommodation.getDescription(),
-      images: accommodation.getImages(),
-      amenities: accommodation.getAmenities(),
-      policies: {
-        checkInTime: accommodation.getPolicies().getCheckInTime(),
-        checkOutTime: accommodation.getPolicies().getCheckOutTime(),
-        childrenAllowed: accommodation.getPolicies().isChildrenAllowed(),
-        petsAllowed: accommodation.getPolicies().isPetsAllowed(),
-        smokingAllowed: accommodation.getPolicies().isSmokingAllowed(),
-      },
-      cancellationPolicy: {
-        type: accommodation.getCancellationPolicy().getType(),
-        freeCancellationDays: accommodation
-          .getCancellationPolicy()
-          .getFreeCancellationDays(),
-        refundPercentage: accommodation
-          .getCancellationPolicy()
-          .getRefundPercentage(),
-      },
-      approvedBy: accommodation.getApprovedBy(),
-      approvedAt: accommodation.getApprovedAt(),
-      createdAt: new Date(), // TODO: Get from ORM entity
-      updatedAt: new Date(), // TODO: Get from ORM entity
-    };
+    return accommodations.map((acc) => this.dtoMapper.toDto(acc));
   }
 }

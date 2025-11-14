@@ -14,6 +14,7 @@ import { ACCOMMODATION_REPOSITORY } from "./domain/repositories/accommodation.re
 import { AccommodationRepository } from "./infrastructure/persistence/repositories/accommodation.repository";
 import { AccommodationOrmEntity } from "./infrastructure/persistence/entities/accommodation.orm-entity";
 import { AccommodationMapper } from "./infrastructure/persistence/mappers/accommodation.mapper";
+import { AccommodationDtoMapper } from "./infrastructure/persistence/mappers/accommodation-dto.mapper";
 import { AccommodationApprovalService } from "./domain/services/accommodation-approval.service";
 import { AccommodationStatusService } from "./domain/services/accommodation-status.service";
 import { FloorManagementService } from "./domain/services/floor-management.service";
@@ -30,6 +31,7 @@ const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
     ...queryHandlers,
     { provide: ACCOMMODATION_REPOSITORY, useClass: AccommodationRepository },
     AccommodationMapper,
+    AccommodationDtoMapper,
     AccommodationApprovalService,
     AccommodationStatusService,
     FloorManagementService,
