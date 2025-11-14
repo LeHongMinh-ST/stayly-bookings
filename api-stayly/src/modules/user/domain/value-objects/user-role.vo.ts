@@ -34,4 +34,3 @@ export class UserRole {
     return this.value;
   }
 }
-

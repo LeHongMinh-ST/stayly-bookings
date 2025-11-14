@@ -17,7 +17,6 @@ import { Email } from '../../../../../common/domain/value-objects/email.vo';
 import { PasswordHash } from '../../../../../common/domain/value-objects/password-hash.vo';
 import { User } from '../../../domain/entities/user.entity';
 import { UserId } from '../../../domain/value-objects/user-id.vo';
-import { UserRoleEnum } from '../../../domain/value-objects/user-role.vo';
 
 @Injectable()
 export class DefaultUsersSeedService {

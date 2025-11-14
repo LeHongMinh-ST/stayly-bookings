@@ -42,5 +42,3 @@ export class UserAccessService implements IUserAccessPort {
     return UserResponseDto.fromAggregate(user);
   }
 }
-
-

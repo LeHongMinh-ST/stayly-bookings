@@ -55,7 +55,10 @@ export class RolesController {
     description: 'Returns list of all roles',
     type: [RoleResponseDto],
   })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async listRoles(): Promise<RoleResponseDto[]> {
     return this.queryBus.execute(new ListRolesQuery());
   }
@@ -73,7 +76,10 @@ export class RolesController {
     type: RoleResponseDto,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async createRole(@Body() dto: CreateRoleDto): Promise<RoleResponseDto> {
     const command = new CreateRoleCommand(dto.displayName, dto.permissions);
     return this.commandBus.execute(command);
@@ -95,7 +101,10 @@ export class RolesController {
     type: RoleResponseDto,
   })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async getRole(@Param('id') id: string): Promise<RoleResponseDto> {
     return this.queryBus.execute(new GetRoleQuery(id));
   }
@@ -119,7 +128,10 @@ export class RolesController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async updateRole(
     @Param('id') id: string,
     @Body() dto: UpdateRoleDto,
@@ -144,9 +156,15 @@ export class RolesController {
     status: 200,
     description: 'Role successfully deleted',
   })
-  @ApiResponse({ status: 400, description: 'Bad request - cannot delete super admin role' })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - cannot delete super admin role',
+  })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async deleteRole(@Param('id') id: string): Promise<void> {
     const command = new DeleteRoleCommand(id);
     return this.commandBus.execute(command);
@@ -172,7 +190,10 @@ export class RolesController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Role not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async assignPermissionsToRole(
     @Param('id') id: string,
     @Body() dto: AssignPermissionsToRoleDto,
@@ -181,4 +202,3 @@ export class RolesController {
     return this.commandBus.execute(command);
   }
 }
-

@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../errors";
+import { InvalidInputError } from '../errors';
 
 /**
  * Email value object encapsulates email validation logic

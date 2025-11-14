@@ -80,5 +80,3 @@ export function getHttpStatusFromDomainError(error: DomainError): number {
   if (error instanceof InvalidOperationError) return 422;
   return 500;
 }
-
-

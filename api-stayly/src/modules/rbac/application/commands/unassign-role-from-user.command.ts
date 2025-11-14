@@ -7,4 +7,3 @@ export class UnassignRoleFromUserCommand {
     public readonly userId: string,
   ) {}
 }
-

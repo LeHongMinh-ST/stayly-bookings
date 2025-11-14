@@ -1,7 +1,12 @@
 /**
  * DeleteRoleHandler orchestrates role deletion workflow
  */
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DeleteRoleCommand } from '../delete-role.command';
 import type { IRoleRepository } from '../../../domain/repositories/role.repository.interface';
@@ -32,4 +37,3 @@ export class DeleteRoleHandler
     await this.roleRepository.delete(role);
   }
 }
-

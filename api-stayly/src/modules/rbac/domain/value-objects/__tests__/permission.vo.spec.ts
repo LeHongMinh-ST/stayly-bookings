@@ -51,9 +51,7 @@ describe('Permission', () => {
 
     it('should throw error when permission is empty', () => {
       // Act & Assert
-      expect(() => Permission.create('')).toThrow(
-        'Permission cannot be empty',
-      );
+      expect(() => Permission.create('')).toThrow('Permission cannot be empty');
       expect(() => Permission.create('   ')).toThrow(
         'Permission cannot be empty',
       );
@@ -91,10 +89,7 @@ describe('Permission', () => {
 
     it('should accept permissions with wildcard in action', () => {
       // Arrange
-      const wildcardPermissions = [
-        'user:manage',
-        'booking:manage',
-      ];
+      const wildcardPermissions = ['user:manage', 'booking:manage'];
 
       // Act & Assert
       wildcardPermissions.forEach((permission) => {
@@ -118,4 +113,3 @@ describe('Permission', () => {
     });
   });
 });
-

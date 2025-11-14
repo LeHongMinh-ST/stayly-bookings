@@ -15,13 +15,13 @@ describe('ListRolesHandler', () => {
   let roleRepository: jest.Mocked<IRoleRepository>;
 
   beforeEach(async () => {
-      const mockRoleRepository = {
-        findAll: jest.fn(),
-        findById: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
-        exists: jest.fn(),
-      };
+    const mockRoleRepository = {
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      save: jest.fn(),
+      delete: jest.fn(),
+      exists: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

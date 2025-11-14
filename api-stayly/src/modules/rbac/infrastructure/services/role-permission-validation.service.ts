@@ -58,7 +58,7 @@ export class RolePermissionValidationService
         }
 
         validatedRoleIds.push(roleIdStr);
-      } catch (error) {
+      } catch (_error) {
         invalidRoleIds.push(roleIdStr);
       }
     }
@@ -98,4 +98,3 @@ export class RolePermissionValidationService
     return permissionCodes;
   }
 }
-

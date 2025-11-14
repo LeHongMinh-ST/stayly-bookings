@@ -10,7 +10,10 @@ import { JwtPayload } from '../../domain/value-objects/jwt-payload.vo';
 import { AccessToken } from '../../domain/value-objects/access-token.vo';
 import { RefreshToken } from '../../domain/value-objects/refresh-token.vo';
 import { TokenPair } from '../../domain/value-objects/token-pair.vo';
-import { throwInternalError, throwInvalidInput } from '../../../../common/application/exceptions';
+import {
+  throwInternalError,
+  throwInvalidInput,
+} from '../../../../common/application/exceptions';
 
 @Injectable()
 export class JwtTokenService implements TokenService {

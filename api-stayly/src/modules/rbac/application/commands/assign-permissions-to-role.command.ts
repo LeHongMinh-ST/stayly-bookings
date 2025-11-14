@@ -4,4 +4,3 @@ export class AssignPermissionsToRoleCommand {
     public readonly permissions: string[],
   ) {}
 }
-

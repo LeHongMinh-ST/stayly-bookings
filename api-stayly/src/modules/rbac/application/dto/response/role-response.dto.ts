@@ -2,13 +2,22 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../../../domain/entities/role.entity';
 
 export class RoleResponseDto {
-  @ApiProperty({ description: 'Role unique identifier', example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({
+    description: 'Role unique identifier',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
   id!: string;
 
-  @ApiProperty({ description: 'Display name for the role', example: 'Super Admin' })
+  @ApiProperty({
+    description: 'Display name for the role',
+    example: 'Super Admin',
+  })
   displayName!: string;
 
-  @ApiProperty({ description: 'Whether this is the super admin role', example: false })
+  @ApiProperty({
+    description: 'Whether this is the super admin role',
+    example: false,
+  })
   isSuperAdmin!: boolean;
 
   @ApiProperty({
@@ -34,7 +43,10 @@ export class RoleResponseDto {
     return {
       id: '',
       displayName: role.getValue
-        ? role.getValue().replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+        ? role
+            .getValue()
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (l) => l.toUpperCase())
         : role.displayName,
       isSuperAdmin: false,
       permissions: [],

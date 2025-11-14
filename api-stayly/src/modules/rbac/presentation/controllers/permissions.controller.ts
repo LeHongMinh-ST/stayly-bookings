@@ -20,9 +20,7 @@ import { Permission } from '../../domain/value-objects/permission.vo';
 @ApiBearerAuth('JWT-auth')
 @Controller('v1/rbac/permissions')
 export class PermissionsController {
-  constructor(
-    private readonly queryBus: QueryBus,
-  ) {}
+  constructor(private readonly queryBus: QueryBus) {}
 
   /**
    * Lists all available permissions
@@ -35,12 +33,16 @@ export class PermissionsController {
     description: 'Returns list of all permissions',
     type: [PermissionResponseDto],
   })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async listPermissions(): Promise<PermissionResponseDto[]> {
-    const permissions: Permission[] = await this.queryBus.execute(new ListPermissionsQuery());
+    const permissions: Permission[] = await this.queryBus.execute(
+      new ListPermissionsQuery(),
+    );
     return permissions.map((permission) =>
       PermissionResponseDto.fromValueObject(permission),
     );
   }
 }
-

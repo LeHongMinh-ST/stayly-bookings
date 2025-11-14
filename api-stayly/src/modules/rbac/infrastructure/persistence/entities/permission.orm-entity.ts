@@ -35,4 +35,3 @@ export class PermissionOrmEntity {
   @ManyToMany(() => RoleOrmEntity, (role) => role.permissions)
   roles!: RoleOrmEntity[];
 }
-

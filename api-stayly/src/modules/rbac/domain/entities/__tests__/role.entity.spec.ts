@@ -226,7 +226,6 @@ describe('Role', () => {
       expect(role.getPermissions()[0].getValue()).toBe('user:create');
       expect(role.getPermissions()[1].getValue()).toBe('user:update');
     });
-
   });
 
   describe('removePermissions', () => {

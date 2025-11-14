@@ -36,10 +36,7 @@ export class Customer extends BaseEntity<CustomerId> {
 
   static register(props: CreateCustomerProps): Customer {
     if (!props.fullName?.trim()) {
-      throw new InvalidInputError(
-        'Customer full name is required',
-        'fullName',
-      );
+      throw new InvalidInputError('Customer full name is required', 'fullName');
     }
 
     const now = new Date();
@@ -88,10 +85,7 @@ export class Customer extends BaseEntity<CustomerId> {
 
   rename(nextFullName: string): void {
     if (!nextFullName?.trim()) {
-      throw new InvalidInputError(
-        'Customer full name is required',
-        'fullName',
-      );
+      throw new InvalidInputError('Customer full name is required', 'fullName');
     }
     this.fullName = nextFullName.trim();
   }

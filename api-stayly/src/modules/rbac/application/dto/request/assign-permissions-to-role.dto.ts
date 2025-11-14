@@ -12,4 +12,3 @@ export class AssignPermissionsToRoleDto {
   @IsString({ each: true })
   permissions!: string[];
 }
-

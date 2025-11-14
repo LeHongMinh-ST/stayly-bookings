@@ -18,13 +18,13 @@ describe('DeleteRoleHandler', () => {
   const displayName = 'Editor';
 
   beforeEach(async () => {
-      const mockRoleRepository = {
-        findById: jest.fn(),
-        delete: jest.fn(),
-        findAll: jest.fn(),
-        save: jest.fn(),
-        exists: jest.fn(),
-      };
+    const mockRoleRepository = {
+      findById: jest.fn(),
+      delete: jest.fn(),
+      findAll: jest.fn(),
+      save: jest.fn(),
+      exists: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -112,4 +112,3 @@ describe('DeleteRoleHandler', () => {
     });
   });
 });
-

@@ -73,14 +73,18 @@ describe('CreateRoleHandler', () => {
       expect(result.isSuperAdmin).toBe(false);
       expect(result.permissions).toEqual([]);
       expect(roleRepository.save).toHaveBeenCalled();
-      expect(rolePermissionValidation.validatePermissions).not.toHaveBeenCalled();
+      expect(
+        rolePermissionValidation.validatePermissions,
+      ).not.toHaveBeenCalled();
     });
 
     it('should create role with permissions', async () => {
       // Arrange
       const permissions = ['user:read', 'user:create'];
       const command = new CreateRoleCommand(displayName, permissions);
-      rolePermissionValidation.validatePermissions.mockResolvedValue(permissions);
+      rolePermissionValidation.validatePermissions.mockResolvedValue(
+        permissions,
+      );
       roleRepository.save.mockResolvedValue();
 
       // Act
@@ -115,4 +119,3 @@ describe('CreateRoleHandler', () => {
     });
   });
 });
-

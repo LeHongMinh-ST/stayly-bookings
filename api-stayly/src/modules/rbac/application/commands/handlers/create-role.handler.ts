@@ -50,4 +50,3 @@ export class CreateRoleHandler
     return RoleResponseDto.fromDomain(role);
   }
 }
-

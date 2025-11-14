@@ -7,4 +7,3 @@ export class AssignRoleToUserCommand {
     public readonly userId: string,
   ) {}
 }
-

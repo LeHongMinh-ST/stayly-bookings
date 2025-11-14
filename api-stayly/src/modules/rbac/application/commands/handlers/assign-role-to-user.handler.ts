@@ -49,4 +49,3 @@ export class AssignRoleToUserHandler
     return await this.userAccess.getUserResponse(command.userId);
   }
 }
-

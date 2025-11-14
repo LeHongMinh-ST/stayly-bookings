@@ -30,4 +30,3 @@ export class GetRoleHandler
     return RoleResponseDto.fromDomain(role);
   }
 }
-

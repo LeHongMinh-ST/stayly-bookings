@@ -19,5 +19,5 @@ export interface IUserRolePermissionQueryPort {
   getUserRolesAndPermissions(userId: string): Promise<UserRolePermissionData>;
 }
 
-export const USER_ROLE_PERMISSION_QUERY_PORT = 'USER_ROLE_PERMISSION_QUERY_PORT';
-
+export const USER_ROLE_PERMISSION_QUERY_PORT =
+  'USER_ROLE_PERMISSION_QUERY_PORT';

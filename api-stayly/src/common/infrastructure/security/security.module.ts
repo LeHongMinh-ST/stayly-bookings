@@ -11,9 +11,6 @@ import { PASSWORD_HASHER } from '../../application/interfaces/password-hasher.in
     BcryptPasswordHasherService,
     { provide: PASSWORD_HASHER, useExisting: BcryptPasswordHasherService },
   ],
-  exports: [
-    PASSWORD_HASHER,
-    BcryptPasswordHasherService,
-  ],
+  exports: [PASSWORD_HASHER, BcryptPasswordHasherService],
 })
 export class SecurityModule {}

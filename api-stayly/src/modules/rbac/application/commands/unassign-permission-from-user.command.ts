@@ -7,4 +7,3 @@ export class UnassignPermissionFromUserCommand {
     public readonly userId: string,
   ) {}
 }
-

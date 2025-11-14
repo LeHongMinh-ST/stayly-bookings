@@ -11,4 +11,3 @@ export class UpdateRoleDto {
   @IsString()
   displayName?: string;
 }
-

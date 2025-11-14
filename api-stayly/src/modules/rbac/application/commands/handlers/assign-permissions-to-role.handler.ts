@@ -49,4 +49,3 @@ export class AssignPermissionsToRoleHandler
     return RoleResponseDto.fromDomain(role);
   }
 }
-

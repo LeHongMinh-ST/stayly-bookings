@@ -26,5 +26,3 @@ export interface IUserRoleLinkPort {
 }
 
 export const USER_ROLE_LINK_PORT = 'USER_ROLE_LINK_PORT';
-
-

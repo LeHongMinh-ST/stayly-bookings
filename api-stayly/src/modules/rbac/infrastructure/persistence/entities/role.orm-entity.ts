@@ -41,4 +41,3 @@ export class RoleOrmEntity {
   })
   permissions!: PermissionOrmEntity[];
 }
-

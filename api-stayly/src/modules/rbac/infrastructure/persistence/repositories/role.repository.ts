@@ -58,7 +58,11 @@ export class RoleRepository implements IRoleRepository {
       relations: ['permissions'],
     });
 
-    const entity = RoleOrmMapper.toOrm(role, permissions, existing ?? undefined);
+    const entity = RoleOrmMapper.toOrm(
+      role,
+      permissions,
+      existing ?? undefined,
+    );
     await this.roleRepo.save(entity);
   }
 

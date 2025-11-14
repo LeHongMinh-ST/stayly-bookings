@@ -18,5 +18,3 @@ export interface IUserAccessPort {
 }
 
 export const USER_ACCESS_PORT = 'USER_ACCESS_PORT';
-
-

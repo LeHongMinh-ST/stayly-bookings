@@ -20,5 +20,5 @@ export interface IRolePermissionValidationPort {
   validatePermissions(permissionCodes: string[]): Promise<string[]>;
 }
 
-export const ROLE_PERMISSION_VALIDATION_PORT = 'ROLE_PERMISSION_VALIDATION_PORT';
-
+export const ROLE_PERMISSION_VALIDATION_PORT =
+  'ROLE_PERMISSION_VALIDATION_PORT';

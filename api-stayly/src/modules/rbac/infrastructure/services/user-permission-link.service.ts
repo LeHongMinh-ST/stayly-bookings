@@ -116,5 +116,3 @@ export class UserPermissionLinkService implements IUserPermissionLinkPort {
     await this.userRepository.save(user);
   }
 }
-
-

@@ -12,4 +12,3 @@ export class SessionId extends BaseId {
     return new SessionId(value);
   }
 }
-

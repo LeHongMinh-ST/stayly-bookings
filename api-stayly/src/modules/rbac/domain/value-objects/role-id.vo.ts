@@ -12,4 +12,3 @@ export class RoleId extends BaseId {
     return new RoleId(value);
   }
 }
-

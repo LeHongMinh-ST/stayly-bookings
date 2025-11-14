@@ -31,5 +31,3 @@ export interface IUserPermissionLinkPort {
 }
 
 export const USER_PERMISSION_LINK_PORT = 'USER_PERMISSION_LINK_PORT';
-
-

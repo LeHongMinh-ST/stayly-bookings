@@ -36,4 +36,3 @@ export class UpdateRoleHandler
     return RoleResponseDto.fromDomain(role);
   }
 }
-

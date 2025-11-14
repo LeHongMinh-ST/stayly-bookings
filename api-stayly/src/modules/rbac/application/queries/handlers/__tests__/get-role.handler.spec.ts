@@ -19,13 +19,13 @@ describe('GetRoleHandler', () => {
   const displayName = 'Editor';
 
   beforeEach(async () => {
-      const mockRoleRepository = {
-        findById: jest.fn(),
-        findAll: jest.fn(),
-        save: jest.fn(),
-        delete: jest.fn(),
-        exists: jest.fn(),
-      };
+    const mockRoleRepository = {
+      findById: jest.fn(),
+      findAll: jest.fn(),
+      save: jest.fn(),
+      delete: jest.fn(),
+      exists: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -115,4 +115,3 @@ describe('GetRoleHandler', () => {
     });
   });
 });
-

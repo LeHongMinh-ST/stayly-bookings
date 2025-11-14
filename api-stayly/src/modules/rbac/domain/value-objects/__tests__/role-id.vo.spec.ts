@@ -30,7 +30,9 @@ describe('RoleId', () => {
 
     it('should throw error when UUID is empty string', () => {
       // Act & Assert
-      expect(() => RoleId.create('')).toThrow('Identifier must be a valid UUID');
+      expect(() => RoleId.create('')).toThrow(
+        'Identifier must be a valid UUID',
+      );
     });
 
     it('should throw error when UUID format is incorrect', () => {
@@ -52,11 +54,7 @@ describe('RoleId', () => {
 
     it('should accept valid UUID v4 format', () => {
       // Arrange
-      const validUuids = [
-        randomUUID(),
-        randomUUID(),
-        randomUUID(),
-      ];
+      const validUuids = [randomUUID(), randomUUID(), randomUUID()];
 
       // Act & Assert
       validUuids.forEach((uuid) => {
@@ -80,4 +78,3 @@ describe('RoleId', () => {
     });
   });
 });
-

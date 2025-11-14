@@ -18,4 +18,3 @@ export class InvalidStateError extends DomainError {
     });
   }
 }
-

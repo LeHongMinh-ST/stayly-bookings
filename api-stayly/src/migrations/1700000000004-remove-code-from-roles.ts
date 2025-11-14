@@ -5,17 +5,15 @@ import {
   TableIndex,
 } from 'typeorm';
 
-export class RemoveCodeFromRoles1700000000004
-  implements MigrationInterface
-{
+export class RemoveCodeFromRoles1700000000004 implements MigrationInterface {
   name = 'RemoveCodeFromRoles1700000000004';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Drop unique index on code if exists
     const rolesTable = await queryRunner.getTable('roles');
     if (rolesTable) {
-      const codeIndex = rolesTable.indices.find(
-        (idx) => idx.columnNames.includes('code'),
+      const codeIndex = rolesTable.indices.find((idx) =>
+        idx.columnNames.includes('code'),
       );
       if (codeIndex) {
         await queryRunner.dropIndex('roles', codeIndex);
@@ -49,4 +47,3 @@ export class RemoveCodeFromRoles1700000000004
     );
   }
 }
-

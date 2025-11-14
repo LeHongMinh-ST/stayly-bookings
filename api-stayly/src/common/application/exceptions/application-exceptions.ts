@@ -39,10 +39,7 @@ export function throwEntityNotFound(
  * Throws BadRequestException for invalid input scenarios
  * Use when input validation fails or business rule is violated
  */
-export function throwInvalidInput(
-  message: string,
-  field?: string,
-): never {
+export function throwInvalidInput(message: string, field?: string): never {
   const fullMessage = field ? `${field}: ${message}` : message;
   throw new BadRequestException(fullMessage);
 }
@@ -51,10 +48,7 @@ export function throwInvalidInput(
  * Throws ConflictException for resource conflict scenarios
  * Use when there's a conflict with current state (duplicate, concurrent modification, etc.)
  */
-export function throwConflict(
-  message: string,
-  conflictType?: string,
-): never {
+export function throwConflict(message: string, conflictType?: string): never {
   throw new ConflictException(message);
 }
 
@@ -150,4 +144,3 @@ export function ensureNoConflict(
     throwConflict(message, conflictType);
   }
 }
-

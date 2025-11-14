@@ -4,4 +4,3 @@ export class UpdateRoleCommand {
     public readonly displayName?: string,
   ) {}
 }
-

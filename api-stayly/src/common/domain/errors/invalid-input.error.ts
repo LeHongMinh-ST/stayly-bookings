@@ -18,5 +18,3 @@ export class InvalidInputError extends DomainError {
     });
   }
 }
-
-

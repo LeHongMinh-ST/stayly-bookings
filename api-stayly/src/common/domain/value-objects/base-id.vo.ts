@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../errors";
+import { InvalidInputError } from '../errors';
 
 /**
  * BaseId value object encapsulates UUID validation for aggregate identifiers
@@ -41,7 +41,3 @@ export abstract class BaseId {
     }
   }
 }
-
-
-
-

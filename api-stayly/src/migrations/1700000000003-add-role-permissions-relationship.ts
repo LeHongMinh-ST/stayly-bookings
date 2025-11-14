@@ -99,8 +99,14 @@ export class AddRolePermissionsRelationship1700000000003
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     // Drop indexes
-    await queryRunner.dropIndex('role_permissions', 'idx_role_permissions_permission_id');
-    await queryRunner.dropIndex('role_permissions', 'idx_role_permissions_role_id');
+    await queryRunner.dropIndex(
+      'role_permissions',
+      'idx_role_permissions_permission_id',
+    );
+    await queryRunner.dropIndex(
+      'role_permissions',
+      'idx_role_permissions_role_id',
+    );
     await queryRunner.dropIndex('roles', 'idx_roles_is_super_admin');
 
     // Drop foreign keys
@@ -119,4 +125,3 @@ export class AddRolePermissionsRelationship1700000000003
     await queryRunner.dropColumn('roles', 'is_super_admin');
   }
 }
-

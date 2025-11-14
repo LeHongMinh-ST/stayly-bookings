@@ -54,4 +54,3 @@ export class AssignPermissionToUserHandler
     return await this.userAccess.getUserResponse(command.userId);
   }
 }
-

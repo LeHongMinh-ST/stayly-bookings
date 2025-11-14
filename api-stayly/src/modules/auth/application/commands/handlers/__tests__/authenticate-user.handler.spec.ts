@@ -1,7 +1,7 @@
 /**
  * Unit tests for AuthenticateUserHandler
  * Tests user (admin/staff) authentication flow
- * 
+ *
  * Note: User authentication data no longer includes roles/permissions.
  * They are queried separately from RBAC module via IUserRolePermissionQueryService
  */
@@ -106,7 +106,9 @@ describe('AuthenticateUserHandler', () => {
 
     handler = module.get<AuthenticateUserHandler>(AuthenticateUserHandler);
     userAuthService = module.get(USER_AUTHENTICATION_SERVICE);
-    userRolePermissionQueryService = module.get(USER_ROLE_PERMISSION_QUERY_SERVICE);
+    userRolePermissionQueryService = module.get(
+      USER_ROLE_PERMISSION_QUERY_SERVICE,
+    );
     passwordHasher = module.get(PASSWORD_HASHER);
     tokenService = module.get(TOKEN_SERVICE);
     sessionRepository = module.get(SESSION_REPOSITORY);
@@ -533,7 +535,9 @@ describe('AuthenticateUserHandler', () => {
       );
 
       // Act & Assert
-      await expect(handler.execute(command)).rejects.toThrow('User not found in RBAC');
+      await expect(handler.execute(command)).rejects.toThrow(
+        'User not found in RBAC',
+      );
       expect(userAuthService.findForAuthentication).toHaveBeenCalled();
       expect(passwordHasher.compare).toHaveBeenCalled();
       expect(

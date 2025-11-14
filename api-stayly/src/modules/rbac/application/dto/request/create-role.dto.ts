@@ -21,4 +21,3 @@ export class CreateRoleDto {
   @IsString({ each: true })
   permissions?: string[];
 }
-

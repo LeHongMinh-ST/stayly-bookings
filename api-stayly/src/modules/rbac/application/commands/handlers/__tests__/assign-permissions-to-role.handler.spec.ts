@@ -76,7 +76,9 @@ describe('AssignPermissionsToRoleHandler', () => {
         permissions,
       );
       roleRepository.findById.mockResolvedValue(role);
-      rolePermissionValidation.validatePermissions.mockResolvedValue(permissions);
+      rolePermissionValidation.validatePermissions.mockResolvedValue(
+        permissions,
+      );
       roleRepository.save.mockResolvedValue();
 
       // Act
@@ -103,7 +105,9 @@ describe('AssignPermissionsToRoleHandler', () => {
       // Act & Assert
       await expect(handler.execute(command)).rejects.toThrow('Role not found');
       expect(roleRepository.findById).toHaveBeenCalledWith(roleId);
-      expect(rolePermissionValidation.validatePermissions).not.toHaveBeenCalled();
+      expect(
+        rolePermissionValidation.validatePermissions,
+      ).not.toHaveBeenCalled();
       expect(roleRepository.save).not.toHaveBeenCalled();
     });
 
@@ -149,7 +153,9 @@ describe('AssignPermissionsToRoleHandler', () => {
         newPermissions,
       );
       roleRepository.findById.mockResolvedValue(role);
-      rolePermissionValidation.validatePermissions.mockResolvedValue(newPermissions);
+      rolePermissionValidation.validatePermissions.mockResolvedValue(
+        newPermissions,
+      );
       roleRepository.save.mockResolvedValue();
 
       // Act
@@ -181,4 +187,3 @@ describe('AssignPermissionsToRoleHandler', () => {
     });
   });
 });
-

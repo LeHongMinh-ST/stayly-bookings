@@ -1,5 +1,11 @@
 import { Controller, Delete, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UserResponseDto } from 'src/modules/user/application/dto/response/user-response.dto';
 import { AssignPermissionToUserCommand } from '../../application/commands/assign-permission-to-user.command';
 import { Permissions } from '../../../../common/decorators/permissions.decorator';
@@ -14,9 +20,7 @@ import { UnassignPermissionFromUserCommand } from '../../application/commands/un
 @UseGuards(JwtUserGuard)
 @ApiBearerAuth('JWT-auth')
 export class RbacAssignController {
-  constructor(
-    private readonly commandBus: CommandBus,
-  ) { }
+  constructor(private readonly commandBus: CommandBus) {}
 
   /**
    * Assigns a single permission to a user
@@ -41,7 +45,10 @@ export class RbacAssignController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Permission or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async assignPermissionToUser(
     @Param('userId') userId: string,
     @Param('permissionId') permissionId: string,
@@ -73,7 +80,10 @@ export class RbacAssignController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Role or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async assignRoleToUser(
     @Param('userId') userId: string,
     @Param('roleId') roleId: string,
@@ -105,7 +115,10 @@ export class RbacAssignController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Role or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async unassignRoleFromUser(
     @Param('roleId') roleId: string,
     @Param('userId') userId: string,
@@ -137,7 +150,10 @@ export class RbacAssignController {
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation failed' })
   @ApiResponse({ status: 404, description: 'Permission or user not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
   async unassignPermissionFromUser(
     @Param('userId') userId: string,
     @Param('permissionId') permissionId: string,

@@ -312,9 +312,9 @@ describe('UserRolePermissionQueryService', () => {
       userRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(
-        service.getUserRolesAndPermissions(userId),
-      ).rejects.toThrow('User not found');
+      await expect(service.getUserRolesAndPermissions(userId)).rejects.toThrow(
+        'User not found',
+      );
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
         relations: ['roles', 'permissions'],
@@ -379,4 +379,3 @@ describe('UserRolePermissionQueryService', () => {
     });
   });
 });
-

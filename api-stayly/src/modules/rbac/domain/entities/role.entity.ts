@@ -111,4 +111,3 @@ export class Role extends BaseEntity<RoleId> {
     return [...this.permissions];
   }
 }
-

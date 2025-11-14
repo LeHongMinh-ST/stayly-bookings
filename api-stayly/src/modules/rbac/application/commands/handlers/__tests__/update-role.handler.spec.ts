@@ -19,13 +19,13 @@ describe('UpdateRoleHandler', () => {
   const newDisplayName = 'Content Editor';
 
   beforeEach(async () => {
-      const mockRoleRepository = {
-        findById: jest.fn(),
-        save: jest.fn(),
-        findAll: jest.fn(),
-        delete: jest.fn(),
-        exists: jest.fn(),
-      };
+    const mockRoleRepository = {
+      findById: jest.fn(),
+      save: jest.fn(),
+      findAll: jest.fn(),
+      delete: jest.fn(),
+      exists: jest.fn(),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -95,7 +95,5 @@ describe('UpdateRoleHandler', () => {
       expect(result.displayName).toBe(displayName);
       expect(roleRepository.save).toHaveBeenCalled();
     });
-
   });
 });
-
