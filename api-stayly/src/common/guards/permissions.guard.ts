@@ -12,11 +12,21 @@ import {
   CanActivate,
   ExecutionContext,
   Inject,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import type { IRoleRepository } from '../../modules/rbac/domain/repositories/role.repository.interface';
 import { ROLE_REPOSITORY } from '../../modules/rbac/domain/repositories/role.repository.interface';
+import type { Request } from 'express';
+
+type JwtUserContext = {
+  userType?: 'user' | 'customer';
+  roles?: string[];
+  permissions?: string[];
+};
+
+type AuthenticatedRequest = Request & { user?: JwtUserContext };
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -36,9 +46,10 @@ export class PermissionsGuard implements CanActivate {
       return true; // No permissions required
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const user = request.user;
     if (!user) {
-      return false;
+      throw new UnauthorizedException('Missing authenticated user context');
     }
 
     // Only apply permission check to user (admin/staff), not customer
@@ -48,7 +59,7 @@ export class PermissionsGuard implements CanActivate {
     }
 
     // Super admin automatically has full permissions
-    const userRoles = user.roles || [];
+    const userRoles = Array.isArray(user.roles) ? user.roles : [];
     if (userRoles.includes('super_admin')) {
       return true;
     }
@@ -57,18 +68,22 @@ export class PermissionsGuard implements CanActivate {
     // This merges permissions from roles and direct user permissions
     const allPermissions = await this.loadUserPermissions(
       userRoles,
-      user.permissions || [],
+      Array.isArray(user.permissions) ? user.permissions : [],
     );
+    const permissionSet = new Set(allPermissions);
 
     // Check if user has wildcard permission '*:manage' for full access
-    if (allPermissions.includes('*:manage')) {
+    if (permissionSet.has('*:manage')) {
       return true;
     }
 
     // Check if user has all required permissions
     return requiredPermissions.every((requiredPermission) => {
+      if (!requiredPermission) {
+        return false;
+      }
       // Direct permission match
-      if (allPermissions.includes(requiredPermission)) {
+      if (permissionSet.has(requiredPermission)) {
         return true;
       }
 
@@ -76,7 +91,7 @@ export class PermissionsGuard implements CanActivate {
       const [module, action] = requiredPermission.split(':');
       if (module && action) {
         const wildcardPermission = `${module}:*`;
-        if (allPermissions.includes(wildcardPermission)) {
+        if (permissionSet.has(wildcardPermission)) {
           return true;
         }
       }
@@ -90,24 +105,27 @@ export class PermissionsGuard implements CanActivate {
    * Merges permissions from roles and direct user permissions
    */
   private async loadUserPermissions(
-    roleIds: string[],
-    directPermissions: string[],
+    roleIds: readonly string[],
+    directPermissions: readonly string[],
   ): Promise<string[]> {
-    const allPermissions = new Set<string>(directPermissions);
+    const permissions = new Set<string>(directPermissions);
 
-    if (roleIds.length > 0) {
-      // Load roles with permissions from database
-      const roles = await this.roleRepository.findAll();
-      const userRoles = roles.filter((role) =>
-        roleIds.includes(role.getId().getValue()),
-      );
-
-      for (const role of userRoles) {
-        const rolePermissions = role.getPermissions().map((p) => p.getValue());
-        rolePermissions.forEach((perm) => allPermissions.add(perm));
-      }
+    if (roleIds.length === 0) {
+      return Array.from(permissions);
     }
 
-    return Array.from(allPermissions);
+    const roles = await this.roleRepository.findAll();
+    for (const role of roles) {
+      const roleId = role.getId().getValue();
+      if (!roleIds.includes(roleId)) {
+        continue;
+      }
+      role
+        .getPermissions()
+        .map((permission) => permission.getValue())
+        .forEach((perm) => permissions.add(perm));
+    }
+
+    return Array.from(permissions);
   }
 }

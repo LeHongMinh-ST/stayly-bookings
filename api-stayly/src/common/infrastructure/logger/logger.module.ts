@@ -6,6 +6,10 @@
 import { Module } from '@nestjs/common';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import type { IncomingMessage, ServerResponse } from 'http';
+
+type RequestWithId = IncomingMessage & { id?: string };
+type ResponseWithStatus = ServerResponse & { statusCode?: number };
 
 @Module({
   imports: [
@@ -14,7 +18,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const isDevelopment = configService.get('app.env') === 'development';
-        const logLevel = configService.get('logging.level') || 'info';
+        const logLevel = (
+          configService.get<string>('logging.level') ?? 'info'
+        ).toLowerCase();
 
         return {
           pinoHttp: {
@@ -30,12 +36,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 }
               : undefined,
             serializers: {
-              req: (req: any) => ({
+              req: (req: RequestWithId) => ({
                 id: req.id,
                 method: req.method,
                 url: req.url,
               }),
-              res: (res: any) => ({
+              res: (res: ResponseWithStatus) => ({
                 statusCode: res.statusCode,
               }),
             },

@@ -4,9 +4,22 @@
  * Only applies to user (admin/staff), not customer
  */
 
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import type { Request } from 'express';
+
+type JwtUserContext = {
+  userType?: 'user' | 'customer';
+  roles?: string[];
+};
+
+type AuthenticatedRequest = Request & { user?: JwtUserContext };
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -22,9 +35,10 @@ export class RolesGuard implements CanActivate {
       return true; // No roles required
     }
 
-    const { user } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const user = request.user;
     if (!user) {
-      return false;
+      throw new UnauthorizedException('Missing authenticated user context');
     }
 
     // Only apply role check to user (admin/staff), not customer
@@ -34,7 +48,7 @@ export class RolesGuard implements CanActivate {
     }
 
     // Check if user has at least one of the required roles
-    const userRoles = user.roles || [];
+    const userRoles = Array.isArray(user.roles) ? user.roles : [];
     return requiredRoles.some((role) => userRoles.includes(role));
   }
 }

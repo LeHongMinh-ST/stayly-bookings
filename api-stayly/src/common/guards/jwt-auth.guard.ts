@@ -12,6 +12,12 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
+type JwtAuthenticatedUser = {
+  userType?: 'user' | 'customer';
+  roles?: string[];
+  permissions?: string[];
+} & Record<string, unknown>;
+
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private reflector: Reflector) {
@@ -32,9 +38,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest<TUser extends JwtAuthenticatedUser>(
+    err: unknown,
+    user?: TUser,
+  ): TUser {
     if (err || !user) {
-      throw err || new UnauthorizedException('Invalid or expired token');
+      if (err instanceof Error) {
+        throw err;
+      }
+      throw new UnauthorizedException('Invalid or expired token');
     }
     return user;
   }

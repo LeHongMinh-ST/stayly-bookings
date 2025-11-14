@@ -5,6 +5,13 @@
 
 import { Injectable, Inject, OnModuleInit } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
+
+type KafkaEventPayload = {
+  aggregateId?: string;
+  id?: string;
+  [key: string]: unknown;
+};
 
 @Injectable()
 export class KafkaProducerService implements OnModuleInit {
@@ -22,12 +29,13 @@ export class KafkaProducerService implements OnModuleInit {
    * @param topic - Kafka topic name
    * @param event - Event data
    */
-  async publish(topic: string, event: any): Promise<void> {
-    await this.kafkaClient.emit(topic, {
-      key: event.aggregateId || event.id,
+  async publish(topic: string, event: KafkaEventPayload): Promise<void> {
+    const payload = {
+      key: event.aggregateId ?? event.id ?? null,
       value: JSON.stringify(event),
       timestamp: new Date().toISOString(),
-    });
+    };
+    await lastValueFrom(this.kafkaClient.emit(topic, payload));
   }
 
   /**
@@ -35,7 +43,10 @@ export class KafkaProducerService implements OnModuleInit {
    * @param topic - Kafka topic name
    * @param events - Array of event data
    */
-  async publishBatch(topic: string, events: any[]): Promise<void> {
+  async publishBatch(
+    topic: string,
+    events: readonly KafkaEventPayload[],
+  ): Promise<void> {
     const promises = events.map((event) => this.publish(topic, event));
     await Promise.all(promises);
   }

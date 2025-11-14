@@ -15,6 +15,24 @@ import { Request, Response } from 'express';
 import { DomainError } from '../domain/errors';
 import { mapDomainErrorToHttpException } from '../domain/errors/domain-error-mapper';
 
+const resolveResponseMessage = (
+  response: unknown,
+  fallback: string,
+): string => {
+  if (typeof response === 'string') {
+    return response;
+  }
+  if (
+    response &&
+    typeof response === 'object' &&
+    'message' in response &&
+    typeof (response as { message?: unknown }).message === 'string'
+  ) {
+    return (response as { message: string }).message;
+  }
+  return fallback;
+};
+
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
@@ -24,40 +42,33 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let httpException: HttpException;
     let status: number;
-    let message: string | object;
+    let message: string;
 
     // Handle domain errors - map to HTTP exceptions
     if (exception instanceof DomainError) {
-      httpException = mapDomainErrorToHttpException(exception);
+      const httpException = mapDomainErrorToHttpException(exception);
       status = httpException.getStatus();
       const exceptionResponse = httpException.getResponse();
-      message =
-        typeof exceptionResponse === 'string'
-          ? exceptionResponse
-          : (exceptionResponse as any).message || exception.message;
+      message = resolveResponseMessage(exceptionResponse, exception.message);
 
       // Log domain error with context
+      const contextPayload = JSON.stringify({
+        code: exception.code,
+        metadata: exception.metadata,
+        path: request.url,
+        method: request.method,
+      });
       this.logger.warn(
         `Domain error: ${exception.name} - ${exception.message}`,
-        {
-          code: exception.code,
-          metadata: exception.metadata,
-          path: request.url,
-          method: request.method,
-        },
+        contextPayload,
       );
     }
     // Handle HTTP exceptions
     else if (exception instanceof HttpException) {
-      httpException = exception;
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      message =
-        typeof exceptionResponse === 'string'
-          ? exceptionResponse
-          : (exceptionResponse as any).message || exception.message;
+      message = resolveResponseMessage(exceptionResponse, exception.message);
     }
     // Handle unknown errors
     else {
@@ -80,10 +91,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       method: request.method,
-      message:
-        typeof message === 'string'
-          ? message
-          : (message as any).message || 'Internal server error',
+      message,
     };
 
     response.status(status).json(errorResponse);

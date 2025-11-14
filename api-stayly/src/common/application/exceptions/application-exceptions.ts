@@ -8,7 +8,6 @@ import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
-  HttpException,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
@@ -49,7 +48,8 @@ export function throwInvalidInput(message: string, field?: string): never {
  * Use when there's a conflict with current state (duplicate, concurrent modification, etc.)
  */
 export function throwConflict(message: string, conflictType?: string): never {
-  throw new ConflictException(message);
+  const fullMessage = conflictType ? `${conflictType}: ${message}` : message;
+  throw new ConflictException(fullMessage);
 }
 
 /**
@@ -60,7 +60,8 @@ export function throwUnauthorized(
   message: string = 'Authentication required',
   reason?: string,
 ): never {
-  throw new UnauthorizedException(message);
+  const fullMessage = reason ? `${message}. Reason: ${reason}` : message;
+  throw new UnauthorizedException(fullMessage);
 }
 
 /**
@@ -72,7 +73,14 @@ export function throwForbidden(
   requiredPermission?: string,
   requiredRole?: string,
 ): never {
-  throw new ForbiddenException(message);
+  const details = [
+    requiredPermission && `permission=${requiredPermission}`,
+    requiredRole && `role=${requiredRole}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const fullMessage = details ? `${message} (${details})` : message;
+  throw new ForbiddenException(fullMessage);
 }
 
 /**
@@ -84,7 +92,14 @@ export function throwInvalidOperation(
   operation?: string,
   reason?: string,
 ): never {
-  throw new UnprocessableEntityException(message);
+  const details = [
+    operation && `operation=${operation}`,
+    reason && `reason=${reason}`,
+  ]
+    .filter(Boolean)
+    .join(', ');
+  const fullMessage = details ? `${message} (${details})` : message;
+  throw new UnprocessableEntityException(fullMessage);
 }
 
 /**

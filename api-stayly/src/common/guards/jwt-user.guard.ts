@@ -11,6 +11,11 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
+type JwtUserPayload = {
+  userType?: 'user' | 'customer';
+  roles?: string[];
+} & Record<string, unknown>;
+
 @Injectable()
 export class JwtUserGuard extends AuthGuard('jwt-user') {
   constructor(private reflector: Reflector) {
@@ -31,12 +36,17 @@ export class JwtUserGuard extends AuthGuard('jwt-user') {
     return super.canActivate(context);
   }
 
-  handleRequest(err: any, user: any, info: any) {
+  handleRequest<TUser extends JwtUserPayload>(
+    err: unknown,
+    user?: TUser,
+  ): TUser {
     if (err || !user) {
-      throw err || new UnauthorizedException('Invalid or expired token');
+      if (err instanceof Error) {
+        throw err;
+      }
+      throw new UnauthorizedException('Invalid or expired token');
     }
 
-    // Additional check: ensure user is not a customer
     if (user.userType === 'customer') {
       throw new UnauthorizedException(
         'Customer tokens are not allowed for admin endpoints',
