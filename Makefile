@@ -31,6 +31,7 @@ setup: install docker-up ## Complete setup: install dependencies and start Docke
 install: ## Install backend dependencies
 	@echo "$(GREEN)Installing backend dependencies...$(RESET)"
 	cd api-stayly && pnpm install
+	cd app-stayly && pnpm install
 
 ##@ Docker
 
@@ -101,6 +102,15 @@ stop: ## Stop backend server (if running in background)
 	@echo "$(YELLOW)Stopping backend server...$(RESET)"
 	@pkill -f "nest start" || true
 	@echo "$(GREEN)✓ Backend server stopped!$(RESET)"
+
+start-fe: ## Start frontend development server (local)
+	@echo "$(GREEN)Starting frontend development server...$(RESET)"
+	cd app-stayly && pnpm dev
+
+stop-fe: ## Stop frontend server (if running in background)
+	@echo "$(YELLOW)Stopping frontend server...$(RESET)"
+	@pkill -f "pnpm dev" || true
+	@echo "$(GREEN)✓ Frontend server stopped!$(RESET)"
 
 restart: stop start ## Restart backend server
 
