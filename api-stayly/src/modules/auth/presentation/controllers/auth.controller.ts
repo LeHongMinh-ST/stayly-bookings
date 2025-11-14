@@ -129,14 +129,18 @@ export class UserAuthController {
     userAgent: string | null;
     ipAddress: string | null;
   } {
-    const userAgentHeader = req.headers['user-agent'];
+    const { headers, ip } = req;
+    const userAgentHeader = headers['user-agent'] as
+      | string
+      | string[]
+      | undefined;
     const userAgent = Array.isArray(userAgentHeader)
       ? (userAgentHeader[0] ?? null)
       : (userAgentHeader ?? null);
 
     return {
       userAgent,
-      ipAddress: req.ip ?? null,
+      ipAddress: typeof ip === 'string' ? ip : null,
     };
   }
 }

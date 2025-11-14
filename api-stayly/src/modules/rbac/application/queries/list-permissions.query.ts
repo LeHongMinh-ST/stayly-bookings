@@ -1,4 +1,7 @@
-import { DEFAULT_PAGE_OFFSET, DEFAULT_PAGE_SIZE } from 'src/common/constants';
+import {
+  DEFAULT_PAGE_OFFSET,
+  DEFAULT_PAGE_SIZE,
+} from '../../../../common/constants';
 
 /**
  * ListPermissionsQuery retrieves all available permissions from catalog

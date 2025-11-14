@@ -15,6 +15,14 @@ import {
   throwInvalidInput,
 } from '../../../../common/application/exceptions';
 
+type DecodedRefreshPayload = {
+  sub?: string;
+  email?: string;
+  roles?: string[];
+  permissions?: string[];
+  tokenId?: string;
+};
+
 @Injectable()
 export class JwtTokenService implements TokenService {
   private readonly refreshSecret: string;
@@ -83,12 +91,15 @@ export class JwtTokenService implements TokenService {
   }
 
   async verifyRefreshToken(token: string): Promise<JwtPayload> {
-    const payload = await this.jwtService.verifyAsync(token, {
-      secret: this.refreshSecret,
-    });
+    const payload = await this.jwtService.verifyAsync<DecodedRefreshPayload>(
+      token,
+      {
+        secret: this.refreshSecret,
+      },
+    );
     return JwtPayload.create({
-      sub: payload.sub,
-      email: payload.email,
+      sub: payload.sub ?? '',
+      email: payload.email ?? '',
       roles: payload.roles ?? [],
       permissions: payload.permissions ?? [],
       tokenId: payload.tokenId,

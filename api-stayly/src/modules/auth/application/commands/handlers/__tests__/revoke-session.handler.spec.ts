@@ -14,7 +14,9 @@ import { randomUUID } from 'crypto';
 
 describe('RevokeSessionHandler', () => {
   let handler: RevokeSessionHandler;
-  let sessionRepository: jest.Mocked<ISessionRepository>;
+  let findActiveByTokenIdMock: jest.Mock;
+  let revokeByIdMock: jest.Mock;
+  let saveSessionMock: jest.Mock;
 
   const tokenId = randomUUID();
   const userId = randomUUID();
@@ -37,10 +39,14 @@ describe('RevokeSessionHandler', () => {
 
   beforeEach(async () => {
     // Arrange: Create mocks
-    const mockSessionRepository = {
-      save: jest.fn(),
-      findActiveByTokenId: jest.fn(),
-      revokeById: jest.fn(),
+    findActiveByTokenIdMock = jest.fn();
+    revokeByIdMock = jest.fn();
+    saveSessionMock = jest.fn();
+
+    const mockSessionRepository: ISessionRepository = {
+      save: saveSessionMock,
+      findActiveByTokenId: findActiveByTokenIdMock,
+      revokeById: revokeByIdMock,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -54,7 +60,6 @@ describe('RevokeSessionHandler', () => {
     }).compile();
 
     handler = module.get<RevokeSessionHandler>(RevokeSessionHandler);
-    sessionRepository = module.get(SESSION_REPOSITORY);
   });
 
   afterEach(() => {
@@ -65,38 +70,30 @@ describe('RevokeSessionHandler', () => {
     it('should revoke session successfully', async () => {
       // Arrange
       const command = new RevokeSessionCommand(tokenId);
-      const revokeDate = new Date();
 
-      sessionRepository.findActiveByTokenId.mockResolvedValue(mockSession);
-      sessionRepository.revokeById.mockResolvedValue();
+      findActiveByTokenIdMock.mockResolvedValue(mockSession);
+      revokeByIdMock.mockResolvedValue(undefined);
 
       // Act
       await handler.execute(command);
 
       // Assert
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
-        tokenId,
-      );
-      expect(sessionRepository.revokeById).toHaveBeenCalledWith(
-        sessionId,
-        expect.any(Date),
-      );
+      expect(findActiveByTokenIdMock).toHaveBeenCalledWith(tokenId);
+      expect(revokeByIdMock).toHaveBeenCalledWith(sessionId, expect.any(Date));
     });
 
     it('should do nothing when session not found', async () => {
       // Arrange
       const command = new RevokeSessionCommand(tokenId);
 
-      sessionRepository.findActiveByTokenId.mockResolvedValue(null);
+      findActiveByTokenIdMock.mockResolvedValue(null);
 
       // Act
       await handler.execute(command);
 
       // Assert
-      expect(sessionRepository.findActiveByTokenId).toHaveBeenCalledWith(
-        tokenId,
-      );
-      expect(sessionRepository.revokeById).not.toHaveBeenCalled();
+      expect(findActiveByTokenIdMock).toHaveBeenCalledWith(tokenId);
+      expect(revokeByIdMock).not.toHaveBeenCalled();
     });
 
     it('should revoke session with current date', async () => {
@@ -104,15 +101,15 @@ describe('RevokeSessionHandler', () => {
       const command = new RevokeSessionCommand(tokenId);
       const beforeRevoke = new Date();
 
-      sessionRepository.findActiveByTokenId.mockResolvedValue(mockSession);
-      sessionRepository.revokeById.mockResolvedValue();
+      findActiveByTokenIdMock.mockResolvedValue(mockSession);
+      revokeByIdMock.mockResolvedValue(undefined);
 
       // Act
       await handler.execute(command);
 
       // Assert
-      expect(sessionRepository.revokeById).toHaveBeenCalled();
-      const revokeDate = sessionRepository.revokeById.mock.calls[0][1];
+      expect(revokeByIdMock).toHaveBeenCalled();
+      const [, revokeDate] = revokeByIdMock.mock.calls[0] as [string, Date];
       expect(revokeDate).toBeInstanceOf(Date);
       expect(revokeDate.getTime()).toBeGreaterThanOrEqual(
         beforeRevoke.getTime(),
