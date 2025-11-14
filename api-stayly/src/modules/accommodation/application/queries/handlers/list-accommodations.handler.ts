@@ -8,13 +8,13 @@ import { Inject } from "@nestjs/common";
 import { ListAccommodationsQuery } from "../list-accommodations.query";
 import { ACCOMMODATION_REPOSITORY } from "../../../domain/repositories/accommodation.repository.interface";
 import type { IAccommodationRepository } from "../../../domain/repositories/accommodation.repository.interface";
-import { AccommodationResponseDto } from "../../dto/response/accommodation-response.dto";
+import { AccommodationCollectionDto } from "../../dto/response/accommodation-collection.dto";
 import { AccommodationDtoMapper } from "../../../infrastructure/persistence/mappers/accommodation-dto.mapper";
 import { Accommodation } from "../../../domain/entities/accommodation.entity";
 
 @QueryHandler(ListAccommodationsQuery)
 export class ListAccommodationsHandler
-  implements IQueryHandler<ListAccommodationsQuery>
+  implements IQueryHandler<ListAccommodationsQuery, AccommodationCollectionDto>
 {
   constructor(
     @Inject(ACCOMMODATION_REPOSITORY)
@@ -24,22 +24,50 @@ export class ListAccommodationsHandler
 
   async execute(
     query: ListAccommodationsQuery,
-  ): Promise<AccommodationResponseDto[]> {
-    let accommodations: Accommodation[];
+  ): Promise<AccommodationCollectionDto> {
+    // Validate and normalize pagination params using common helper
+    const { page, limit, offset } = query.normalize();
 
+    // Build filters for count
+    const filters = {
+      ownerId: query.ownerId,
+      type: query.type,
+      status: query.status,
+    };
+
+    // Fetch accommodations and total count in parallel
+    const [accommodations, total] = await Promise.all([
+      this.fetchAccommodations(query, limit, offset),
+      this.accommodationRepo.count(filters),
+    ]);
+
+    // Map to DTOs
+    const data = accommodations.map((acc) => this.dtoMapper.toDto(acc));
+
+    return new AccommodationCollectionDto(data, total, limit, page);
+  }
+
+  private async fetchAccommodations(
+    query: ListAccommodationsQuery,
+    limit: number,
+    offset: number,
+  ): Promise<Accommodation[]> {
     if (query.ownerId) {
-      accommodations = await this.accommodationRepo.findByOwnerId(
+      return this.accommodationRepo.findByOwnerId(
         query.ownerId,
+        limit,
+        offset,
+        query.status,
       );
-    } else if (query.type) {
-      accommodations = await this.accommodationRepo.findByType(query.type);
-    } else {
-      accommodations = await this.accommodationRepo.findAll();
     }
-
-    // TODO: Filter by status if provided
-    // TODO: Apply pagination (limit, offset)
-
-    return accommodations.map((acc) => this.dtoMapper.toDto(acc));
+    if (query.type) {
+      return this.accommodationRepo.findByType(
+        query.type,
+        limit,
+        offset,
+        query.status,
+      );
+    }
+    return this.accommodationRepo.findAll(limit, offset, query.status);
   }
 }

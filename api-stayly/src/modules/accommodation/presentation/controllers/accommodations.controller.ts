@@ -30,8 +30,14 @@ import { GetAccommodationQuery } from "../../application/queries/get-accommodati
 import { ListAccommodationsQuery } from "../../application/queries/list-accommodations.query";
 import { CreateAccommodationDto } from "../../application/dto/request/create-accommodation.dto";
 import { AccommodationResponseDto } from "../../application/dto/response/accommodation-response.dto";
+import { AccommodationCollectionDto } from "../../application/dto/response/accommodation-collection.dto";
 import { AccommodationType } from "../../domain/entities/accommodation.entity";
 import { AccommodationDtoMapper } from "../../infrastructure/persistence/mappers/accommodation-dto.mapper";
+import { ParseIntPipe } from "@nestjs/common";
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_NUMBER,
+} from "../../../../common/constants";
 
 @Controller("v1/accommodations")
 @ApiTags("accommodations")
@@ -105,11 +111,11 @@ export class AccommodationsController {
   }
 
   /**
-   * List accommodations with filters
+   * List accommodations with filters and pagination
    */
   @Get()
   @Permissions("homestay:read", "homestay:manage")
-  @ApiOperation({ summary: "List accommodations" })
+  @ApiOperation({ summary: "List accommodations with pagination" })
   @ApiQuery({
     name: "ownerId",
     required: false,
@@ -119,22 +125,41 @@ export class AccommodationsController {
     name: "type",
     required: false,
     description: "Filter by type (homestay/hotel)",
+    enum: AccommodationType,
   })
   @ApiQuery({
     name: "status",
     required: false,
     description: "Filter by status",
   })
+  @ApiQuery({
+    name: "page",
+    required: false,
+    type: Number,
+    description: "Page number (starts from 1)",
+    example: 1,
+  })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    type: Number,
+    description: "Number of items per page",
+    example: 20,
+  })
   @ApiResponse({
     status: 200,
-    description: "List of accommodations",
-    type: [AccommodationResponseDto],
+    description: "Paginated list of accommodations",
+    type: AccommodationCollectionDto,
   })
   async list(
     @Query("ownerId") ownerId?: string,
     @Query("type") type?: string,
     @Query("status") status?: string,
-  ): Promise<AccommodationResponseDto[]> {
+    @Query("page", new ParseIntPipe({ optional: true }))
+    page: number = DEFAULT_PAGE_NUMBER,
+    @Query("limit", new ParseIntPipe({ optional: true }))
+    limit: number = DEFAULT_PAGE_SIZE,
+  ): Promise<AccommodationCollectionDto> {
     const accommodationType: AccommodationType | undefined =
       type &&
       Object.values(AccommodationType).includes(type as AccommodationType)
@@ -144,6 +169,8 @@ export class AccommodationsController {
       ownerId,
       accommodationType,
       status,
+      page,
+      limit,
     );
     return this.queryBus.execute(query);
   }
