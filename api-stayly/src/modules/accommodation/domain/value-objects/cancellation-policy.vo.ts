@@ -3,6 +3,8 @@
  * Represents cancellation policy for accommodation
  */
 
+import { InvalidInputError } from "../../../../common/domain/errors";
+
 export enum CancellationPolicyType {
   FLEXIBLE = "flexible",
   MODERATE = "moderate",
@@ -17,10 +19,14 @@ export class CancellationPolicy {
     private readonly refundPercentage: number,
   ) {
     if (freeCancellationDays < 0) {
-      throw new Error("Free cancellation days must be non-negative");
+      throw new InvalidInputError(
+        "Free cancellation days must be non-negative",
+      );
     }
     if (refundPercentage < 0 || refundPercentage > 100) {
-      throw new Error("Refund percentage must be between 0 and 100");
+      throw new InvalidInputError(
+        "Refund percentage must be between 0 and 100",
+      );
     }
   }
 

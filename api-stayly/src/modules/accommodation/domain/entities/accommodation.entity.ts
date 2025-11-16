@@ -16,6 +16,10 @@ import { CancellationPolicy } from "../value-objects/cancellation-policy.vo";
 import { Policies } from "../value-objects/policies.vo";
 import { AccommodationCreatedEvent } from "../events/accommodation-created.event";
 import { AccommodationApprovedEvent } from "../events/accommodation-approved.event";
+import {
+  InvalidInputError,
+  InvalidStateError,
+} from "../../../../common/domain/errors";
 
 export enum AccommodationType {
   HOMESTAY = "homestay",
@@ -59,11 +63,13 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     // Business rules validation
     if (props.type === AccommodationType.HOMESTAY) {
       if (props.images.length < 3 || props.images.length > 20) {
-        throw new Error("Homestay must have between 3 and 20 images");
+        throw new InvalidInputError(
+          "Homestay must have between 3 and 20 images",
+        );
       }
     } else if (props.type === AccommodationType.HOTEL) {
       if (props.images.length < 5 || props.images.length > 50) {
-        throw new Error("Hotel must have between 5 and 50 images");
+        throw new InvalidInputError("Hotel must have between 5 and 50 images");
       }
     }
 
@@ -183,7 +189,9 @@ export class Accommodation extends BaseEntity<AccommodationId> {
   // Business methods
   approve(approvedBy: string): void {
     if (!this.status.isPending()) {
-      throw new Error("Only pending accommodations can be approved");
+      throw new InvalidStateError(
+        "Only pending accommodations can be approved",
+      );
     }
 
     this.status = AccommodationStatusVO.create(AccommodationStatus.APPROVED);

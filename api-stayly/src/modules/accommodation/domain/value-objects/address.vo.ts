@@ -3,6 +3,8 @@
  * Represents detailed address information
  */
 
+import { InvalidInputError } from "../../../../common/domain/errors";
+
 export class Address {
   private constructor(
     private readonly street: string,
@@ -26,7 +28,7 @@ export class Address {
       !props.province ||
       !props.country
     ) {
-      throw new Error("All address fields are required");
+      throw new InvalidInputError("All address fields are required");
     }
 
     return new Address(

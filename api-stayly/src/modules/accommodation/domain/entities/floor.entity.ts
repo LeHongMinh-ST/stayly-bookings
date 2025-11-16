@@ -7,6 +7,7 @@
 import { FloorStatus, FloorStatusVO } from "../value-objects/floor-status.vo";
 import { FloorType, FloorTypeVO } from "../value-objects/floor-type.vo";
 import { AccommodationId } from "../value-objects/accommodation-id.vo";
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export interface CreateFloorProps {
   hotelId: AccommodationId;
@@ -31,7 +32,7 @@ export class Floor {
 
   static create(props: CreateFloorProps): Floor {
     if (props.floorNumber < 0) {
-      throw new Error("Floor number must be non-negative");
+      throw new InvalidInputError("Floor number must be non-negative");
     }
 
     return new Floor(
@@ -82,7 +83,7 @@ export class Floor {
   // Business methods
   updateName(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error("Name cannot be empty");
+      throw new InvalidInputError("Name cannot be empty");
     }
     this.name = name;
   }
