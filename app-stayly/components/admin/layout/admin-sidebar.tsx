@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAdminNavigation } from "@/hooks/use-admin-navigation";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils/cn";
-import { Button } from "@/components/ui/button";
 import { useAdminShellStore } from "@/store/admin-shell-store";
 
 /**
@@ -16,7 +14,7 @@ import { useAdminShellStore } from "@/store/admin-shell-store";
 export function AdminSidebar() {
   const { groups } = useAdminNavigation();
   const pathname = usePathname();
-  const { isSidebarCollapsed, toggleSidebar } = useAdminShellStore();
+  const { isSidebarCollapsed } = useAdminShellStore();
 
   return (
     <aside
