@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Get,
+  Delete,
   Body,
   Param,
   Query,
@@ -28,6 +29,7 @@ import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
 import { Permissions } from "../../../../common/decorators/permissions.decorator";
 import { CreateAccommodationCommand } from "../../application/commands/create-accommodation.command";
 import { UpdateAccommodationCommand } from "../../application/commands/update-accommodation.command";
+import { DeleteAccommodationCommand } from "../../application/commands/delete-accommodation.command";
 import { GetAccommodationQuery } from "../../application/queries/get-accommodation.query";
 import { ListAccommodationsQuery } from "../../application/queries/list-accommodations.query";
 import { CreateAccommodationDto } from "../../application/dto/request/create-accommodation.dto";
@@ -41,6 +43,7 @@ import {
   DEFAULT_PAGE_SIZE,
   DEFAULT_PAGE_NUMBER,
 } from "../../../../common/constants";
+import { CurrentUser } from "../../../../common/decorators/current-user.decorator";
 
 @Controller("v1/accommodations")
 @ApiTags("accommodations")
@@ -114,10 +117,11 @@ export class AccommodationsController {
   async update(
     @Param("id") id: string,
     @Body() dto: UpdateAccommodationDto,
+    @CurrentUser("id") userId: string,
   ): Promise<AccommodationResponseDto> {
     const command = new UpdateAccommodationCommand(
       id,
-      "", // ownerId will be extracted from JWT token in handler (or middleware/guard)
+      userId,
       dto.name,
       dto.description,
       dto.images,
@@ -219,5 +223,32 @@ export class AccommodationsController {
       limit,
     );
     return this.queryBus.execute(query);
+  }
+
+  /**
+   * Delete accommodation
+   */
+  @Delete(":id")
+  @Permissions("homestay:delete", "homestay:manage")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Delete accommodation" })
+  @ApiParam({
+    name: "id",
+    description: "Accommodation unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  })
+  @ApiResponse({ status: 204, description: "Accommodation deleted" })
+  @ApiResponse({ status: 404, description: "Accommodation not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - insufficient permissions or not owner",
+  })
+  async delete(
+    @Param("id") id: string,
+    @CurrentUser("id") userId: string,
+  ): Promise<void> {
+    const command = new DeleteAccommodationCommand(id, userId);
+
+    await this.commandBus.execute(command);
   }
 }
