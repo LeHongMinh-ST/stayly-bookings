@@ -14,12 +14,14 @@ export class AccommodationBookingPolicyService
 {
   private readonly logger = new Logger(AccommodationBookingPolicyService.name);
 
-  hasUpcomingBookings(accommodationId: string, withinDays: number): boolean {
+  async hasUpcomingBookings(
+    accommodationId: string,
+    withinDays: number,
+  ): Promise<boolean> {
     this.logger.debug(
       `Default booking policy adapter invoked for accommodation ${accommodationId} with window ${withinDays} days`,
     );
-    // TODO: Integrate with Booking bounded context once available.
-    return false;
+    return await Promise.resolve(false);
   }
 }
 

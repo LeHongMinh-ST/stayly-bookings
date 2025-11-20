@@ -20,6 +20,7 @@ import { FloorManagementService } from "./domain/services/floor-management.servi
 import { RbacModule } from "../rbac/rbac.module";
 import { USER_AUTHORIZATION_SERVICE } from "./infrastructure/services/user-authorization.service";
 import { ACCOMMODATION_BOOKING_POLICY_SERVICE } from "./infrastructure/services/accommodation-booking-policy.service";
+import { DefaultAccommodationsSeedService } from "./infrastructure/persistence/seeds/default-accommodations-seed.service";
 import { UpdateAccommodationHandler } from "./application/commands/handlers/update-accommodation.handler";
 import { DeleteAccommodationHandler } from "./application/commands/handlers/delete-accommodation.handler";
 
@@ -48,6 +49,7 @@ const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
     FloorManagementService,
     USER_AUTHORIZATION_SERVICE,
     ACCOMMODATION_BOOKING_POLICY_SERVICE,
+    DefaultAccommodationsSeedService,
   ],
   exports: [ACCOMMODATION_REPOSITORY],
 })

@@ -13,14 +13,10 @@ import { DeleteAccommodationCommand } from "../delete-accommodation.command";
 import { ACCOMMODATION_REPOSITORY } from "../../../domain/repositories/accommodation.repository.interface";
 import type { IAccommodationRepository } from "../../../domain/repositories/accommodation.repository.interface";
 import { AccommodationId } from "../../../domain/value-objects/accommodation-id.vo";
-import {
-  IUserAuthorizationPort,
-  USER_AUTHORIZATION_PORT,
-} from "../../interfaces/user-authorization.port";
-import {
-  ACCOMMODATION_BOOKING_POLICY_PORT,
-  IAccommodationBookingPolicyPort,
-} from "../../interfaces/accommodation-booking-policy.port";
+import type { IUserAuthorizationPort } from "../../interfaces/user-authorization.port";
+import { USER_AUTHORIZATION_PORT } from "../../interfaces/user-authorization.port";
+import type { IAccommodationBookingPolicyPort } from "../../interfaces/accommodation-booking-policy.port";
+import { ACCOMMODATION_BOOKING_POLICY_PORT } from "../../interfaces/accommodation-booking-policy.port";
 
 const UPCOMING_BOOKING_LOOKAHEAD_DAYS = 30;
 

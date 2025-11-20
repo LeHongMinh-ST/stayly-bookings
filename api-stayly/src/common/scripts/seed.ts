@@ -9,6 +9,7 @@ import { AppModule } from "../../app.module";
 import { RolePermissionSeedService } from "../../modules/rbac/infrastructure/persistence/seeds/role-permission-seed.service";
 import { DefaultUsersSeedService } from "../../modules/user/infrastructure/persistence/seeds/default-users-seed.service";
 import { DefaultCustomersSeedService } from "../../modules/customer/infrastructure/persistence/seeds/default-customers-seed.service";
+import { DefaultAccommodationsSeedService } from "../../modules/accommodation/infrastructure/persistence/seeds/default-accommodations-seed.service";
 
 async function bootstrap() {
   const logger = new Logger("Seeder");
@@ -29,7 +30,14 @@ async function bootstrap() {
     const defaultUsersSeedService = app.get(DefaultUsersSeedService);
     await defaultUsersSeedService.seed();
 
-    // 3. Seed sample customer
+    // 3. Seed sample accommodations
+    logger.log("Seeding sample accommodations...");
+    const defaultAccommodationsSeedService = app.get(
+      DefaultAccommodationsSeedService,
+    );
+    await defaultAccommodationsSeedService.seed();
+
+    // 4. Seed sample customer
     logger.log("Seeding sample customer...");
     const defaultCustomersSeedService = app.get(DefaultCustomersSeedService);
     await defaultCustomersSeedService.seed();
