@@ -38,6 +38,3 @@ export abstract class BaseEntity<TId extends BaseId> {
     this.domainEvents.push(event);
   }
 }
-
-
-

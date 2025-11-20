@@ -119,7 +119,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - `LoyaltyTier`: Enum (bronze, silver, gold, platinum)
 
 **Business Rules:**
-- Email phải unique trong hệ thống (có thể trùng với User nhưng là tài khoản riêng)
+- Email phải unique trong bảng `customers` (có thể trùng với User nhưng là tài khoản riêng)
 - Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số
 - Phải xác thực email trước khi có thể đặt phòng
 - Customer không thể truy cập Admin Panel
@@ -147,7 +147,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
   - `id`: Unique identifier
   - `type`: Loại (homestay, hotel)
   - `name`: Tên
-  - `status`: Trạng thái (pending, approved, rejected, active, suspended)
+  - `status`: Trạng thái (active, suspended, inactive)
   - `owner_id`: Foreign key to User (Owner)
   - `address`: Địa chỉ (Value Object)
   - `location`: Tọa độ GPS (Value Object)
@@ -156,8 +156,6 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
   - `amenities`: Danh sách tiện ích
   - `policies`: Chính sách (Value Object)
   - `cancellation_policy`: Chính sách hủy (Value Object)
-  - `approved_by`: User ID duyệt (Super Admin)
-  - `approved_at`: Thời gian duyệt
   - `created_at`, `updated_at`
 
 - `Homestay` (Entity - extends Accommodation)
@@ -207,7 +205,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
   - `latitude`: Vĩ độ
   - `longitude`: Kinh độ
 
-- `AccommodationStatus`: Enum (pending, approved, rejected, active, suspended)
+- `AccommodationStatus`: Enum (active, suspended, inactive)
 
 - `CancellationPolicy`: Chính sách hủy
   - `type`: Loại (flexible, moderate, strict, non_refundable)
@@ -226,8 +224,8 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - `FloorType`: Enum (room_floor, restaurant_floor, spa_floor, gym_floor, pool_floor, meeting_floor, business_floor, mixed_floor, lobby_floor)
 
 **Business Rules:**
-- Accommodation phải được Super Admin duyệt trước khi hiển thị công khai
-- Không thể xóa Accommodation có booking trong vòng 30 ngày tới
+- Accommodation sẽ hoạt động ngay sau khi tạo
+- Không thể xóa Accommodation nếu có bất kỳ booking nào ở trạng thái `pending_payment` hoặc `confirmed` trong tương lai
 - Khi tạm ngưng, không hiển thị trong tìm kiếm nhưng vẫn hiển thị booking đã đặt
 - Hotel phải có ít nhất 10 phòng
 - Homestay tối thiểu 3 ảnh, tối đa 20 ảnh
@@ -241,7 +239,6 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 **Repository:** `AccommodationRepository`
 
 **Domain Services:**
-- `AccommodationApprovalService`: Duyệt/từ chối Accommodation
 - `AccommodationStatusService`: Quản lý trạng thái (active, suspended)
 - `FloorManagementService`: Quản lý Floor (chỉ cho Hotel)
 
@@ -270,6 +267,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
   - `images`: Danh sách hình ảnh
   - `inventory`: Số lượng phòng có sẵn (thường = 1 cho homestay)
   - `status`: Trạng thái (active, inactive)
+  - `version`: Optimistic locking version
   - `created_at`, `updated_at`
 
 **Entities cho Hotel:**
@@ -289,6 +287,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
   - `images`: Danh sách hình ảnh
   - `inventory`: Số lượng phòng của loại này
   - `status`: Trạng thái (active, inactive)
+  - `version`: Optimistic locking version
   - `created_at`, `updated_at`
 
 - `Room` (Entity - thuộc RoomType)
@@ -307,7 +306,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 
 **Business Rules:**
 - Số lượng khách tối đa phải >= 1
-- Không thể xóa Room/RoomType đang có booking chưa hoàn thành
+- Không thể xóa Room/RoomType đang có booking chưa hoàn thành trong tương lai
 - Đối với Hotel: mỗi Room phải thuộc một RoomType
 - Đối với Hotel: mỗi Room phải có room_number unique trong hotel
 - Chỉ Room có status `available` hoặc `clean` mới có thể đặt
@@ -388,9 +387,9 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - Không thể thay đổi giá cho các ngày đã có booking
 - Độ ưu tiên: PromotionPrice > WeeklyPrice > SeasonalPrice > base_price
 - Công thức tính giá:
-  ```
-  Final Price = MAX(PromotionPrice, WeeklyPrice, SeasonalPrice, base_price) + ExtraGuestCharge
-  ```
+  Final Price = (PromotionPrice ?? WeeklyPrice ?? SeasonalPrice ?? base_price) + ExtraGuestCharge
+  
+  *Priority:* Promotion > Weekly > Seasonal > Base
 
 **Repository:** `PricingRepository`
 
@@ -482,6 +481,7 @@ Dựa trên nghiệp vụ hệ thống quản lý homestay và hotel booking, t�
 - Không thể hủy booking đã completed
 - Check-in chỉ có thể thực hiện sau check_in_date
 - Check-out phải sau check-in
+- **Concurrency Control:** Sử dụng Optimistic Locking (check `version` của Room/RoomType) khi tạo booking để tránh race condition.
 
 **Repository:** `BookingRepository`
 

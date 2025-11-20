@@ -56,11 +56,11 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 - **Không thể truy cập hệ thống quản lý (Admin Panel)**
 
 **Quy tắc:**
-- Email phải duy nhất trong hệ thống (có thể trùng với email của tài khoản quản lý nhưng là tài khoản riêng biệt)
+- Email phải duy nhất trong bảng tương ứng (`users` hoặc `customers`). Một người có thể dùng cùng email cho cả 2 loại tài khoản nhưng chúng là 2 thực thể riêng biệt.
 - Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường, số
 - Phải xác thực email trước khi có thể đặt phòng
 - Khách hàng có thể đặt phòng mà không cần đăng ký (guest checkout), nhưng đăng ký sẽ có nhiều lợi ích hơn (lưu lịch sử, tích điểm, v.v.)
-- Customer và User là 2 bảng riêng biệt, không thể chuyển đổi vai trò
+- Customer và User là 2 bảng riêng biệt, đăng nhập ở 2 cổng khác nhau (`/admin` vs `/`), không thể chuyển đổi vai trò
 
 ### 2.1.1. Phân quyền và quản lý người dùng (Role-Based Access Control)
 
@@ -75,7 +75,6 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 1. **Super Admin (Quản trị viên hệ thống):**
    - Quyền cao nhất trong hệ thống
    - Quản lý toàn bộ hệ thống
-   - Duyệt/từ chối homestay/hotel mới
    - Quản lý người dùng toàn hệ thống
    - Xem báo cáo tổng quan
    - Cấu hình hệ thống
@@ -305,7 +304,6 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 | Xem báo cáo | ✅ Tất cả | ✅ Tất cả | ✅ (được gán) | ❌ | ❌ | ❌ | ✅ | ❌ |
 | Quản lý thanh toán | ✅ Tất cả | ✅ Tất cả | ✅ (được gán) | ❌ | ❌ | ❌ | ✅ | ✅ (của mình) |
 | Quản lý dịch vụ | ✅ Tất cả | ✅ Tất cả | ✅ (được gán) | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Duyệt homestay/hotel | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | Cấu hình hệ thống | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 
 **Quy tắc:**
@@ -368,9 +366,9 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 **Quy tắc:**
 - Owner có thể quản lý nhiều homestay
 - Manager có thể tạo homestay nếu được Owner cấp quyền
-- Homestay phải được duyệt bởi Super Admin trước khi hiển thị công khai
+- Homestay sẽ hoạt động ngay sau khi tạo (status = active)
 - Khi tạm ngưng, homestay không hiển thị trong kết quả tìm kiếm nhưng vẫn hiển thị booking đã đặt
-- Không thể xóa homestay có booking trong vòng 30 ngày tới
+- Không thể xóa homestay nếu có bất kỳ booking nào ở trạng thái `pending_payment` hoặc `confirmed` trong tương lai. Phải hủy hoặc đợi booking hoàn thành mới được xóa.
 
 ### 2.2.1. Quản lý thông tin Hotel (Khách sạn)
 
@@ -403,10 +401,10 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 **Quy tắc:**
 - Owner có thể quản lý nhiều hotel
 - Manager có thể tạo hotel nếu được Owner cấp quyền
-- Hotel phải được duyệt bởi Super Admin trước khi hiển thị công khai
+- Hotel sẽ hoạt động ngay sau khi tạo (status = active)
 - Hạng sao phải được xác nhận bởi cơ quan có thẩm quyền (Super Admin có thể xác nhận)
 - Khi tạm ngưng, hotel không hiển thị trong kết quả tìm kiếm nhưng vẫn hiển thị booking đã đặt
-- Không thể xóa hotel có booking trong vòng 30 ngày tới
+- Không thể xóa hotel nếu có bất kỳ booking nào ở trạng thái `pending_payment` hoặc `confirmed` trong tương lai.
 - Hotel phải có ít nhất 10 phòng
 
 ### 2.2.2. Quản lý tầng (Floors) - Chỉ áp dụng cho Hotel
@@ -451,7 +449,7 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
   - Hình ảnh phòng (tối thiểu 2 ảnh, tối đa 10 ảnh)
   - Tiện ích trong phòng (TV, tủ lạnh, ban công, v.v.)
 - Chỉnh sửa thông tin phòng
-- Xóa phòng (chỉ khi không có booking trong vòng 30 ngày tới)
+- Xóa phòng (chỉ khi không có booking nào trong tương lai)
 - Quản lý số lượng phòng (inventory): số phòng có sẵn của mỗi loại
 
 **Nghiệp vụ cho Hotel:**
@@ -481,7 +479,7 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
   - Trạng thái phòng: available, occupied, maintenance, out of order
   - Ghi chú đặc biệt cho từng phòng
 - Chỉnh sửa thông tin loại phòng
-- Xóa loại phòng (chỉ khi không có booking trong vòng 30 ngày tới và không có phòng nào đang sử dụng)
+- Xóa loại phòng (chỉ khi không có booking nào trong tương lai và không có phòng nào đang sử dụng)
 - Block/unblock phòng cụ thể để bảo trì
 
 **Quy tắc:**
@@ -511,12 +509,13 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
 
 **Công thức tính giá:**
 ```
-Giá cuối cùng = MAX(
-  Giá khuyến mãi (nếu có),
-  Giá theo ngày trong tuần (nếu có),
-  Giá theo mùa (nếu có),
-  Giá cơ bản
-) + Phụ thu thêm khách (nếu có)
+Giá cuối cùng = (PromotionPrice ?? WeeklyPrice ?? SeasonalPrice ?? BasePrice) + ExtraGuestCharge
+
+*Logic ưu tiên (Priority Chain):*
+1. **Promotion Price**: Nếu có khuyến mãi áp dụng, dùng giá khuyến mãi.
+2. **Weekly Price**: Nếu không có khuyến mãi, kiểm tra giá ngày trong tuần (cuối tuần/ngày thường).
+3. **Seasonal Price**: Nếu không có giá tuần, kiểm tra giá theo mùa.
+4. **Base Price**: Nếu không có các giá trên, dùng giá cơ bản.
 ```
 
 ### 2.5. Quản lý lịch đặt phòng (Calendar)
@@ -663,7 +662,7 @@ Giá cuối cùng = MAX(
   - Có thể hủy miễn phí
 
 **Quy tắc:**
-- Chỉ hiển thị homestay/hotel đã được duyệt và đang hoạt động
+- Chỉ hiển thị homestay/hotel đang hoạt động
 - Chỉ hiển thị phòng còn trống trong khoảng thời gian tìm kiếm
 - Ngày check-out phải sau ngày check-in ít nhất 1 ngày
 - Kết quả tìm kiếm có thể hiển thị cả homestay và hotel, hoặc lọc theo loại
