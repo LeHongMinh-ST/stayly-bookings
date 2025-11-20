@@ -15,11 +15,7 @@ import { Location } from "../value-objects/location.vo";
 import { CancellationPolicy } from "../value-objects/cancellation-policy.vo";
 import { Policies } from "../value-objects/policies.vo";
 import { AccommodationCreatedEvent } from "../events/accommodation-created.event";
-import { AccommodationApprovedEvent } from "../events/accommodation-approved.event";
-import {
-  InvalidInputError,
-  InvalidStateError,
-} from "../../../../common/domain/errors";
+import { InvalidInputError } from "../../../../common/domain/errors";
 
 export enum AccommodationType {
   HOMESTAY = "homestay",
@@ -53,8 +49,6 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     private amenities: string[],
     private policies: Policies,
     private cancellationPolicy: CancellationPolicy,
-    private approvedBy: string | null = null,
-    private approvedAt: Date | null = null,
   ) {
     super(id);
   }
@@ -78,7 +72,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
       accommodationId,
       props.type,
       props.name,
-      AccommodationStatusVO.create(AccommodationStatus.PENDING),
+      AccommodationStatusVO.create(AccommodationStatus.ACTIVE),
       props.ownerId,
       props.address,
       props.location,
@@ -110,8 +104,6 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     amenities: string[];
     policies: Policies;
     cancellationPolicy: CancellationPolicy;
-    approvedBy: string | null;
-    approvedAt: Date | null;
   }): Accommodation {
     return new Accommodation(
       props.id,
@@ -126,8 +118,6 @@ export class Accommodation extends BaseEntity<AccommodationId> {
       props.amenities,
       props.policies,
       props.cancellationPolicy,
-      props.approvedBy,
-      props.approvedAt,
     );
   }
 
@@ -178,45 +168,11 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     return this.cancellationPolicy;
   }
 
-  getApprovedBy(): string | null {
-    return this.approvedBy;
-  }
-
-  getApprovedAt(): Date | null {
-    return this.approvedAt;
-  }
-
   // Business methods
-  approve(approvedBy: string): void {
-    if (!this.status.isPending()) {
-      throw new InvalidStateError(
-        "Only pending accommodations can be approved",
-      );
-    }
-
-    this.status = AccommodationStatusVO.create(AccommodationStatus.APPROVED);
-    this.approvedBy = approvedBy;
-    this.approvedAt = new Date();
-
-    // Raise domain event
-    this.recordEvent(new AccommodationApprovedEvent(this.getId(), approvedBy));
-  }
-
-  reject(approvedBy: string): void {
-    if (!this.status.isPending()) {
-      throw new Error("Only pending accommodations can be rejected");
-    }
-
-    this.status = AccommodationStatusVO.create(AccommodationStatus.REJECTED);
-    this.approvedBy = approvedBy;
-    this.approvedAt = new Date();
-  }
-
   activate(): void {
-    if (!this.status.isApproved()) {
-      throw new Error("Only approved accommodations can be activated");
+    if (this.status.isActive()) {
+      return;
     }
-
     this.status = AccommodationStatusVO.create(AccommodationStatus.ACTIVE);
   }
 

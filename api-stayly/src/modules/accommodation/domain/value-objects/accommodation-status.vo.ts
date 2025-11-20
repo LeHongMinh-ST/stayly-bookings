@@ -4,11 +4,9 @@
  */
 
 export enum AccommodationStatus {
-  PENDING = "pending",
-  APPROVED = "approved",
-  REJECTED = "rejected",
   ACTIVE = "active",
   SUSPENDED = "suspended",
+  INACTIVE = "inactive",
 }
 
 export class AccommodationStatusVO {
@@ -22,14 +20,6 @@ export class AccommodationStatusVO {
     return this.value;
   }
 
-  isPending(): boolean {
-    return this.value === AccommodationStatus.PENDING;
-  }
-
-  isApproved(): boolean {
-    return this.value === AccommodationStatus.APPROVED;
-  }
-
   isActive(): boolean {
     return this.value === AccommodationStatus.ACTIVE;
   }
@@ -40,7 +30,7 @@ export class AccommodationStatusVO {
 
   canBeDeleted(): boolean {
     return (
-      this.value === AccommodationStatus.REJECTED ||
+      this.value === AccommodationStatus.INACTIVE ||
       this.value === AccommodationStatus.SUSPENDED
     );
   }

@@ -63,12 +63,6 @@ export class AccommodationResponseDto {
     refundPercentage: number;
   };
 
-  @ApiProperty({ description: "Approved by user ID", nullable: true })
-  approvedBy: string | null;
-
-  @ApiProperty({ description: "Approved at", nullable: true })
-  approvedAt: Date | null;
-
   @ApiProperty({ description: "Created at" })
   createdAt: Date;
 

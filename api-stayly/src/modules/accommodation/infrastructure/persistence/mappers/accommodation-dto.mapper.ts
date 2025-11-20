@@ -46,8 +46,7 @@ export class AccommodationDtoMapper {
           .getCancellationPolicy()
           .getRefundPercentage(),
       },
-      approvedBy: accommodation.getApprovedBy(),
-      approvedAt: accommodation.getApprovedAt(),
+
       createdAt: new Date(), // TODO: Get from ORM entity if needed
       updatedAt: new Date(), // TODO: Get from ORM entity if needed
     };

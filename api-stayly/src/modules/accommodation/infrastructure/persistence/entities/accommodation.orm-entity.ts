@@ -97,13 +97,6 @@ export class AccommodationOrmEntity {
   })
   refundPercentage: number;
 
-  // Approval fields
-  @Column({ name: "approved_by", type: "uuid", nullable: true })
-  approvedBy: string | null;
-
-  @Column({ name: "approved_at", type: "timestamp", nullable: true })
-  approvedAt: Date | null;
-
   // Hotel-specific fields (nullable for homestay)
   @Column({ name: "star_rating", type: "integer", nullable: true })
   starRating: number | null;

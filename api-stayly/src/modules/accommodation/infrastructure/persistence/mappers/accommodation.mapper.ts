@@ -58,9 +58,6 @@ export class AccommodationMapper {
       cancellationPolicy.getFreeCancellationDays();
     ormEntity.refundPercentage = cancellationPolicy.getRefundPercentage();
 
-    ormEntity.approvedBy = accommodation.getApprovedBy();
-    ormEntity.approvedAt = accommodation.getApprovedAt();
-
     return ormEntity;
   }
 
@@ -104,8 +101,6 @@ export class AccommodationMapper {
       amenities: ormEntity.amenities,
       policies,
       cancellationPolicy,
-      approvedBy: ormEntity.approvedBy,
-      approvedAt: ormEntity.approvedAt,
     });
   }
 }
