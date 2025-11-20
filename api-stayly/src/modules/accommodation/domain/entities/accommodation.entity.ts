@@ -15,7 +15,10 @@ import { Location } from "../value-objects/location.vo";
 import { CancellationPolicy } from "../value-objects/cancellation-policy.vo";
 import { Policies } from "../value-objects/policies.vo";
 import { AccommodationCreatedEvent } from "../events/accommodation-created.event";
-import { InvalidInputError } from "../../../../common/domain/errors";
+import {
+  InvalidInputError,
+  InvalidStateError,
+} from "../../../../common/domain/errors";
 
 export enum AccommodationType {
   HOMESTAY = "homestay",
@@ -33,6 +36,7 @@ export interface CreateAccommodationProps {
   amenities: string[];
   policies: Policies;
   cancellationPolicy: CancellationPolicy;
+  starRating?: number;
 }
 
 export class Accommodation extends BaseEntity<AccommodationId> {
@@ -49,6 +53,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     private amenities: string[],
     private policies: Policies,
     private cancellationPolicy: CancellationPolicy,
+    private starRating?: number,
   ) {
     super(id);
   }
@@ -81,6 +86,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
       props.amenities,
       props.policies,
       props.cancellationPolicy,
+      props.starRating,
     );
 
     // Raise domain event
@@ -104,6 +110,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     amenities: string[];
     policies: Policies;
     cancellationPolicy: CancellationPolicy;
+    starRating?: number;
   }): Accommodation {
     return new Accommodation(
       props.id,
@@ -118,6 +125,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
       props.amenities,
       props.policies,
       props.cancellationPolicy,
+      props.starRating,
     );
   }
 
@@ -168,6 +176,10 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     return this.cancellationPolicy;
   }
 
+  getStarRating(): number | undefined {
+    return this.starRating;
+  }
+
   // Business methods
   activate(): void {
     if (this.status.isActive()) {
@@ -178,7 +190,9 @@ export class Accommodation extends BaseEntity<AccommodationId> {
 
   suspend(): void {
     if (!this.status.isActive()) {
-      throw new Error("Only active accommodations can be suspended");
+      throw new InvalidStateError(
+        "Only active accommodations can be suspended",
+      );
     }
 
     this.status = AccommodationStatusVO.create(AccommodationStatus.SUSPENDED);
@@ -186,7 +200,7 @@ export class Accommodation extends BaseEntity<AccommodationId> {
 
   updateName(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error("Name cannot be empty");
+      throw new InvalidInputError("Name cannot be empty");
     }
     this.name = name;
   }
@@ -203,11 +217,13 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     // Validate image count based on type
     if (this.type === AccommodationType.HOMESTAY) {
       if (images.length < 3 || images.length > 20) {
-        throw new Error("Homestay must have between 3 and 20 images");
+        throw new InvalidInputError(
+          "Homestay must have between 3 and 20 images",
+        );
       }
     } else if (this.type === AccommodationType.HOTEL) {
       if (images.length < 5 || images.length > 50) {
-        throw new Error("Hotel must have between 5 and 50 images");
+        throw new InvalidInputError("Hotel must have between 5 and 50 images");
       }
     }
     this.images = images;
