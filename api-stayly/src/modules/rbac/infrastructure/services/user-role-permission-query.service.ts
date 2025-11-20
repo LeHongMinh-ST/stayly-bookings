@@ -53,8 +53,9 @@ export class UserRolePermissionQueryService
 
     // Load roles with permissions to get permissions from roles
     const allPermissions = new Set<string>(directPermissions);
+    let roles: RoleOrmEntity[] = [];
     if (roleIds.length > 0) {
-      const roles = await this.roleRepository.find({
+      roles = await this.roleRepository.find({
         where: roleIds.map((id) => ({ id })),
         relations: ["permissions"],
       });
@@ -67,9 +68,12 @@ export class UserRolePermissionQueryService
       }
     }
 
+    const hasSuperAdminRole = roles.some((role) => role.isSuperAdmin);
+
     return {
       roles: roleIds,
       permissions: Array.from(allPermissions),
+      isSuperAdmin: hasSuperAdminRole,
     };
   }
 }

@@ -56,6 +56,7 @@ describe("AuthenticateUserHandler", () => {
   const mockRolePermissionData = {
     roles: ["super_admin"],
     permissions: ["user:manage", "user:read", "user:create"],
+    isSuperAdmin: true,
   };
 
   beforeEach(async () => {
@@ -355,6 +356,7 @@ describe("AuthenticateUserHandler", () => {
           "booking:read",
           "booking:create",
         ],
+        isSuperAdmin: true,
       };
 
       const accessToken = AccessToken.create("access-token-long-enough", 3600);
@@ -401,6 +403,7 @@ describe("AuthenticateUserHandler", () => {
       const noRolePermissionData = {
         roles: [],
         permissions: ["user:read"],
+        isSuperAdmin: false,
       };
 
       const accessToken = AccessToken.create("access-token-long-enough", 3600);

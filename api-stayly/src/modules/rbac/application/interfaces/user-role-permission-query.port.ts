@@ -7,6 +7,7 @@
 export interface UserRolePermissionData {
   roles: string[];
   permissions: string[];
+  isSuperAdmin: boolean;
 }
 
 export interface IUserRolePermissionQueryPort {

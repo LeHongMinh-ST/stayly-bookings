@@ -161,6 +161,7 @@ describe("UserRolePermissionQueryService", () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.roles).toEqual([roleId1, roleId2]);
+      expect(result.isSuperAdmin).toBe(false);
       expect(result.permissions).toContain("user:read"); // Direct permission
       expect(result.permissions).toContain("user:create"); // From owner role
       expect(result.permissions).toContain("user:update"); // From manager role
@@ -214,6 +215,7 @@ describe("UserRolePermissionQueryService", () => {
       // Assert
       expect(result.roles).toEqual([]);
       expect(result.permissions).toEqual(["user:read", "user:create"]);
+      expect(result.isSuperAdmin).toBe(false);
       expect(findMock).not.toHaveBeenCalled();
     });
 
@@ -301,6 +303,7 @@ describe("UserRolePermissionQueryService", () => {
       expect(result.permissions).toContain("user:read");
       expect(result.permissions).toContain("user:create");
       expect(result.permissions).toContain("user:update");
+      expect(result.isSuperAdmin).toBe(false);
       // Should not have duplicate user:read
       expect(result.permissions.filter((p) => p === "user:read")).toHaveLength(
         1,
@@ -376,6 +379,7 @@ describe("UserRolePermissionQueryService", () => {
       expect(result.roles).toEqual([roleId1]);
       expect(result.permissions).toContain("user:manage");
       expect(result.permissions).toContain("booking:manage");
+      expect(result.isSuperAdmin).toBe(true);
     });
   });
 });

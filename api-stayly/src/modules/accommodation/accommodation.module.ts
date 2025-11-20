@@ -17,6 +17,8 @@ import { AccommodationMapper } from "./infrastructure/persistence/mappers/accomm
 import { AccommodationDtoMapper } from "./infrastructure/persistence/mappers/accommodation-dto.mapper";
 import { AccommodationStatusService } from "./domain/services/accommodation-status.service";
 import { FloorManagementService } from "./domain/services/floor-management.service";
+import { RbacModule } from "../rbac/rbac.module";
+import { USER_AUTHORIZATION_SERVICE } from "./infrastructure/services/user-authorization.service";
 
 import { UpdateAccommodationHandler } from "./application/commands/handlers/update-accommodation.handler";
 
@@ -28,7 +30,11 @@ const commandHandlers = [
 const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
 
 @Module({
-  imports: [CqrsModule, TypeOrmModule.forFeature([AccommodationOrmEntity])],
+  imports: [
+    CqrsModule,
+    TypeOrmModule.forFeature([AccommodationOrmEntity]),
+    RbacModule,
+  ],
   controllers: [AccommodationsController],
   providers: [
     ...commandHandlers,
@@ -38,6 +44,7 @@ const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
     AccommodationDtoMapper,
     AccommodationStatusService,
     FloorManagementService,
+    USER_AUTHORIZATION_SERVICE,
   ],
   exports: [ACCOMMODATION_REPOSITORY],
 })

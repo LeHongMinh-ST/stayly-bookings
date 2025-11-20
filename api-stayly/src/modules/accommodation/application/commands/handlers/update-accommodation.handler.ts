@@ -19,6 +19,8 @@ import {
 } from "../../../domain/value-objects/cancellation-policy.vo";
 import { AccommodationResponseDto } from "../../dto/response/accommodation-response.dto";
 import { AccommodationDtoMapper } from "../../../infrastructure/persistence/mappers/accommodation-dto.mapper";
+import type { IUserAuthorizationPort } from "../../interfaces/user-authorization.port";
+import { USER_AUTHORIZATION_PORT } from "../../interfaces/user-authorization.port";
 
 @CommandHandler(UpdateAccommodationCommand)
 export class UpdateAccommodationHandler
@@ -29,6 +31,8 @@ export class UpdateAccommodationHandler
     private readonly accommodationRepo: IAccommodationRepository,
     private readonly eventBus: EventBus,
     private readonly dtoMapper: AccommodationDtoMapper,
+    @Inject(USER_AUTHORIZATION_PORT)
+    private readonly userAuthorization: IUserAuthorizationPort,
   ) {}
 
   async execute(
@@ -45,8 +49,13 @@ export class UpdateAccommodationHandler
       );
     }
 
-    // 2. Check ownership
-    if (accommodation.getOwnerId() !== command.ownerId) {
+    // 2. Check ownership (skip when actor owns super admin capability)
+    const isOwner = accommodation.getOwnerId() === command.ownerId;
+    const isSuperAdmin = await this.userAuthorization.isSuperAdmin(
+      command.ownerId,
+    );
+
+    if (!isOwner && !isSuperAdmin) {
       throw new ForbiddenException(
         "You do not have permission to update this accommodation",
       );
