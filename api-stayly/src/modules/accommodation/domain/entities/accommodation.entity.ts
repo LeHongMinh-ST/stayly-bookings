@@ -39,6 +39,18 @@ export interface CreateAccommodationProps {
   starRating?: number;
 }
 
+export interface UpdateAccommodationProps {
+  name?: string;
+  description?: string;
+  images?: string[];
+  amenities?: string[];
+  policies?: Policies;
+  cancellationPolicy?: CancellationPolicy;
+  starRating?: number;
+  address?: Address;
+  location?: Location;
+}
+
 export class Accommodation extends BaseEntity<AccommodationId> {
   private constructor(
     id: AccommodationId,
@@ -196,6 +208,36 @@ export class Accommodation extends BaseEntity<AccommodationId> {
     }
 
     this.status = AccommodationStatusVO.create(AccommodationStatus.SUSPENDED);
+  }
+
+  update(props: UpdateAccommodationProps): void {
+    if (props.name !== undefined) {
+      this.updateName(props.name);
+    }
+    if (props.description !== undefined) {
+      this.updateDescription(props.description);
+    }
+    if (props.images) {
+      this.updateImages(props.images);
+    }
+    if (props.amenities) {
+      this.amenities = props.amenities;
+    }
+    if (props.policies) {
+      this.policies = props.policies;
+    }
+    if (props.cancellationPolicy) {
+      this.cancellationPolicy = props.cancellationPolicy;
+    }
+    if (props.starRating !== undefined) {
+      this.starRating = props.starRating;
+    }
+    if (props.address) {
+      this.address = props.address;
+    }
+    if (props.location) {
+      this.location = props.location;
+    }
   }
 
   updateName(name: string): void {

@@ -15,11 +15,15 @@ import { AccommodationRepository } from "./infrastructure/persistence/repositori
 import { AccommodationOrmEntity } from "./infrastructure/persistence/entities/accommodation.orm-entity";
 import { AccommodationMapper } from "./infrastructure/persistence/mappers/accommodation.mapper";
 import { AccommodationDtoMapper } from "./infrastructure/persistence/mappers/accommodation-dto.mapper";
-import { AccommodationApprovalService } from "./domain/services/accommodation-approval.service";
 import { AccommodationStatusService } from "./domain/services/accommodation-status.service";
 import { FloorManagementService } from "./domain/services/floor-management.service";
 
-const commandHandlers = [CreateAccommodationHandler];
+import { UpdateAccommodationHandler } from "./application/commands/handlers/update-accommodation.handler";
+
+const commandHandlers = [
+  CreateAccommodationHandler,
+  UpdateAccommodationHandler,
+];
 
 const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
 
@@ -32,7 +36,6 @@ const queryHandlers = [GetAccommodationHandler, ListAccommodationsHandler];
     { provide: ACCOMMODATION_REPOSITORY, useClass: AccommodationRepository },
     AccommodationMapper,
     AccommodationDtoMapper,
-    AccommodationApprovalService,
     AccommodationStatusService,
     FloorManagementService,
   ],

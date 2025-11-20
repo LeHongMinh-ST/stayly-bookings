@@ -6,6 +6,7 @@
 import {
   Controller,
   Post,
+  Put,
   Get,
   Body,
   Param,
@@ -26,9 +27,11 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { JwtUserGuard } from "../../../../common/guards/jwt-user.guard";
 import { Permissions } from "../../../../common/decorators/permissions.decorator";
 import { CreateAccommodationCommand } from "../../application/commands/create-accommodation.command";
+import { UpdateAccommodationCommand } from "../../application/commands/update-accommodation.command";
 import { GetAccommodationQuery } from "../../application/queries/get-accommodation.query";
 import { ListAccommodationsQuery } from "../../application/queries/list-accommodations.query";
 import { CreateAccommodationDto } from "../../application/dto/request/create-accommodation.dto";
+import { UpdateAccommodationDto } from "../dto/update-accommodation.dto";
 import { AccommodationResponseDto } from "../../application/dto/response/accommodation-response.dto";
 import { AccommodationCollectionDto } from "../../application/dto/response/accommodation-collection.dto";
 import { AccommodationType } from "../../domain/entities/accommodation.entity";
@@ -81,6 +84,49 @@ export class AccommodationsController {
       dto.amenities,
       dto.policies,
       dto.cancellationPolicy,
+    );
+
+    return this.commandBus.execute(command);
+  }
+
+  /**
+   * Update accommodation
+   */
+  @Put(":id")
+  @Permissions("homestay:update", "homestay:manage")
+  @ApiOperation({ summary: "Update accommodation" })
+  @ApiParam({
+    name: "id",
+    description: "Accommodation unique identifier",
+    example: "123e4567-e89b-12d3-a456-426614174000",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Accommodation updated successfully",
+    type: AccommodationResponseDto,
+  })
+  @ApiResponse({ status: 400, description: "Bad request - validation failed" })
+  @ApiResponse({ status: 404, description: "Accommodation not found" })
+  @ApiResponse({
+    status: 403,
+    description: "Forbidden - insufficient permissions or not owner",
+  })
+  async update(
+    @Param("id") id: string,
+    @Body() dto: UpdateAccommodationDto,
+  ): Promise<AccommodationResponseDto> {
+    const command = new UpdateAccommodationCommand(
+      id,
+      "", // ownerId will be extracted from JWT token in handler (or middleware/guard)
+      dto.name,
+      dto.description,
+      dto.images,
+      dto.amenities,
+      dto.policies,
+      dto.cancellationPolicy,
+      dto.address,
+      dto.location,
+      dto.starRating,
     );
 
     return this.commandBus.execute(command);
