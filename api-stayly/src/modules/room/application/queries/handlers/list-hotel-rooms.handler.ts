@@ -11,6 +11,7 @@ import type { IRoomTypeRepository } from "../../../domain/repositories/room-type
 import { HotelRoomCollectionDto } from "../../dto/response/hotel-room-collection.dto";
 import { HotelRoomResponseDto } from "../../dto/response/hotel-room-response.dto";
 import { RoomDtoMapper } from "../../../infrastructure/persistence/mappers/room-dto.mapper";
+import { HotelRoom } from "../../../domain/entities/hotel-room.entity";
 
 @QueryHandler(ListHotelRoomsQuery)
 export class ListHotelRoomsHandler
@@ -34,9 +35,13 @@ export class ListHotelRoomsHandler
     };
 
     // Fetch hotel rooms and total count in parallel
+    const hotelRoomsPromise: Promise<HotelRoom[]> =
+      this.roomTypeRepository.findManyHotelRooms(limit, offset, filters);
+    const totalPromise: Promise<number> =
+      this.roomTypeRepository.countHotelRooms(filters);
     const [hotelRooms, total] = await Promise.all([
-      this.roomTypeRepository.findManyHotelRooms(limit, offset, filters),
-      this.roomTypeRepository.countHotelRooms(filters),
+      hotelRoomsPromise,
+      totalPromise,
     ]);
 
     // Map to DTOs
