@@ -44,4 +44,22 @@ export class SessionRepository implements ISessionRepository {
   async revokeById(id: string, revokedAt: Date): Promise<void> {
     await this.sessionRepo.update({ id }, { revokedAt });
   }
+
+  /**
+   * Revokes all active sessions for specified subject
+   */
+  async revokeAllBySubject(
+    subjectId: string,
+    subjectType: "user" | "customer",
+    revokedAt: Date,
+  ): Promise<void> {
+    await this.sessionRepo.update(
+      {
+        userId: subjectId,
+        userType: subjectType,
+        revokedAt: IsNull(),
+      },
+      { revokedAt },
+    );
+  }
 }

@@ -3,14 +3,16 @@
  * This service implements ICustomerAuthenticationPort and encapsulates customer authentication logic
  * Following Port/Adapter Pattern - service implements port defined in application layer
  */
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 import type { ICustomerRepository } from "../../domain/repositories/customer.repository.interface";
 import { CUSTOMER_REPOSITORY } from "../../domain/repositories/customer.repository.interface";
 import type {
   ICustomerAuthenticationPort,
   CustomerAuthenticationData,
 } from "../../application/interfaces/customer-authentication.port";
+import { CustomerId } from "../../domain/value-objects/customer-id.vo";
 
 @Injectable()
 export class CustomerAuthenticationService
@@ -40,5 +42,22 @@ export class CustomerAuthenticationService
       passwordHash: customer.getPasswordHash().getValue(),
       isActive: customer.isActive(),
     };
+  }
+
+  /**
+   * Updates password hash for customer aggregates
+   */
+  async updatePasswordHash(
+    customerId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void> {
+    const customer = await this.customerRepository.findById(
+      CustomerId.create(customerId),
+    );
+    if (!customer) {
+      throw new NotFoundException("Customer not found");
+    }
+    customer.changePassword(passwordHash);
+    await this.customerRepository.save(customer);
   }
 }

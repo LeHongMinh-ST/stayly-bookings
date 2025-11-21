@@ -6,14 +6,16 @@
  * Note: This service only returns user information. Roles and permissions are queried
  * separately from RBAC module via IUserRolePermissionQueryPort
  */
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 import type { IUserRepository } from "../../domain/repositories/user.repository.interface";
 import { USER_REPOSITORY } from "../../domain/repositories/user.repository.interface";
 import type {
   IUserAuthenticationPort,
   UserAuthenticationData,
 } from "../../application/interfaces/user-authentication.port";
+import { UserId } from "../../domain/value-objects/user-id.vo";
 
 @Injectable()
 export class UserAuthenticationService implements IUserAuthenticationPort {
@@ -44,5 +46,20 @@ export class UserAuthenticationService implements IUserAuthenticationPort {
       passwordHash: user.getPasswordHash().getValue(),
       isActive: user.isActive(),
     };
+  }
+
+  /**
+   * Updates password hash for downstream password reset workflows
+   */
+  async updatePasswordHash(
+    userId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void> {
+    const user = await this.userRepository.findById(UserId.create(userId));
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    user.changePassword(passwordHash);
+    await this.userRepository.save(user);
   }
 }

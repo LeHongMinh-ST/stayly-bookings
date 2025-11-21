@@ -4,6 +4,7 @@
  * Following Adapter Pattern to decouple auth module from customer domain
  */
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 
 /**
  * Customer authentication data required for authentication flow
@@ -24,6 +25,14 @@ export interface ICustomerAuthenticationService {
   findForAuthentication(
     email: Email,
   ): Promise<CustomerAuthenticationData | null>;
+
+  /**
+   * Updates stored password hash for customer
+   */
+  updatePasswordHash(
+    customerId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void>;
 }
 
 export const CUSTOMER_AUTHENTICATION_SERVICE =

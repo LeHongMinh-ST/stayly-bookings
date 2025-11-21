@@ -5,6 +5,7 @@
  * Following Port/Adapter Pattern - Port is defined in application layer
  */
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 
 /**
  * Customer authentication data required for authentication flow
@@ -29,6 +30,14 @@ export interface ICustomerAuthenticationPort {
   findForAuthentication(
     email: Email,
   ): Promise<CustomerAuthenticationData | null>;
+
+  /**
+   * Updates password hash for downstream password reset workflows
+   */
+  updatePasswordHash(
+    customerId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void>;
 }
 
 export const CUSTOMER_AUTHENTICATION_PORT = "CUSTOMER_AUTHENTICATION_PORT";

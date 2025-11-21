@@ -347,6 +347,37 @@ Hệ thống hỗ trợ 2 loại hình lưu trú chính:
     - Super Admin role (`is_super_admin = true`) tự động có full permissions, không thể xóa
     - Permissions được check real-time từ database (không cần đăng nhập lại)
 
+### 2.1.2. Quên mật khẩu (Password Reset)
+
+**Phạm vi:**
+- Áp dụng cho cả tài khoản quản lý (Users: Super Admin, Owner, Manager, Staff) và khách hàng (Customers).
+- Endpoint phân tách theo loại tài khoản (`/v1/auth/user/...` vs `/v1/auth/customers/...`) nhưng logic giống nhau.
+
+**Luồng nghiệp vụ chi tiết:**
+1. Người dùng gửi email tới endpoint `password/forgot`.
+2. Hệ thống luôn trả `202 Accepted`. Nếu email hợp lệ và tài khoản đang hoạt động:
+   - Sinh OTP 6 chữ số và token dài (48 bytes → hex) → chỉ xuất hiện dạng plaintext trong email, lưu ở DB dạng SHA-256 hash.
+   - Tạo bản ghi `password_reset_requests` với trạng thái `pending`, `attempt_count = 0`, `max_attempts = 5`, metadata (`requested_ip`, `requested_user_agent`).
+   - OTP hết hạn sau **10 phút**, token hết hạn sau **60 phút** (có thể override qua config `auth.passwordReset.*`).
+   - Gửi email chứa **OTP** và **link reset** (`?requestId=...&token=...&type=...`).
+   - Nếu cùng tài khoản đã có request ở trạng thái `pending/otp_verified`, request cũ bị `revoked`.
+3. Người dùng nhập OTP → hệ thống:
+   - Tra bản ghi theo `requestId`.
+   - So khớp hash OTP, kiểm tra chưa hết hạn và chưa vượt quá 5 lần thử.
+   - Nếu trùng khớp: chuyển trạng thái `otp_verified`, lưu `verified_at`.
+   - Nếu sai: tăng `attempt_count`, ghi `last_attempt_at`. Đủ 5 lần → `revoked`.
+4. Người dùng click link và gửi `requestId + token + newPassword`:
+   - Token hash phải khớp và request phải ở trạng thái `otp_verified`.
+   - Hash mật khẩu mới bằng `PASSWORD_HASHER`, gọi tới module User/Customer để cập nhật.
+   - Đánh dấu request `completed`, lưu `completed_at`, revoke tất cả refresh session của tài khoản để buộc đăng nhập lại.
+
+**Quy tắc bảo mật & audit:**
+- Không bao giờ trả OTP/token plaintext qua API (chỉ email).
+- Thông báo lỗi luôn dùng thông điệp chung “Invalid or expired …” để tránh suy đoán.
+- Chỉ tối đa 1 request active cho mỗi tài khoản; request mới tự động revoke request cũ.
+- Ghi log đầy đủ IP, user-agent, thời gian tạo/attempt để hỗ trợ điều tra.
+- Sau khi reset thành công bắt buộc đăng nhập lại do toàn bộ session bị revoke.
+
 ### 2.2. Quản lý thông tin Homestay
 
 **Nghiệp vụ:**

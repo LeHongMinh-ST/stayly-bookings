@@ -765,6 +765,22 @@ export class CustomerResponseDto {
 - Use meaningful examples that reflect real-world usage
 - Document error responses (400, 401, 403, 404, 500, etc.)
 
+### 6.5. Password Reset API Contract
+
+- **Endpoints (song song cho `/v1/auth/user` và `/v1/auth/customers`):**
+  - `POST password/forgot` → body `{ email }`, trả `202` cùng `requestId`, `expiresAt`, `otpExpiresAt`. Luôn trả thành công để tránh lộ tài khoản.
+  - `POST password/verify-otp` → body `{ requestId, otp }`, trả `204` khi hợp lệ. Sai hoặc hết hạn cũng trả `400` với thông báo chung `"Invalid or expired OTP"`.
+  - `POST password/reset` → body `{ requestId, token, newPassword }`, yêu cầu OTP đã verify. Trả `204` + revoke toàn bộ refresh session.
+- **Validation & bảo mật:**
+  - OTP 6 chữ số, token > 32 ký tự, `newPassword` ≥ 8 ký tự và tuân thủ chính sách mật khẩu hệ thống.
+  - Tất cả OTP/token lưu ở DB dưới dạng SHA-256 hash, không log plaintext.
+  - `max_attempts = 5`, sau đó request bị `revoked`; controller không trả chi tiết số lần còn lại.
+  - Luôn ghi nhận `user-agent`, `ip` trong request metadata và truyền xuống command để lưu trong domain.
+- **Swagger:**
+  - Gắn `@HttpCode(202)` cho forgot và `@HttpCode(204)` cho verify/reset.
+  - Response DTO `PasswordResetRequestResponseDto` chỉ hiển thị khi request thành công.
+  - Document error responses `400 (Invalid or expired ...)` để front-end xử lý thống nhất.
+
 ---
 
 ## 7. Database Conventions

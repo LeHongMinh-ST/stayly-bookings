@@ -10,6 +10,7 @@
  */
 import { Inject, Injectable } from "@nestjs/common";
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 import type { IUserAuthenticationPort } from "../../../user/application/interfaces/user-authentication.port";
 import { USER_AUTHENTICATION_PORT } from "../../../user/application/interfaces/user-authentication.port";
 import type {
@@ -32,5 +33,15 @@ export class UserAuthenticationAdapter implements IUserAuthenticationService {
     email: Email,
   ): Promise<UserAuthenticationData | null> {
     return this.userAuthenticationPort.findForAuthentication(email);
+  }
+
+  /**
+   * Delegates password hash update to user module port
+   */
+  async updatePasswordHash(
+    userId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void> {
+    await this.userAuthenticationPort.updatePasswordHash(userId, passwordHash);
   }
 }

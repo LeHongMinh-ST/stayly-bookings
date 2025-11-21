@@ -10,6 +10,7 @@
  */
 import { Inject, Injectable } from "@nestjs/common";
 import { Email } from "../../../../common/domain/value-objects/email.vo";
+import { PasswordHash } from "../../../../common/domain/value-objects/password-hash.vo";
 import type { ICustomerAuthenticationPort } from "../../../customer/application/interfaces/customer-authentication.port";
 import { CUSTOMER_AUTHENTICATION_PORT } from "../../../customer/application/interfaces/customer-authentication.port";
 import type {
@@ -34,5 +35,18 @@ export class CustomerAuthenticationAdapter
     email: Email,
   ): Promise<CustomerAuthenticationData | null> {
     return this.customerAuthenticationPort.findForAuthentication(email);
+  }
+
+  /**
+   * Delegates password hash update to customer module
+   */
+  async updatePasswordHash(
+    customerId: string,
+    passwordHash: PasswordHash,
+  ): Promise<void> {
+    await this.customerAuthenticationPort.updatePasswordHash(
+      customerId,
+      passwordHash,
+    );
   }
 }

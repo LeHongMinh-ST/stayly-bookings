@@ -2,7 +2,15 @@
  * CustomerAuthController manages authentication flows for customers (login, refresh, logout)
  * Only accessible by customers from customers table
  */
-import { Body, Controller, Inject, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Inject,
+  Post,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -22,6 +30,13 @@ import { RevokeSessionCommand } from "../../application/commands/revoke-session.
 import type { Request } from "express";
 import type { TokenService } from "../../../../common/application/interfaces/token-service.interface";
 import { TOKEN_SERVICE } from "../../../../common/application/interfaces/token-service.interface";
+import { ForgotPasswordRequestDto } from "../../application/dto/request/forgot-password-request.dto";
+import { VerifyPasswordResetOtpDto } from "../../application/dto/request/verify-password-reset-otp.dto";
+import { CompletePasswordResetDto } from "../../application/dto/request/complete-password-reset.dto";
+import { RequestPasswordResetCommand } from "../../application/commands/request-password-reset.command";
+import { PasswordResetRequestResponseDto } from "../../application/dto/response/password-reset-request-response.dto";
+import { VerifyPasswordResetOtpCommand } from "../../application/commands/verify-password-reset-otp.command";
+import { CompletePasswordResetCommand } from "../../application/commands/complete-password-reset.command";
 
 @ApiTags("auth")
 @Controller("v1/auth/customers")
@@ -59,6 +74,87 @@ export class CustomerAuthController {
       ipAddress,
     );
     return this.commandBus.execute(command);
+  }
+
+  /**
+   * Initiates password reset flow for customer accounts
+   */
+  @Post("password/forgot")
+  @Public()
+  @HttpCode(202)
+  @ApiOperation({
+    summary: "Request password reset (customer)",
+  })
+  @ApiBody({ type: ForgotPasswordRequestDto })
+  @ApiResponse({
+    status: 202,
+    description: "Reset instructions sent when account exists",
+    type: PasswordResetRequestResponseDto,
+  })
+  async forgotPassword(
+    @Body() dto: ForgotPasswordRequestDto,
+    @Req() req: Request,
+  ): Promise<PasswordResetRequestResponseDto> {
+    const { userAgent, ipAddress } = this.extractRequestMetadata(req);
+    return this.commandBus.execute(
+      new RequestPasswordResetCommand(
+        dto.email,
+        "customer",
+        userAgent,
+        ipAddress,
+      ),
+    );
+  }
+
+  /**
+   * Verifies OTP for customer password reset
+   */
+  @Post("password/verify-otp")
+  @Public()
+  @HttpCode(204)
+  @ApiOperation({
+    summary: "Verify password reset OTP (customer)",
+  })
+  @ApiBody({ type: VerifyPasswordResetOtpDto })
+  @ApiResponse({ status: 204, description: "OTP verified successfully" })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid OTP or request expired",
+  })
+  async verifyPasswordResetOtp(
+    @Body() dto: VerifyPasswordResetOtpDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new VerifyPasswordResetOtpCommand(dto.requestId, dto.otp, "customer"),
+    );
+  }
+
+  /**
+   * Completes customer password reset using token from email link
+   */
+  @Post("password/reset")
+  @Public()
+  @HttpCode(204)
+  @ApiOperation({
+    summary: "Complete password reset using email token (customer)",
+  })
+  @ApiBody({ type: CompletePasswordResetDto })
+  @ApiResponse({ status: 204, description: "Password updated successfully" })
+  @ApiResponse({
+    status: 400,
+    description: "Invalid token or OTP not verified",
+  })
+  async completePasswordReset(
+    @Body() dto: CompletePasswordResetDto,
+  ): Promise<void> {
+    await this.commandBus.execute(
+      new CompletePasswordResetCommand(
+        dto.requestId,
+        dto.token,
+        dto.newPassword,
+        "customer",
+      ),
+    );
   }
 
   /**

@@ -8,6 +8,11 @@ export interface ISessionRepository {
   findById(id: string): Promise<Session | null>;
   findActiveByTokenId(tokenId: string): Promise<Session | null>;
   revokeById(id: string, revokedAt: Date): Promise<void>;
+  revokeAllBySubject(
+    subjectId: string,
+    subjectType: "user" | "customer",
+    revokedAt: Date,
+  ): Promise<void>;
 }
 
 export const SESSION_REPOSITORY = "SESSION_REPOSITORY";

@@ -17,10 +17,16 @@ import { AuthenticateUserHandler } from "./application/commands/handlers/authent
 import { AuthenticateCustomerHandler } from "./application/commands/handlers/authenticate-customer.handler";
 import { RefreshTokenHandler } from "./application/commands/handlers/refresh-token.handler";
 import { RevokeSessionHandler } from "./application/commands/handlers/revoke-session.handler";
+import { RequestPasswordResetHandler } from "./application/commands/handlers/request-password-reset.handler";
+import { VerifyPasswordResetOtpHandler } from "./application/commands/handlers/verify-password-reset-otp.handler";
+import { CompletePasswordResetHandler } from "./application/commands/handlers/complete-password-reset.handler";
 import { TOKEN_SERVICE } from "../../common/application/interfaces/token-service.interface";
 import { SESSION_REPOSITORY } from "./domain/repositories/session.repository.interface";
+import { PASSWORD_RESET_REQUEST_REPOSITORY } from "./domain/repositories/password-reset-request.repository.interface";
 import { SessionOrmEntity } from "./infrastructure/persistence/entities/session.orm-entity";
+import { PasswordResetRequestOrmEntity } from "./infrastructure/persistence/entities/password-reset-request.orm-entity";
 import { SessionRepository } from "./infrastructure/persistence/repositories/session.repository";
+import { PasswordResetRequestRepository } from "./infrastructure/persistence/repositories/password-reset-request.repository";
 import { UserAuthController } from "./presentation/controllers/auth.controller";
 import { CustomerAuthController } from "./presentation/controllers/customer-auth.controller";
 import { JwtTokenService } from "./infrastructure/services/jwt-token.service";
@@ -32,12 +38,17 @@ import { UserRolePermissionQueryAdapter } from "./infrastructure/adapters/user-r
 import { CUSTOMER_AUTHENTICATION_SERVICE } from "./application/interfaces/customer-authentication.service.interface";
 import { USER_AUTHENTICATION_SERVICE } from "./application/interfaces/user-authentication.service.interface";
 import { USER_ROLE_PERMISSION_QUERY_SERVICE } from "./application/interfaces/user-role-permission-query.service.interface";
+import { PASSWORD_RESET_NOTIFICATION_SERVICE } from "./application/interfaces/password-reset-notification.service.interface";
+import { PasswordResetNotificationService } from "./infrastructure/services/password-reset-notification.service";
 
 const commandHandlers = [
   AuthenticateUserHandler,
   AuthenticateCustomerHandler,
   RefreshTokenHandler,
   RevokeSessionHandler,
+  RequestPasswordResetHandler,
+  VerifyPasswordResetOtpHandler,
+  CompletePasswordResetHandler,
 ];
 
 @Module({
@@ -47,7 +58,7 @@ const commandHandlers = [
     UserModule,
     CustomerModule,
     RbacModule, // Import RbacModule to access USER_ROLE_PERMISSION_QUERY_PORT
-    TypeOrmModule.forFeature([SessionOrmEntity]),
+    TypeOrmModule.forFeature([SessionOrmEntity, PasswordResetRequestOrmEntity]),
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -68,6 +79,14 @@ const commandHandlers = [
     JwtUserStrategy,
     JwtCustomerStrategy,
     { provide: SESSION_REPOSITORY, useClass: SessionRepository },
+    {
+      provide: PASSWORD_RESET_REQUEST_REPOSITORY,
+      useClass: PasswordResetRequestRepository,
+    },
+    {
+      provide: PASSWORD_RESET_NOTIFICATION_SERVICE,
+      useClass: PasswordResetNotificationService,
+    },
     { provide: TOKEN_SERVICE, useClass: JwtTokenService },
     // Adapters use services from other modules, not repositories directly
     // Services are exported from modules and provide what other modules need
