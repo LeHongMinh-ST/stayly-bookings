@@ -1,8 +1,10 @@
+import { Injectable } from "@nestjs/common";
 import { Room } from "../../../domain/entities/room.entity";
 import { RoomType } from "../../../domain/entities/room-type.entity";
 import { RoomResponseDto } from "../../../application/dto/response/room-response.dto";
 import { RoomTypeResponseDto } from "../../../application/dto/response/room-type-response.dto";
 
+@Injectable()
 export class RoomDtoMapper {
   toRoomDto(room: Room): RoomResponseDto {
     const basePrice = room.getBasePrice();
