@@ -100,4 +100,19 @@ export class RoomTypeOrmMapper {
     entity.notes = room.getNotes() ?? null;
     return entity;
   }
+
+  static hotelRoomToOrm(room: HotelRoom): HotelRoomOrmEntity {
+    return this.toHotelRoomOrm(room);
+  }
+
+  static hotelRoomToDomain(entity: HotelRoomOrmEntity): HotelRoom {
+    return HotelRoom.rehydrate({
+      id: HotelRoomId.create(entity.id),
+      roomTypeId: RoomTypeId.create(entity.roomTypeId),
+      roomNumber: RoomNumberVO.create(entity.roomNumber),
+      status: HotelRoomStatusVO.create(entity.status as never),
+      floorId: entity.floorId ?? undefined,
+      notes: entity.notes ?? undefined,
+    });
+  }
 }
