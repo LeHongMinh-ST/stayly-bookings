@@ -781,6 +781,17 @@ export class CustomerResponseDto {
   - Response DTO `PasswordResetRequestResponseDto` chỉ hiển thị khi request thành công.
   - Document error responses `400 (Invalid or expired ...)` để front-end xử lý thống nhất.
 
+### 6.6. Notification Module & Kafka Conventions
+
+- **Topic naming:** `notification.<event>` (ví dụ `notification.password-reset`, `notification.booking-confirmed`). Event payload phải chứa `eventId`, `occurredAt`, `subjectId`, `channel`.
+- **Event flow:** Context phát event → Kafka Producer publish → NotificationModule consumer (`@MessagePattern` hoặc EventEmitter bridge) → `NotificationService.dispatch`.
+- **Template naming:** snake_case không dấu (`password_reset`, `booking_confirmed_owner`) để ánh xạ với thư mục template/email provider.
+- **Channels:** `email`, `sms`, `push`. Nếu channel chưa hỗ trợ → `NotificationService` ghi log `failed` với lý do “Unsupported channel”.
+- **Persistence:** mọi lần gửi phải lưu vào `notification_logs` với `status`, `attempts`, `error_message` để phục vụ audit & retry. Không lưu plaintext thông tin nhạy cảm (mask email/phone).
+- **Providers:** wrap third-party SDK (SendGrid/Mailgun/SES/Twilio...) qua interface `IEmailProvider`/`ISmsProvider`. Provider chỉ xử lý giao tiếp, không chứa business logic.
+- **Config:** `notification.email.sender`, `notification.email.provider`, `notification.kafkaTopics.*`, `notification.retry.maxAttempts`, `notification.retry.backoffMs` (nếu có). Không hardcode thông tin trong code.
+- **Testing:** sử dụng `LoggerEmailProvider` hoặc fake provider ghi log, kèm unit test cho NotificationService mô phỏng success/failure path.
+
 ---
 
 ## 7. Database Conventions

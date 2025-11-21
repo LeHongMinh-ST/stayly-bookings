@@ -63,6 +63,19 @@ export default () => ({
     format: process.env.LOG_FORMAT || "json",
   },
 
+  // Notification
+  notification: {
+    email: {
+      sender: process.env.NOTIFICATION_EMAIL_SENDER || "no-reply@stayly.io",
+      provider: process.env.NOTIFICATION_EMAIL_PROVIDER || "logger",
+    },
+    kafkaTopics: {
+      passwordReset:
+        process.env.KAFKA_TOPIC_NOTIFICATION_PASSWORD_RESET ||
+        "notification.password-reset",
+    },
+  },
+
   // Seeds
   seeds: {
     superAdminEmail: process.env.SEED_SUPER_ADMIN_EMAIL || "admin@stayly.dev",

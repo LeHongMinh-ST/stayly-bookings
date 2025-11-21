@@ -1049,6 +1049,14 @@ Giá cuối cùng = (PromotionPrice ?? WeeklyPrice ?? SeasonalPrice ?? BasePrice
 - Gửi SMS (tùy chọn, có phí)
 - Thông báo trong app/web (in-app notification)
 
+**Kiến trúc NotificationModule (event-driven):**
+- Mỗi nghiệp vụ phát sự kiện (CQRS hoặc Kafka topic) khi cần gửi thông báo, ví dụ `notification.password-reset`.
+- `NotificationModule` subscribe Kafka topic tương ứng (hoặc nhận trực tiếp qua EventEmitter) → mapping vào aggregate `Notification`, ghi log vào bảng `notification_logs`.
+- `NotificationService` quyết định channel (hiện hỗ trợ email, future: sms/push), chọn template, truyền payload (OTP, link, booking info).
+- Provider email (SendGrid/Mailgun/SES…) được trừu tượng hóa; có thể cấu hình fallback hoặc logger provider cho dev.
+- Lưu retry metadata (`status`, `attempts`, `last_attempt_at`, `error_message`) để theo dõi SLA và tái gửi nếu provider lỗi.
+- Có thể kích hoạt chế độ đồng bộ (call trực tiếp NotificationService) cho case OTP, đồng thời vẫn publish event để đảm bảo audit.
+
 ### 6.2. Tin nhắn giữa khách hàng và Owner/Manager
 
 **Nghiệp vụ:**

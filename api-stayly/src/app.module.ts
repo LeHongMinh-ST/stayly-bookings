@@ -39,6 +39,7 @@ import { UserModule } from "./modules/user/user.module";
 import { CustomerModule } from "./modules/customer/customer.module";
 import { AccommodationModule } from "./modules/accommodation/accommodation.module";
 import { RoomModule } from "./modules/room/room.module";
+import { NotificationModule } from "./modules/notification/notification.module";
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { RoomModule } from "./modules/room/room.module";
     CustomerModule,
     AccommodationModule,
     RoomModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

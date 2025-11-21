@@ -4,6 +4,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { randomUUID } from "crypto";
 
 import { Email } from "../../../../../common/domain/value-objects/email.vo";
@@ -25,11 +26,8 @@ import { PasswordResetRequestId } from "../../../domain/value-objects/password-r
 import type { PasswordResetSubjectType } from "../../../domain/types/password-reset.types";
 import { PasswordResetUtil } from "../../utils/password-reset.util";
 import { PasswordResetRequestResponseDto } from "../../dto/response/password-reset-request-response.dto";
-import type {
-  IPasswordResetNotificationService,
-  PasswordResetNotificationPayload,
-} from "../../interfaces/password-reset-notification.service.interface";
-import { PASSWORD_RESET_NOTIFICATION_SERVICE } from "../../interfaces/password-reset-notification.service.interface";
+import { KafkaProducerService } from "../../../../../common/infrastructure/kafka/kafka.producer.service";
+import { PasswordResetRequestedEvent } from "../../../domain/events/password-reset-requested.event";
 
 type PasswordResetAccount = UserAuthenticationData | CustomerAuthenticationData;
 
@@ -52,8 +50,8 @@ export class RequestPasswordResetHandler
     @Inject(PASSWORD_RESET_REQUEST_REPOSITORY)
     private readonly passwordResetRepository: IPasswordResetRequestRepository,
     private readonly configService: ConfigService,
-    @Inject(PASSWORD_RESET_NOTIFICATION_SERVICE)
-    private readonly notificationService: IPasswordResetNotificationService,
+    private readonly eventEmitter: EventEmitter2,
+    private readonly kafkaProducer: KafkaProducerService,
   ) {}
 
   /**
@@ -115,16 +113,32 @@ export class RequestPasswordResetHandler
     token: string,
     request: PasswordResetRequest,
   ): Promise<void> {
-    const payload: PasswordResetNotificationPayload = {
-      email,
+    const event = new PasswordResetRequestedEvent(
+      request.getId().getValue(),
+      request.getSubjectId(),
       subjectType,
-      otp,
+      email,
       token,
-      requestId: request.getId().getValue(),
-      expiresAt: request.getExpiresAt(),
-      otpExpiresAt: request.getOtpExpiresAt(),
-    };
-    await this.notificationService.sendResetInstructions(payload);
+      otp,
+      request.getExpiresAt(),
+      request.getOtpExpiresAt(),
+    );
+    const topic =
+      this.configService.get<string>(
+        "notification.kafkaTopics.passwordReset",
+      ) ?? "notification.password-reset";
+    await this.kafkaProducer.publish(topic, {
+      requestId: event.requestId,
+      subjectId: event.subjectId,
+      subjectType: event.subjectType,
+      email: event.email,
+      token: event.token,
+      otp: event.otp,
+      expiresAt: event.expiresAt.toISOString(),
+      otpExpiresAt: event.otpExpiresAt.toISOString(),
+      occurredAt: event.occurredAt.toISOString(),
+    });
+    this.eventEmitter.emit("notification.password-reset.requested", event);
   }
 
   private async resolveAccount(

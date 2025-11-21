@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PassportModule } from "@nestjs/passport";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { SecurityModule } from "../../common/infrastructure/security/security.module";
+import { KafkaModule } from "../../common/infrastructure/kafka/kafka.module";
 import { UserModule } from "../user/user.module";
 import { CustomerModule } from "../customer/customer.module";
 import { RbacModule } from "../rbac/rbac.module";
@@ -38,8 +39,7 @@ import { UserRolePermissionQueryAdapter } from "./infrastructure/adapters/user-r
 import { CUSTOMER_AUTHENTICATION_SERVICE } from "./application/interfaces/customer-authentication.service.interface";
 import { USER_AUTHENTICATION_SERVICE } from "./application/interfaces/user-authentication.service.interface";
 import { USER_ROLE_PERMISSION_QUERY_SERVICE } from "./application/interfaces/user-role-permission-query.service.interface";
-import { PASSWORD_RESET_NOTIFICATION_SERVICE } from "./application/interfaces/password-reset-notification.service.interface";
-import { PasswordResetNotificationService } from "./infrastructure/services/password-reset-notification.service";
+import { NotificationModule } from "../notification/notification.module";
 
 const commandHandlers = [
   AuthenticateUserHandler,
@@ -55,6 +55,8 @@ const commandHandlers = [
   imports: [
     CqrsModule,
     SecurityModule,
+    KafkaModule,
+    NotificationModule,
     UserModule,
     CustomerModule,
     RbacModule, // Import RbacModule to access USER_ROLE_PERMISSION_QUERY_PORT
@@ -82,10 +84,6 @@ const commandHandlers = [
     {
       provide: PASSWORD_RESET_REQUEST_REPOSITORY,
       useClass: PasswordResetRequestRepository,
-    },
-    {
-      provide: PASSWORD_RESET_NOTIFICATION_SERVICE,
-      useClass: PasswordResetNotificationService,
     },
     { provide: TOKEN_SERVICE, useClass: JwtTokenService },
     // Adapters use services from other modules, not repositories directly

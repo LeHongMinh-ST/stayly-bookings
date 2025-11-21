@@ -12,6 +12,7 @@ export class PasswordResetRequestedEvent implements DomainEvent {
     public readonly requestId: string,
     public readonly subjectId: string,
     public readonly subjectType: PasswordResetSubjectType,
+    public readonly email: string,
     public readonly token: string,
     public readonly otp: string,
     public readonly expiresAt: Date,

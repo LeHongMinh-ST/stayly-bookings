@@ -1,5 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 import { RequestPasswordResetHandler } from "../request-password-reset.handler";
 import { RequestPasswordResetCommand } from "../../request-password-reset.command";
@@ -15,16 +16,16 @@ import {
   PASSWORD_RESET_REQUEST_REPOSITORY,
   type IPasswordResetRequestRepository,
 } from "../../../../domain/repositories/password-reset-request.repository.interface";
-import {
-  PASSWORD_RESET_NOTIFICATION_SERVICE,
-  type IPasswordResetNotificationService,
-} from "../../../interfaces/password-reset-notification.service.interface";
+import { KafkaProducerService } from "../../../../../../common/infrastructure/kafka/kafka.producer.service";
 describe("RequestPasswordResetHandler", () => {
   let handler: RequestPasswordResetHandler;
   let userAuthMock: jest.Mocked<IUserAuthenticationService>;
   let customerAuthMock: jest.Mocked<ICustomerAuthenticationService>;
   let repositoryMock: jest.Mocked<IPasswordResetRequestRepository>;
-  let notificationMock: jest.Mocked<IPasswordResetNotificationService>;
+  let eventEmitterMock: jest.Mocked<EventEmitter2>;
+  let kafkaProducerMock: jest.Mocked<KafkaProducerService>;
+  let emitMock: jest.MockedFunction<EventEmitter2["emit"]>;
+  let kafkaPublishMock: jest.MockedFunction<KafkaProducerService["publish"]>;
 
   const configGetMock = jest.fn();
 
@@ -46,9 +47,17 @@ describe("RequestPasswordResetHandler", () => {
       findLatestBySubject: jest.fn(),
     };
 
-    notificationMock = {
-      sendResetInstructions: jest.fn(),
-    };
+    emitMock = jest.fn();
+    eventEmitterMock = {
+      emit: emitMock,
+    } as unknown as jest.Mocked<EventEmitter2>;
+
+    kafkaPublishMock = jest.fn();
+    kafkaProducerMock = {
+      publish: kafkaPublishMock,
+      publishBatch: jest.fn(),
+      onModuleInit: jest.fn(),
+    } as unknown as jest.Mocked<KafkaProducerService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -66,8 +75,12 @@ describe("RequestPasswordResetHandler", () => {
           useValue: repositoryMock,
         },
         {
-          provide: PASSWORD_RESET_NOTIFICATION_SERVICE,
-          useValue: notificationMock,
+          provide: EventEmitter2,
+          useValue: eventEmitterMock,
+        },
+        {
+          provide: KafkaProducerService,
+          useValue: kafkaProducerMock,
         },
         {
           provide: ConfigService,
@@ -103,11 +116,16 @@ describe("RequestPasswordResetHandler", () => {
     );
 
     expect(repositoryMock.save).toHaveBeenCalledTimes(1);
-    expect(notificationMock.sendResetInstructions).toHaveBeenCalledWith(
+    expect(kafkaPublishMock).toHaveBeenCalledWith(
+      "notification.password-reset",
       expect.objectContaining({
         email: "admin@stayly.dev",
         subjectType: "user",
       }),
+    );
+    expect(emitMock).toHaveBeenCalledWith(
+      "notification.password-reset.requested",
+      expect.any(Object),
     );
     expect(response.requestId).toEqual(expect.any(String));
   });
@@ -125,7 +143,8 @@ describe("RequestPasswordResetHandler", () => {
     );
 
     expect(repositoryMock.save).not.toHaveBeenCalled();
-    expect(notificationMock.sendResetInstructions).not.toHaveBeenCalled();
+    expect(kafkaPublishMock).not.toHaveBeenCalled();
+    expect(emitMock).not.toHaveBeenCalled();
     expect(response.requestId).toEqual(expect.any(String));
   });
 
