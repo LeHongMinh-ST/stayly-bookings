@@ -21,11 +21,22 @@ export class PasswordResetNotificationHandler {
   ) {}
 
   /**
-   * In production this should be wired to Kafka topic (e.g. notification.password-reset).
-   * Here we reuse Nest EventEmitter to keep contract explicit.
+   * Handles in-process events (legacy/internal flows)
    */
   @OnEvent("notification.password-reset.requested")
-  async handle(event: PasswordResetRequestedEvent): Promise<void> {
+  async handleInProcess(event: PasswordResetRequestedEvent): Promise<void> {
+    await this.dispatch(event);
+  }
+
+  /**
+   * Handles events emitted by Kafka listener bridge
+   */
+  @OnEvent("kafka.notification.password-reset")
+  async handleKafka(event: PasswordResetRequestedEvent): Promise<void> {
+    await this.dispatch(event);
+  }
+
+  private async dispatch(event: PasswordResetRequestedEvent): Promise<void> {
     await this.notificationService.dispatch({
       channel: "email",
       templateKey: "password_reset",

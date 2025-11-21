@@ -23,8 +23,8 @@ import { NotificationKafkaConsumer } from "./infrastructure/kafka/notification-k
     { provide: EMAIL_PROVIDER, useClass: LoggerEmailProvider },
     { provide: NOTIFICATION_REPOSITORY, useClass: NotificationRepository },
     PasswordResetNotificationHandler,
-    NotificationKafkaConsumer,
   ],
+  controllers: [NotificationKafkaConsumer],
   exports: [NOTIFICATION_SERVICE],
 })
 export class NotificationModule {}

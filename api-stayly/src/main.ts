@@ -7,8 +7,10 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import { MicroserviceOptions } from "@nestjs/microservices";
 import { AppModule } from "./app.module";
 import { Logger } from "nestjs-pino";
+import { getKafkaConfig } from "./common/infrastructure/kafka/kafka.config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -19,6 +21,10 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   const configService = app.get(ConfigService);
+
+  // Start Kafka microservice for async consumers (notification, etc.)
+  app.connectMicroservice<MicroserviceOptions>(getKafkaConfig(configService));
+  await app.startAllMicroservices();
 
   // Global prefix for all routes
   app.setGlobalPrefix("api");

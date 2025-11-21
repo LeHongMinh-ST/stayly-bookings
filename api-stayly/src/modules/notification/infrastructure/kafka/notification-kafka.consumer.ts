@@ -1,27 +1,53 @@
 /**
- * NotificationKafkaConsumer listens to Kafka-emitted events (bridged via Nest EventEmitter)
- * and forwards them to the appropriate application handlers.
+ * NotificationKafkaConsumer listens to Kafka topics and re-emits domain events
+ * so that existing handlers (PasswordResetNotificationHandler) can stay decoupled.
  */
-import { Injectable } from "@nestjs/common";
-import { OnEvent } from "@nestjs/event-emitter";
+import { Controller, Logger } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { MessagePattern, Payload } from "@nestjs/microservices";
 
-import { PasswordResetNotificationHandler } from "../../application/handlers/password-reset-notification.handler";
-import type { PasswordResetRequestedEvent } from "../../../auth/domain/events/password-reset-requested.event";
+import { PasswordResetRequestedEvent } from "../../../auth/domain/events/password-reset-requested.event";
+import type { PasswordResetSubjectType } from "../../../auth/domain/types/password-reset.types";
 
-@Injectable()
+interface PasswordResetKafkaPayload {
+  requestId: string;
+  subjectId: string;
+  subjectType: PasswordResetSubjectType;
+  email: string;
+  token: string;
+  otp: string;
+  expiresAt: string;
+  otpExpiresAt: string;
+  occurredAt?: string;
+}
+
+@Controller()
 export class NotificationKafkaConsumer {
-  constructor(
-    private readonly passwordResetHandler: PasswordResetNotificationHandler,
-  ) {}
+  private readonly logger = new Logger(NotificationKafkaConsumer.name);
+
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   /**
-   * In the current setup, Kafka listener should emit `kafka.notification.password-reset`
-   * whenever a password reset event is consumed from the topic.
+   * Consumes Kafka topic (notification.password-reset) and emits internal event
    */
-  @OnEvent("kafka.notification.password-reset")
-  async handlePasswordResetMessage(
-    payload: PasswordResetRequestedEvent,
-  ): Promise<void> {
-    await this.passwordResetHandler.handle(payload);
+  @MessagePattern("notification.password-reset")
+  handlePasswordResetMessage(
+    @Payload() payload: PasswordResetKafkaPayload,
+  ): void {
+    const event = new PasswordResetRequestedEvent(
+      payload.requestId,
+      payload.subjectId,
+      payload.subjectType,
+      payload.email,
+      payload.token,
+      payload.otp,
+      new Date(payload.expiresAt),
+      new Date(payload.otpExpiresAt),
+      payload.occurredAt ? new Date(payload.occurredAt) : new Date(),
+    );
+    this.logger.debug(
+      `Kafka password reset event received for subject ${event.subjectId}`,
+    );
+    this.eventEmitter.emit("kafka.notification.password-reset", event);
   }
 }
