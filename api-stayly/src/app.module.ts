@@ -38,6 +38,7 @@ import { RbacModule } from "./modules/rbac/rbac.module";
 import { UserModule } from "./modules/user/user.module";
 import { CustomerModule } from "./modules/customer/customer.module";
 import { AccommodationModule } from "./modules/accommodation/accommodation.module";
+import { RoomModule } from "./modules/room/room.module";
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { AccommodationModule } from "./modules/accommodation/accommodation.modul
     UserModule,
     CustomerModule,
     AccommodationModule,
+    RoomModule,
   ],
   controllers: [AppController],
   providers: [
