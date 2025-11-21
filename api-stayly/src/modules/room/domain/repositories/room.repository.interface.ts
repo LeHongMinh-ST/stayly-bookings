@@ -11,4 +11,16 @@ export interface IRoomRepository {
   findById(id: RoomId): Promise<Room | null>;
   findByAccommodationId(accommodationId: string): Promise<Room[]>;
   lockById(id: RoomId): Promise<Room | null>;
+  findMany(
+    limit: number,
+    offset: number,
+    filters?: {
+      accommodationId?: string;
+      status?: string;
+    },
+  ): Promise<Room[]>;
+  count(filters?: {
+    accommodationId?: string;
+    status?: string;
+  }): Promise<number>;
 }

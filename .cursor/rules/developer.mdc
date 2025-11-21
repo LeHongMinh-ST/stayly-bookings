@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+1. Luôn luôn chạy lại lint và test để kiểm tra các lỗi và test sau khi làm xong 1 chức năng, nếu có lỗi cần fix lại lint và test luôn
+2. Luôn tuân thủ các yêu cầu trong các file rule 

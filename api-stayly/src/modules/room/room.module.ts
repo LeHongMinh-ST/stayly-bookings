@@ -23,10 +23,20 @@ import { RoomDtoMapper } from "./infrastructure/persistence/mappers/room-dto.map
 import { RoomAvailabilityService } from "./domain/services/room-availability.service";
 import { RoomFactoryService } from "./domain/services/room-factory.service";
 
+import { ListHomestayRoomsHandler } from "./application/queries/handlers/list-homestay-rooms.handler";
+import { ListRoomTypesHandler } from "./application/queries/handlers/list-room-types.handler";
+import { ListHotelRoomsHandler } from "./application/queries/handlers/list-hotel-rooms.handler";
+
 const commandHandlers = [
   CreateRoomHandler,
   CreateRoomTypeHandler,
   CreateHotelRoomHandler,
+];
+
+const queryHandlers = [
+  ListHomestayRoomsHandler,
+  ListRoomTypesHandler,
+  ListHotelRoomsHandler,
 ];
 
 @Module({
@@ -41,6 +51,7 @@ const commandHandlers = [
   controllers: [RoomsController],
   providers: [
     ...commandHandlers,
+    ...queryHandlers,
     { provide: ROOM_REPOSITORY, useClass: RoomRepository },
     { provide: ROOM_TYPE_REPOSITORY, useClass: RoomTypeRepository },
     RoomOrmMapper,

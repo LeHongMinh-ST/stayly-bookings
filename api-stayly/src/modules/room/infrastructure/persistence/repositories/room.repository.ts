@@ -41,4 +41,53 @@ export class RoomRepository implements IRoomRepository {
     });
     return entity ? RoomOrmMapper.toDomain(entity) : null;
   }
+
+  async findMany(
+    limit: number,
+    offset: number,
+    filters?: {
+      accommodationId?: string;
+      status?: string;
+    },
+  ): Promise<Room[]> {
+    const queryBuilder = this.roomRepo.createQueryBuilder("room");
+
+    if (filters?.accommodationId) {
+      queryBuilder.andWhere("room.accommodationId = :accommodationId", {
+        accommodationId: filters.accommodationId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("room.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    queryBuilder.orderBy("room.createdAt", "DESC").take(limit).skip(offset);
+
+    const entities = await queryBuilder.getMany();
+    return entities.map((entity) => RoomOrmMapper.toDomain(entity));
+  }
+
+  async count(filters?: {
+    accommodationId?: string;
+    status?: string;
+  }): Promise<number> {
+    const queryBuilder = this.roomRepo.createQueryBuilder("room");
+
+    if (filters?.accommodationId) {
+      queryBuilder.andWhere("room.accommodationId = :accommodationId", {
+        accommodationId: filters.accommodationId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("room.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    return queryBuilder.getCount();
+  }
 }

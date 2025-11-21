@@ -109,4 +109,121 @@ export class RoomTypeRepository implements IRoomTypeRepository {
 
     return entities.map((entity) => RoomOrmMapper.toDomain(entity));
   }
+
+  async findMany(
+    limit: number,
+    offset: number,
+    filters?: {
+      hotelId?: string;
+      status?: string;
+    },
+  ): Promise<RoomType[]> {
+    const queryBuilder = this.roomTypeRepo.createQueryBuilder("roomType");
+
+    if (filters?.hotelId) {
+      queryBuilder.andWhere("roomType.hotelId = :hotelId", {
+        hotelId: filters.hotelId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("roomType.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    queryBuilder.orderBy("roomType.createdAt", "DESC").take(limit).skip(offset);
+
+    const entities = await queryBuilder.getMany();
+    return entities.map((entity) => RoomTypeOrmMapper.toDomain(entity, []));
+  }
+
+  async count(filters?: {
+    hotelId?: string;
+    status?: string;
+  }): Promise<number> {
+    const queryBuilder = this.roomTypeRepo.createQueryBuilder("roomType");
+
+    if (filters?.hotelId) {
+      queryBuilder.andWhere("roomType.hotelId = :hotelId", {
+        hotelId: filters.hotelId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("roomType.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    return queryBuilder.getCount();
+  }
+
+  async findManyHotelRooms(
+    limit: number,
+    offset: number,
+    filters?: {
+      roomTypeId?: string;
+      floorId?: string;
+      status?: string;
+    },
+  ): Promise<HotelRoom[]> {
+    const queryBuilder = this.hotelRoomRepo.createQueryBuilder("hotelRoom");
+
+    if (filters?.roomTypeId) {
+      queryBuilder.andWhere("hotelRoom.roomTypeId = :roomTypeId", {
+        roomTypeId: filters.roomTypeId,
+      });
+    }
+
+    if (filters?.floorId) {
+      queryBuilder.andWhere("hotelRoom.floorId = :floorId", {
+        floorId: filters.floorId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("hotelRoom.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    queryBuilder
+      .orderBy("hotelRoom.roomNumber", "ASC")
+      .take(limit)
+      .skip(offset);
+
+    const entities = await queryBuilder.getMany();
+    return entities.map((entity) =>
+      RoomTypeOrmMapper.hotelRoomToDomain(entity),
+    );
+  }
+
+  async countHotelRooms(filters?: {
+    roomTypeId?: string;
+    floorId?: string;
+    status?: string;
+  }): Promise<number> {
+    const queryBuilder = this.hotelRoomRepo.createQueryBuilder("hotelRoom");
+
+    if (filters?.roomTypeId) {
+      queryBuilder.andWhere("hotelRoom.roomTypeId = :roomTypeId", {
+        roomTypeId: filters.roomTypeId,
+      });
+    }
+
+    if (filters?.floorId) {
+      queryBuilder.andWhere("hotelRoom.floorId = :floorId", {
+        floorId: filters.floorId,
+      });
+    }
+
+    if (filters?.status) {
+      queryBuilder.andWhere("hotelRoom.status = :status", {
+        status: filters.status,
+      });
+    }
+
+    return queryBuilder.getCount();
+  }
 }

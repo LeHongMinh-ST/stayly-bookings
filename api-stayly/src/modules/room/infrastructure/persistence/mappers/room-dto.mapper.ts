@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { Room } from "../../../domain/entities/room.entity";
 import { RoomType } from "../../../domain/entities/room-type.entity";
+import { HotelRoom } from "../../../domain/entities/hotel-room.entity";
 import { RoomResponseDto } from "../../../application/dto/response/room-response.dto";
 import { RoomTypeResponseDto } from "../../../application/dto/response/room-type-response.dto";
+import { HotelRoomResponseDto } from "../../../application/dto/response/hotel-room-response.dto";
 
 @Injectable()
 export class RoomDtoMapper {
@@ -65,6 +67,17 @@ export class RoomDtoMapper {
         currency: roomType.getBasePrice().getCurrency(),
       },
       viewDirection: roomType.getViewDirection(),
+    };
+  }
+
+  toHotelRoomDto(hotelRoom: HotelRoom): HotelRoomResponseDto {
+    return {
+      id: hotelRoom.getId().getValue(),
+      roomTypeId: hotelRoom.getRoomTypeId().getValue(),
+      roomNumber: hotelRoom.getRoomNumber().getValue(),
+      floorId: hotelRoom.getFloorId(),
+      status: hotelRoom.getStatus().value(),
+      notes: hotelRoom.getNotes(),
     };
   }
 }

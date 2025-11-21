@@ -14,11 +14,34 @@ export interface IRoomTypeRepository {
   findById(id: RoomTypeId): Promise<RoomType | null>;
   findByHotelId(hotelId: string): Promise<RoomType[]>;
   lockById(id: RoomTypeId): Promise<RoomType | null>;
+  findMany(
+    limit: number,
+    offset: number,
+    filters?: {
+      hotelId?: string;
+      status?: string;
+    },
+  ): Promise<RoomType[]>;
+  count(filters?: { hotelId?: string; status?: string }): Promise<number>;
 
   saveHotelRoom(room: HotelRoom): Promise<void>;
   findHotelRoomById(id: HotelRoomId): Promise<HotelRoom | null>;
   findHotelRoomsByType(roomTypeId: RoomTypeId): Promise<HotelRoom[]>;
   lockHotelRoomById(id: HotelRoomId): Promise<HotelRoom | null>;
+  findManyHotelRooms(
+    limit: number,
+    offset: number,
+    filters?: {
+      roomTypeId?: string;
+      floorId?: string;
+      status?: string;
+    },
+  ): Promise<HotelRoom[]>;
+  countHotelRooms(filters?: {
+    roomTypeId?: string;
+    floorId?: string;
+    status?: string;
+  }): Promise<number>;
 
   /**
    * Homestay rooms live in IRoomRepository but queries occasionally require joins.
